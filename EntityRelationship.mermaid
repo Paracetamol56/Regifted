@@ -1,0 +1,83 @@
+erDiagram
+    %% === Users and Items ===
+    USER ||--o{ ITEM : "owns"
+    USER ||--o{ FAVORITE : "marks"
+    ITEM ||--o{ FAVORITE : "is favorited by"
+    USER ||--o{ MESSAGE : "sends/receives"
+    USER ||--o{ SEARCH : "performs"
+
+    %% === Item States and Keywords ===
+    ITEM ||--|| STATE : "has"
+    ITEM ||--o{ ITEM_KEYWORD : "tagged with"
+    KEYWORD ||--o{ ITEM_KEYWORD : "is linked to"
+
+    %% === Search system ===
+    SEARCH ||--o{ SEARCH_KEYWORD : "has"
+    KEYWORD ||--o{ SEARCH_KEYWORD : "is linked to"
+    SEARCH ||--o{ SEARCH_STATE : "has"
+    SEARCH_STATE }o--|| STATE : "refers to"
+
+    %% === Entities ===
+    USER {
+        string uuid
+        string name
+        string email
+        string password
+        bool notification
+    }
+
+    ITEM {
+        string uuid
+        string userId
+        string title
+        string description
+        date publishDate
+        date donationDate
+        real latitude
+        real longitude
+        string state
+    }
+
+    STATE {
+        string state
+    }
+
+    SEARCH_STATE {
+        string searchId
+        string state
+    }
+
+    KEYWORD {
+        string id
+        string keywords
+    }
+
+    ITEM_KEYWORD {
+        string itemId
+        string keywordId
+    }
+
+    SEARCH_KEYWORD {
+        string searchId
+        string keywordId
+    }
+
+    SEARCH {
+        string userId
+        string query
+        string state
+        real latitude
+        real longitude
+    }
+
+    FAVORITE {
+        string userId
+        string itemId
+    }
+
+    MESSAGE {
+        string senderId
+        string receiverId
+        string content
+        date date
+    }
