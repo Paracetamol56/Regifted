@@ -1,5 +1,7 @@
 package com.regifted.app.security;
 
+import com.regifted.app.entity.User;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,5 +48,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return header.substring(7);
         }
         return null;
+    }
+
+    protected CustomUserDetails createCustomUserDetails(User user) {
+        return new CustomUserDetails(user);
     }
 }
