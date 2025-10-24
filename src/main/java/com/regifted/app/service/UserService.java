@@ -8,6 +8,7 @@ import com.regifted.app.repository.UserRepository;
 import com.regifted.app.security.JwtUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 @Service
 public class UserService {
@@ -23,6 +24,12 @@ public class UserService {
     }
 
     public LoginResponse register(RegisterRequest req) {
+        // Check if request validity
+        Assert.hasText(req.getName(), "Name is required");
+        Assert.hasText(req.getEmail(), "Email is required");
+        Assert.isTrue(req.getEmail().matches("^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$"), "Invalid email format");
+        Assert.hasText(req.getPassword(), "Password is required");
+        // Check if email already exists
         if (repo.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
         }
@@ -36,6 +43,9 @@ public class UserService {
     }
 
     public LoginResponse login(LoginRequest req) {
+        // Check if request validity
+        Assert.hasText(req.getEmail(), "Email is required");
+        Assert.hasText(req.getPassword(), "Password is required");
         User u = repo.findByEmail(req.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
         if (!passwordEncoder.matches(req.getPassword(), u.getPassword())) {
             throw new IllegalArgumentException("Invalid credentials");
