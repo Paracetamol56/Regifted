@@ -1,5 +1,10 @@
 package com.regifted.app.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Data
 @Entity
@@ -8,21 +13,21 @@ package com.regifted.app.entity;
 
 
 /**
- * Je pense qu'il faut permettre uniquement de créer
- * et de supprimer une recherche et non de la modifiée
+ * Je pense qu'il faut permettre uniquement de créer et de supprimer une recherche et non de la
+ * modifiée
  */
 public class Search {
   @Id
-  @column(nullable = false, updatable = false)
+  @Column(nullable = false, updatable = false)
   private String userid;
 
   // Clef etrangère vers State ManyToMany
-  
+
   // Clef étangère vers Keywords ManyToMany
 
-  @column(nullable = false, updatable = false)
-  private Integre latitude;
+  @Column(nullable = false, updatable = false)
+  private Integer latitude;
 
-  @column(nullable = false, updatable = false)
+  @Column(nullable = false, updatable = false)
   private Integer longitude;
 }
