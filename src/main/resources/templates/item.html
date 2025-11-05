@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${item.title}">Item</title>
+</head>
+<body>
+    <h1 th:text="${item.title}">Item title</h1>
+    <p th:text="${item.description}"></p>
+    <p>Published at: <span th:text="${item.publishAt}"></span></p>
+</body>
+</html>
