@@ -1,7 +1,10 @@
-package com.regifted.app.entity;
+package com.regifted.app.item;
 
 import java.time.Instant;
 import java.util.Set;
+
+import com.regifted.app.user.User;
+import com.regifted.app.state.State;
 
 import jakarta.persistence.*;
 import lombok.Data;

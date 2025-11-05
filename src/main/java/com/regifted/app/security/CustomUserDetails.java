@@ -3,7 +3,8 @@ package com.regifted.app.security;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.regifted.app.entity.User;
+
+import com.regifted.app.user.User;
 
 public class CustomUserDetails implements UserDetails {
 

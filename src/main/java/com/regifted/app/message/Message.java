@@ -1,6 +1,9 @@
-package com.regifted.app.entity;
+package com.regifted.app.message;
 
 import java.time.Instant;
+
+import com.regifted.app.user.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

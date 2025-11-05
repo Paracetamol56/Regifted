@@ -1,23 +1,23 @@
-package com.regifted.app.service;
+package com.regifted.app.auth;
 
-import com.regifted.app.dto.LoginRequest;
-import com.regifted.app.dto.LoginResponse;
-import com.regifted.app.dto.RegisterRequest;
-import com.regifted.app.entity.User;
-import com.regifted.app.repository.UserRepository;
-import com.regifted.app.security.JwtUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-@Service
-public class UserService {
+import com.regifted.app.auth.dto.LoginRequest;
+import com.regifted.app.auth.dto.LoginResponse;
+import com.regifted.app.auth.dto.RegisterRequest;
+import com.regifted.app.security.JwtUtils;
+import com.regifted.app.user.User;
+import com.regifted.app.user.UserRepository;
+
+@org.springframework.stereotype.Service
+class AuthService {
 
   private final UserRepository repository;
   private final BCryptPasswordEncoder passwordEncoder;
   private final JwtUtils jwtUtils;
 
-  public UserService(UserRepository repo, BCryptPasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+  public AuthService(UserRepository repo, BCryptPasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
     this.repository = repo;
     this.passwordEncoder = passwordEncoder;
     this.jwtUtils = jwtUtils;
@@ -56,9 +56,5 @@ public class UserService {
     }
     String token = jwtUtils.generateToken(u.getUuid(), u.getEmail());
     return new LoginResponse(token);
-  }
-
-  public User getByUuid(String uuid) {
-    return repository.findById(uuid).orElse(null);
   }
 }
