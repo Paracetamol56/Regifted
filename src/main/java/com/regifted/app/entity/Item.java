@@ -1,6 +1,8 @@
 package com.regifted.app.entity;
 
 import java.time.Instant;
+import java.util.Set;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,15 +10,15 @@ import lombok.Data;
 @Entity
 @Table(name = "item")
 
-
 public class Item {
 
   @Id
   @Column(nullable = false, unique = true)
   private String id;
 
-  // Clef etrangère vers User one to many
-
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", updatable = false, nullable = false)
+  private User user;
 
   @Column(updatable = true, nullable = false)
   private String title;
@@ -39,7 +41,10 @@ public class Item {
   @Column(nullable = false)
   private Integer longitude;
 
-  // Clef etrangère vers State one to many
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "state_id", nullable = false)
+  private State state;
 
-  // Favorie : clef étrangère many to many vers user
+  @ManyToMany()
+  private Set<User> favoriteItems;
 }
