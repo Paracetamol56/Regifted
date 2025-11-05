@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -43,8 +44,7 @@ public class User {
   @Column(nullable = false)
   private Instant updatedAt;
 
-  // Relation many to many vers Item (favoris)
-  @ManyToMany(mappedBy = "favorite")
+  @ManyToMany()
   private Set<Item> favoriteItems;
 
   @PrePersist
