@@ -31,7 +31,7 @@ public class ItemController {
       return new ModelAndView("items"); // templates/items.html
     }
 
-    return items; // auto-serialized to JSON or XML
+    return items;
   }
 
   @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE,
