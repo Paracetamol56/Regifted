@@ -1,23 +1,14 @@
-
 package com.regifted.app.item;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.regifted.app.item.dto.ItemPostRequest;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.io.IOException;
-import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/items")
@@ -46,16 +37,16 @@ public class ItemController {
     return new ModelAndView("items");
   }
 
-  @GetMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
-  public Object getOneHTML(@PathVariable String id, Model model) {
-    Item item = itemService.getById(id);
-    model.addAttribute("item", item);
-    return new ModelAndView("item");
-  }
-
   @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   public Item getItemById(@PathVariable String id) {
     return itemService.getById(id);
   }
 
+  @GetMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
+  public Object getItemByIdHTML(@PathVariable String id, Model model) {
+    Item item = itemService.getById(id);
+
+    model.addAttribute("item", item);
+    return new ModelAndView("item");
+  }
 }
