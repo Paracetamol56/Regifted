@@ -53,5 +53,9 @@ public class User {
     if (this.uuid == null) {
       this.uuid = UUID.randomUUID().toString();
     }
+    this.updatedAt = Instant.now();
+    if (this.createdAt == null) {
+      this.createdAt = this.updatedAt;
+    }
   }
 }

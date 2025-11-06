@@ -1,5 +1,7 @@
 package com.regifted.app.user;
 
+import com.regifted.app.user.dto.UserPostRequest;
+
 @org.springframework.stereotype.Service
 public class UserService {
 
@@ -7,6 +9,10 @@ public class UserService {
 
   public UserService(UserRepository repo) {
     this.repository = repo;
+  }
+
+  public User createUser(UserPostRequest req) {
+    return repository.save(req.toUser());
   }
 
   public User getByUuid(String uuid) {

@@ -2,9 +2,9 @@ package com.regifted.app.item;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
 
 import com.regifted.app.user.User;
-import com.regifted.app.state.State;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,12 +12,11 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "item")
-
 public class Item {
 
   @Id
   @Column(nullable = false, unique = true)
-  private String id;
+  private String uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", updatable = false, nullable = false)
@@ -35,7 +34,7 @@ public class Item {
   @Column(nullable = false)
   private Instant updateAt;
 
-  @Column(nullable = false)
+  @Column(nullable = true)
   private Instant donateAt;
 
   @Column(nullable = false)
@@ -44,10 +43,16 @@ public class Item {
   @Column(nullable = false)
   private Integer longitude;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "state_id", nullable = false)
-  private State state;
+  @Column(nullable = false)
+  private Integer state;
 
   @ManyToMany()
   private Set<User> favoriteItems;
+
+  @PrePersist
+  public void prePersist() {
+    if (this.uuid == null) {
+      this.uuid = UUID.randomUUID().toString();
+    }
+  }
 }
