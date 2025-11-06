@@ -30,62 +30,32 @@ public class ItemController {
   }
 
   @PostMapping(consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-      MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_HTML_VALUE })
-  public ResponseEntity<?> createItem(
-      HttpServletRequest request,
-      @RequestHeader(name = "Accept", defaultValue = MediaType.APPLICATION_JSON_VALUE) String accept)
-      throws IOException {
-    String contentType = request.getContentType();
-
-    ItemPostRequest req;
-
-    if (contentType != null && contentType.contains(MediaType.APPLICATION_JSON_VALUE)) {
-      // Parse JSON manually
-      String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-      req = new ObjectMapper().readValue(body, ItemPostRequest.class);
-    } else {
-      // Handle form data
-      req = new ItemPostRequest();
-    }
-
-    Item created = itemService.createItem(req);
-    URI location = URI.create(request.getRequestURL().toString() + "/" + created.getUuid());
-
-    if (accept.contains(MediaType.TEXT_HTML_VALUE)) {
-      return ResponseEntity.status(HttpStatus.FOUND).location(location).build();
-    }
-
-    return ResponseEntity.created(location).body(created);
+      MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
+          MediaType.APPLICATION_XML_VALUE,
+      })
+  public Item createItem(ItemPostRequest req) {
+    return itemService.createItem(req);
   }
 
-  @GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE,
+  @GetMapping(produces = { MediaType.APPLICATION_XML_VALUE,
       MediaType.TEXT_HTML_VALUE })
-  public Object getAll(
-      @RequestHeader(name = "Accept", defaultValue = MediaType.APPLICATION_JSON_VALUE) String accept,
-      Model model) {
+  public Object getAll(Model model) {
     List<Item> items = itemService.getAllItems();
 
-    if (accept.contains(MediaType.TEXT_HTML_VALUE)) {
-      model.addAttribute("items", items);
-      return new ModelAndView("items"); // templates/items.html
-    }
-
-    return items;
+    model.addAttribute("items", items);
+    return new ModelAndView("items");
   }
 
-  @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE,
-      MediaType.TEXT_HTML_VALUE })
-  public Object getOne(
-      @PathVariable String id,
-      @RequestHeader(name = "Accept", defaultValue = MediaType.APPLICATION_JSON_VALUE) String accept,
-      Model model) {
+  @GetMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
+  public Object getOneHTML(@PathVariable String id, Model model) {
     Item item = itemService.getById(id);
-
-    if (accept.contains(MediaType.TEXT_HTML_VALUE)) {
-      model.addAttribute("item", item);
-      return new ModelAndView("item"); // templates/item.html
-    }
-
-    return item;
+    model.addAttribute("item", item);
+    return new ModelAndView("item");
   }
+
+  @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  public Item getItemById(@PathVariable String id) {
+    return itemService.getById(id);
+  }
+
 }

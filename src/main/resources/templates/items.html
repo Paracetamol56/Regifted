@@ -7,16 +7,8 @@
     <h1>All Items</h1>
     <ul>
       <li th:each="item : ${items}">
-        <a th:href="@{|/items/${item.id}|}" th:text="${item.title}"></a>
+        <a th:href="@{/items/{uuid}(uuid=${item.uuid})}" th:text="${item.title}"></a>
       </li>
     </ul>
-
-    <form action="/items" method="POST">
-      <input name="title" placeholder="Item name" />
-      <input name="description" placeholder="Description" />
-      <input name="latitude" type="number" />
-      <input name="longitude" type="number" />
-      <button type="submit">Submit</button>
-    </form>
   </body>
 </html>

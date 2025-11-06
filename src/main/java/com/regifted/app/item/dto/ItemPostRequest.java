@@ -2,11 +2,9 @@ package com.regifted.app.item.dto;
 
 import java.time.Instant;
 import java.util.Set;
-import java.util.UUID;
 
-import com.regifted.app.state.State;
+import com.regifted.app.item.EState;
 import com.regifted.app.item.Item;
-import com.regifted.app.user.User;
 
 import lombok.Data;
 
@@ -14,9 +12,9 @@ import lombok.Data;
 public class ItemPostRequest {
   private String title;
   private String description;
-  private Integer latitude;
-  private Integer longitude;
-  private Integer state;
+  private Float latitude;
+  private Float longitude;
+  private EState state;
 
   public Item toItem() {
     Item item = new Item();
@@ -26,11 +24,14 @@ public class ItemPostRequest {
     item.setDescription(this.description);
     item.setLatitude(this.latitude);
     item.setLongitude(this.longitude);
-    item.setState(0);
+    item.setState(this.state);
+
+    System.out.println(this);
+    System.out.println(item);
 
     Instant now = Instant.now();
-    item.setPublishAt(now);
-    item.setUpdateAt(now);
+    item.setCreatedAt(now);
+    item.setUpdatedAt(now);
 
     item.setFavoriteItems(Set.of()); // default empty set
 

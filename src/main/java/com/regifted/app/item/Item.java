@@ -19,32 +19,33 @@ public class Item {
   private String uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", updatable = false, nullable = false)
+  @JoinColumn(name = "user_id", updatable = false, nullable = true) // TODO: Make it not nullable later
   private User user;
 
-  @Column(updatable = true, nullable = false)
+  @Column(nullable = false)
   private String title;
 
   @Column(updatable = true)
   private String description;
 
   @Column(nullable = false)
-  private Instant publishAt;
+  private Instant createdAt;
 
   @Column(nullable = false)
-  private Instant updateAt;
+  private Instant updatedAt;
 
   @Column(nullable = true)
   private Instant donateAt;
 
   @Column(nullable = false)
-  private Integer latitude;
+  private Float latitude;
 
   @Column(nullable = false)
-  private Integer longitude;
+  private Float longitude;
 
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private Integer state;
+  private EState state;
 
   @ManyToMany()
   private Set<User> favoriteItems;
@@ -53,6 +54,10 @@ public class Item {
   public void prePersist() {
     if (this.uuid == null) {
       this.uuid = UUID.randomUUID().toString();
+    }
+    this.updatedAt = Instant.now();
+    if (this.createdAt == null) {
+      this.createdAt = this.updatedAt;
     }
   }
 }
