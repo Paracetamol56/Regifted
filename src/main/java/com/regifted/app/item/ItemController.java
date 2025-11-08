@@ -1,6 +1,7 @@
 package com.regifted.app.item;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 
+import java.net.URI;
 import java.util.List;
 
 @Controller
@@ -22,10 +24,13 @@ public class ItemController {
 
   @PostMapping(consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
       MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-          MediaType.APPLICATION_XML_VALUE,
-      })
-  public Item createItem(ItemPostRequest req) {
-    return itemService.createItem(req);
+          MediaType.APPLICATION_XML_VALUE })
+  public ResponseEntity<Item> createItem(ItemPostRequest req) {
+    Item created = itemService.createItem(req);
+    URI location = URI.create(String.format("/items/%s", created.getUuid()));
+    return ResponseEntity
+        .created(location)
+        .build();
   }
 
   @GetMapping(produces = { MediaType.APPLICATION_XML_VALUE,
