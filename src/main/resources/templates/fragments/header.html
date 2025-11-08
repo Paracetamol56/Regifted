@@ -1,0 +1,44 @@
+<header th:fragment="header" class="container-fluid">
+  <nav class="container">
+    <ul>
+      <li><strong><a th:href="@{/}">Regifted</a></strong></li>
+    </ul>
+    <ul>
+      <li><a th:href="@{/items}">Browse</a></li>
+      <li><a th:href="@{/new-item}">Add Item</a></li>
+    </ul>
+    <ul>
+      <li><a th:href="@{/register}" class="secondary">Register</a></li>
+      <li>
+        <select id="theme-select" aria-label="Select color theme">
+          <option value="auto">Auto</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </li>
+    </ul>
+  </nav>
+  <script>
+  const html = document.documentElement;
+  const themeSelect = document.getElementById('theme-select');
+
+  // Load saved theme from localStorage
+  const savedTheme = localStorage.getItem('theme') || 'auto';
+  themeSelect.value = savedTheme;
+  applyTheme(savedTheme);
+
+  themeSelect.addEventListener('change', (e) => {
+    const theme = e.target.value;
+    applyTheme(theme);
+    localStorage.setItem('theme', theme);
+  });
+
+  function applyTheme(theme) {
+    if (theme === 'auto') {
+      html.removeAttribute('data-theme');
+    } else {
+      html.setAttribute('data-theme', theme);
+    }
+  }
+  </script>
+</header>

@@ -4,9 +4,11 @@
   <body>
     <div th:replace="fragments/header :: header"></div>
     <main class="container">
-      <h1 th:text="${item.title}"></h1>
-      <p th:text="${item.description}"></p>
-      <p th:text="${item.state}"></p>
+      <h1>Welcome to Regifted!</h1>
+      <form role="group" action="/items" method="GET">
+        <input name="q" type="q" placeholder="Search" />
+        <input type="submit" value="Search" />
+      </form>
     </main>
     <div th:replace="fragments/footer :: footer"></div>
   </body>

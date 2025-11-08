@@ -1,15 +1,26 @@
 package com.regifted.app;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 public class AppController {
 
   public AppController() {
   }
 
   @GetMapping("/")
-  public String index() {
-    return "Welcome to ReGifted";
+  public String home() {
+    return "index.html";
+  }
+
+  @GetMapping("/register")
+  public String register() {
+    return "register";
+  }
+
+  @GetMapping("/new-item")
+  public String newItem() {
+    return "new-item";
   }
 }

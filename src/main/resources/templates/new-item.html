@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <div th:replace="fragments/header :: header"></div>
+    <main class="container">
+      <h1>New Item</h1>
+      <form action="/items" method="POST">
+        <fieldset>
+          <label for="title">
+            Title
+          </label>
+          <input id="title" name="title" placeholder="Title" required maxlength="100" />
+        </fieldset>
+        <fieldset>
+          <label for="description">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Description"
+            required
+            maxlength="500"
+          ></textarea>
+        </fieldset>
+        <fieldset>
+          <label for="latitude">
+            Latitude
+          </label>
+          <input
+            id="latitude"
+            name="latitude"
+            type="number"
+            placeholder="Latitude"
+            required
+            step="0.000001"
+            min="-90"
+            max="90"
+          />
+        </fieldset>
+        <fieldset>
+          <label for="longitude">
+            Longitude
+          </label>
+          <input
+            id="longitude"
+            name="longitude"
+            type="number"
+            placeholder="Longitude"
+            required
+            step="0.000001"
+            min="-180"
+            max="180"
+          />
+        </fieldset>
+        <fieldset>
+          <label for="state">
+            State
+          </label>
+          <select id="state" name="state" required>
+            <option value="" disabled selected>Select state</option>
+            <option value="RECYCLED">Recyclé</option>
+            <option value="USED">Usagé</option>
+            <option value="NEVER_USED">Jamais utilisé</option>
+            <option value="EXPERIMENTED">Bien vécu</option>
+          </select>
+        </fieldset>
+        <button type="submit">Submit</button>
+      </form>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+  </body>
+</html>

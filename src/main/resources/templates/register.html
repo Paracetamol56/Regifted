@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <div th:replace="fragments/header :: header"></div>
+    <main class="container">
+      <h1>Register</h1>
+      <form action="/users" method="POST">
+        <fieldset>
+          <label>
+            Username
+          </label>
+          <input name="name" placeholder="Username" required minlength="3" maxlength="20" />
+        </fieldset>
+        <fieldset>
+          <label>
+            Email
+          </label>
+          <input name="email" type="email" placeholder="Email" required />
+        </fieldset>
+        <fieldset>
+          <label>
+            Password
+          </label>
+          <input name="password" type="password" placeholder="Password" required minlength="8" />
+          <small>Password must be at least 8 characters long.</small>
+        </fieldset>
+        <fieldset>
+          <label>
+            <input name="notification" type="checkbox" />
+            Receive email notifications
+          </label>
+        </fieldset>
+        <button type="submit">Submit</button>
+      </form>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+  </body>
+</html>
