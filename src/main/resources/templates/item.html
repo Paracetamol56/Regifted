@@ -8,6 +8,7 @@
       <p th:text="${item.description}"></p>
       <p th:text="${item.state}"></p>
     </main>
+    <a th:href="@{/items/update/{id}(id=${item.uuid})}">Mettre à jour l'objet</a>
     <div th:replace="fragments/footer :: footer"></div>
   </body>
 </html>
