@@ -1,0 +1,24 @@
+### GET JSON
+GET http://localhost:8080/items
+Accept: application/json
+
+###
+
+### GET HTML
+GET http://localhost:8080/items
+Accept: text/html
+
+###
+
+### PUT update item
+PUT http://localhost:8080/items/update/7304fdbb-465d-4ed4-ba88-e06f7f4b6e67
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "Mon objet mis à jour",
+  "description": "Description mise à jour de l'objet",
+  "latitude": 45,
+  "longitude": 6,
+  "state": "USED"
+}

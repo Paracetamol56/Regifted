@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 
@@ -22,22 +23,48 @@ public class ItemController {
     this.itemService = itemService;
   }
 
-  @PostMapping(consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-      MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-          MediaType.APPLICATION_XML_VALUE })
+  /**
+ * 
+ * POST ITEMS 
+ * 
+ */
+
+  @PostMapping(consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE }, 
+               produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   public String createItem(ItemPostRequest req) {
     Item created = itemService.createItem(req);
     return "redirect:/items/" + created.getUuid();
   }
 
-  @GetMapping(produces = { MediaType.APPLICATION_XML_VALUE,
-      MediaType.TEXT_HTML_VALUE })
-  public Object getAll(Model model) {
-    List<Item> items = itemService.getAllItems();
 
+/**
+ * 
+ * GET ITEMS 
+ * 
+ */
+
+// Retour HTML ou XML
+@GetMapping(produces = { MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_XML_VALUE })
+public ModelAndView getAllHtml(Model model) {
+    List<Item> items = itemService.getAllItems();
     model.addAttribute("items", items);
     return new ModelAndView("items");
-  }
+}
+
+// Retour JSON
+@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody
+public List<Item> getAllJson() {
+    return itemService.getAllItems();
+}
+
+
+/**
+ * 
+ * GET ITEM BY ID
+ * 
+ */
+
 
   @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   public Item getItemById(@PathVariable String id) {
@@ -52,6 +79,14 @@ public class ItemController {
     return new ModelAndView("item");
   }
 
+
+  /**
+ * 
+ * UPDATE ITEMS 
+ * 
+ */
+
+
   @GetMapping(value = "/update/{id}", produces = MediaType.TEXT_HTML_VALUE)
   public Object getUpdateByIdHTML(@PathVariable String id, Model model) {
     Item item = itemService.getById(id);
@@ -61,11 +96,20 @@ public class ItemController {
   }
 
   @PutMapping(value = "/update/{id}", 
-    consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE }, 
-    produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-  public String updateItem(@PathVariable String id, @ModelAttribute ItemPostRequest req) {
+    consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE}, 
+    produces = { MediaType.APPLICATION_XML_VALUE })
+  public String updateItemHTML(@PathVariable String id, @ModelAttribute ItemPostRequest req) {
       System.out.println("Received update request for ID: " + id + " with data: " + req);
       Item updated = itemService.updateItembyId(id, req);
       return "redirect:/items/" + updated.getUuid();
+  }
+
+  @PutMapping(value = "/update/{id}", 
+    consumes = { MediaType.APPLICATION_JSON_VALUE }, 
+    produces = { MediaType.APPLICATION_JSON_VALUE })
+  @ResponseBody
+  public Item updateItemJson(@PathVariable String id, @RequestBody ItemPostRequest req) {
+    Item updated = itemService.updateItembyId(id, req);
+    return updated;
   }
 }
