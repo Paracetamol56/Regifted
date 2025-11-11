@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="fragments/head :: head"></head>
+
+<body>
+  <div th:replace="fragments/header :: header"></div>
+
+  <main class="container">
+    <h1>Mise à jour de l'objet</h1>
+
+    <form th:action="@{/items}" th:object="${item}" method="put">
+      <fieldset>
+        <label for="title">Titre</label>
+        <input id="title" type="text" th:field="*{title}" placeholder="Titre" required maxlength="100" />
+      </fieldset>
+
+      <fieldset>
+        <label for="description">Description</label>
+        <textarea id="description" th:field="*{description}" placeholder="Description" required maxlength="500"></textarea>
+      </fieldset>
+
+      <fieldset>
+        <label for="latitude">Latitude</label>
+        <input id="latitude" type="number" th:field="*{latitude}" placeholder="Latitude" required step="0.000001" min="-90" max="90" />
+      </fieldset>
+
+      <fieldset>
+        <label for="longitude">Longitude</label>
+        <input id="longitude" type="number" th:field="*{longitude}" placeholder="Longitude" required step="0.000001" min="-180" max="180" />
+      </fieldset>
+
+      <fieldset>
+        <label for="state">État</label>
+        <select id="state" th:field="*{state}" required>
+          <option value="" disabled>Sélectionner un état</option>
+          <option value="RECYCLED">Recyclé</option>
+          <option value="USED">Usagé</option>
+          <option value="NEVER_USED">Jamais utilisé</option>
+          <option value="EXPERIMENTED">Bien vécu</option>
+        </select>
+      </fieldset>
+
+      <button type="submit">Mettre à jour</button>
+    </form>
+  </main>
+
+  <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

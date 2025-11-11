@@ -25,12 +25,9 @@ public class ItemController {
   @PostMapping(consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
       MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
           MediaType.APPLICATION_XML_VALUE })
-  public ResponseEntity<Item> createItem(ItemPostRequest req) {
+  public String createItem(ItemPostRequest req) {
     Item created = itemService.createItem(req);
-    URI location = URI.create(String.format("/items/%s", created.getUuid()));
-    return ResponseEntity
-        .created(location)
-        .build();
+    return "redirect:/items/" + created.getUuid();
   }
 
   @GetMapping(produces = { MediaType.APPLICATION_XML_VALUE,
@@ -54,4 +51,21 @@ public class ItemController {
     model.addAttribute("item", item);
     return new ModelAndView("item");
   }
+
+  @GetMapping(value = "/update/{id}", produces = MediaType.TEXT_HTML_VALUE)
+  public Object getUpdateByIdHTML(@PathVariable String id, Model model) {
+    Item item = itemService.getById(id);
+
+    model.addAttribute("item", item);
+    return new ModelAndView("update-item");
+  }
+
+  @PutMapping(value = "/update/{id}", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+      MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
+          MediaType.APPLICATION_XML_VALUE })
+  public String updateItem(@PathVariable String id, ItemPostRequest req) {
+    Item created = itemService.createItem(req);
+    return "redirect:/items/" + created.getUuid();
+  }
+
 }

@@ -27,4 +27,8 @@ public class ItemService {
     return repository.findById(id)
         .orElseThrow(() -> new RuntimeException("Item not found"));
   }
+
+   public Item updateItembyId(String id, ItemPostRequest itemRequest) {
+    return repository.save(itemRequest.toItem());
+  }
 }
