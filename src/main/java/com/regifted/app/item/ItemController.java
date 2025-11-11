@@ -60,12 +60,12 @@ public class ItemController {
     return new ModelAndView("update-item");
   }
 
-  @PutMapping(value = "/update/{id}", consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-      MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-          MediaType.APPLICATION_XML_VALUE })
-  public String updateItem(@PathVariable String id, ItemPostRequest req) {
-    Item created = itemService.createItem(req);
-    return "redirect:/items/" + created.getUuid();
+  @PutMapping(value = "/update/{id}", 
+    consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE }, 
+    produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  public String updateItem(@PathVariable String id, @ModelAttribute ItemPostRequest req) {
+      System.out.println("Received update request for ID: " + id + " with data: " + req);
+      Item updated = itemService.updateItembyId(id, req);
+      return "redirect:/items/" + updated.getUuid();
   }
-
 }
