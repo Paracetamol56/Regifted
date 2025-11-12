@@ -17,7 +17,4 @@ public class Keyword {
 
   @Column(nullable = false, unique = true)
   private String keyword;
-
-  // Clef etrangère vers Search many to many
-  // Clef etrangère vers Item many to many
 }

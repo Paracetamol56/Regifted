@@ -6,11 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import jakarta.servlet.http.HttpServletRequest;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 
-import java.net.URI;
 import java.util.List;
 
 @Controller
@@ -29,13 +27,18 @@ public class ItemController {
  * 
  */
 
-  @PostMapping(consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE }, 
-               produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  @PostMapping(consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE }, produces = {  MediaType.APPLICATION_XML_VALUE })
   public String createItem(ItemPostRequest req) {
     Item created = itemService.createItem(req);
     return "redirect:/items/" + created.getUuid();
   }
 
+  @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE } )
+  @ResponseBody  
+  public Item createItemJson(@RequestBody ItemPostRequest req) {
+      Item created = itemService.createItem(req);
+      return created;
+  }
 
 /**
  * 

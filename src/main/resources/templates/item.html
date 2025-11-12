@@ -6,6 +6,7 @@
     <main class="container">
       <h1 th:text="${item.title}"></h1>
       <p th:text="${item.description}"></p>
+      <p th:text="${item.keywords[0]}"></p>
       <p th:text="${item.state}"></p>
     </main>
     <a th:href="@{/items/update/{id}(id=${item.uuid})}">Mettre à jour l'objet</a>

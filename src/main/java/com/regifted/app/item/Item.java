@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
+import com.regifted.app.keyword.Keyword;
 import com.regifted.app.user.User;
 
 import jakarta.persistence.*;
@@ -49,6 +50,14 @@ public class Item {
 
   @ManyToMany()
   private Set<User> favoriteItems;
+
+  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(
+      name = "item_keyword",
+      joinColumns = @JoinColumn(name = "item_id"),
+      inverseJoinColumns = @JoinColumn(name = "keyword_id")
+  )
+  private Set<Keyword> keyword;
 
   @PrePersist
   public void prePersist() {

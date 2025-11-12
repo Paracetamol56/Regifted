@@ -22,3 +22,17 @@ Accept: application/json
   "longitude": 6,
   "state": "USED"
 }
+
+
+### Create a new Item
+POST http://localhost:8080/items
+Content-Type: application/json
+
+{
+  "title": "Chaise en bois",
+  "description": "Une chaise solide en chêne massif, légèrement usée mais encore en bon état.",
+  "latitude": 48,
+  "longitude": 40,
+  "state": "USED",
+  "keywords": ["meuble", "bois", "recyclé"]
+}

@@ -14,6 +14,7 @@ public class ItemPostRequest {
   private String description;
   private Float latitude;
   private Float longitude;
+  private Set<String> keywords;
   private EState state;
 
   public Item toItem() {
@@ -25,6 +26,7 @@ public class ItemPostRequest {
     item.setLatitude(this.latitude);
     item.setLongitude(this.longitude);
     item.setState(this.state);
+    item.setKeywords(this.keywords);
 
     System.out.println(this);
     System.out.println(item);

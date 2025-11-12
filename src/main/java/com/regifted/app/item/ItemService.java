@@ -11,6 +11,7 @@ import java.util.List;
 public class ItemService {
 
   private final ItemRepository repository;
+  private final KeywordRepository keywordRepository;
 
   public ItemService(ItemRepository repository) {
     this.repository = repository;
