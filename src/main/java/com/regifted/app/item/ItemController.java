@@ -10,6 +10,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
+import com.regifted.app.keyword.Keyword;
+import com.regifted.app.keyword.KeywordService;
 
 import jakarta.validation.Valid;
 
@@ -20,9 +22,11 @@ import java.util.List;
 public class ItemController {
 
   private final ItemService itemService;
+  private final KeywordService keywordService;
 
-  public ItemController(ItemService itemService) {
+  public ItemController(ItemService itemService, KeywordService keywordService) {
     this.itemService = itemService;
+    this.keywordService = keywordService;
   }
 
   // ======================
@@ -57,7 +61,10 @@ public class ItemController {
       @RequestParam(value = "q", required = false) String q,
       Model model) {
     Page<Item> items = itemService.getItemSearchPage(page, limit, q);
+    List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
+    System.out.println("KEYWORDS: " + keywords);
     model.addAttribute("items", items.getContent());
+    model.addAttribute("keywords", keywords);
     model.addAttribute("page", page);
     model.addAttribute("limit", limit);
     model.addAttribute("query", q);

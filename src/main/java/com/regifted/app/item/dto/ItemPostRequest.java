@@ -1,18 +1,12 @@
 package com.regifted.app.item.dto;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.regifted.app.item.Item;
-import com.regifted.app.keyword.Keyword;
 
-import lombok.Data;
-
-@Data
 public final class ItemPostRequest extends ItemBaseRequest {
 
-  public Item toItem(Set<Keyword> keywordEntities) {
+  public Item toItem() {
     Item item = new Item();
 
     item.setTitle(this.title);
@@ -24,8 +18,6 @@ public final class ItemPostRequest extends ItemBaseRequest {
     Instant now = Instant.now();
     item.setCreatedAt(now);
     item.setUpdatedAt(now);
-
-    item.setKeyword(keywordEntities != null ? keywordEntities : new HashSet<>());
 
     return item;
   }

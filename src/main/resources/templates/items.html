@@ -4,6 +4,13 @@
   <body>
     <div th:replace="fragments/header :: header"></div>
     <main class="container">
+      <aside>
+        <ul>
+          <li th:each="keyword : ${keywords}">
+            <a href="/items?keyword=" th:href="@{/items(keyword=${keyword.name})}" th:text="${keyword.name}"></a>
+          </li>
+        </ul>
+      </aside>
       <h1>All Items</h1>
       <ul>
         <li th:each="item : ${items}">
