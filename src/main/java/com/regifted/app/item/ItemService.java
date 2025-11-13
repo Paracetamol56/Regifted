@@ -1,5 +1,7 @@
 package com.regifted.app.item;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
