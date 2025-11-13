@@ -6,6 +6,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.regifted.app.item.dto.ItemPostRequest;
+import com.regifted.app.item.dto.ItemPutRequest;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 

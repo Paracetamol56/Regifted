@@ -4,20 +4,13 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.regifted.app.item.EState;
 import com.regifted.app.item.Item;
 import com.regifted.app.keyword.Keyword;
 
 import lombok.Data;
 
 @Data
-public class ItemPostRequest {
-    private String title;
-    private String description;
-    private Float latitude;
-    private Float longitude;
-    private Set<String> keywords; // Strings depuis la requête
-    private EState state;
+public final class ItemPostRequest extends ItemBaseRequest {
 
     public Item toItem(Set<Keyword> keywordEntities) {
         Item item = new Item();
