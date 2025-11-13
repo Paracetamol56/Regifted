@@ -1,5 +1,7 @@
 package com.regifted.app.item;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import com.regifted.app.item.dto.ItemPostRequest;
@@ -23,32 +25,40 @@ public class ItemService {
   }
 
   public Item createItem(ItemPostRequest req) {
-     Item item = new Item();
-        item.setTitle(req.getTitle());
-        item.setDescription(req.getDescription());
-        item.setLatitude(req.getLatitude());
-        item.setLongitude(req.getLongitude());
-        item.setState(req.getState());
+    Item item = new Item();
+    item.setTitle(req.getTitle());
+    item.setDescription(req.getDescription());
+    item.setLatitude(req.getLatitude());
+    item.setLongitude(req.getLongitude());
+    item.setState(req.getState());
 
-        /*if (req.getUserId() != null) {
-            userRepository.findById(req.getUserId()).ifPresent(item::setUser);
-        }*/
+    /*
+     * if (req.getUserId() != null) {
+     * userRepository.findById(req.getUserId()).ifPresent(item::setUser);
+     * }
+     */
 
-        // Entités Keyword
-       Set<Keyword> keywordEntities = req.getKeywords().stream()
+    // Entités Keyword
+    Set<Keyword> keywordEntities = req.getKeywords().stream()
         .map(k -> keywordRepository.findByName(k)
             .orElseGet(() -> {
-                Keyword newKeyword = new Keyword();
-                newKeyword.setName(k);
-                return keywordRepository.save(newKeyword);
-            })
-        )
+              Keyword newKeyword = new Keyword();
+              newKeyword.setName(k);
+              return keywordRepository.save(newKeyword);
+            }))
         .collect(Collectors.toSet());
 
-        item.setKeyword(keywordEntities);
-        return this.repository.save(item);
+    item.setKeyword(keywordEntities);
+    return this.repository.save(item);
   }
 
+  public Page<Item> getItemSearchPage(int pageNumber, int pageSize, String query) {
+    PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+    if (query == null || query.isEmpty()) {
+      return repository.findAll(pageable);
+    }
+    return repository.searchByTitleOrDescription(query, pageable);
+  }
 
   public List<Item> getAllItems() {
     return repository.findAll();
@@ -59,7 +69,7 @@ public class ItemService {
         .orElseThrow(() -> new RuntimeException("Item not found"));
   }
 
-   public Item updateItembyId(String id, ItemPostRequest itemRequest) {
+  public Item updateItembyId(String id, ItemPostRequest itemRequest) {
     Item existing = repository.findById(id)
         .orElseThrow(() -> new RuntimeException("Item not found"));
 
@@ -79,7 +89,7 @@ public class ItemService {
 
     existing.setUpdatedAt(Instant.now());
 
-  System.out.println("Updated Item: " + existing);
+    System.out.println("Updated Item: " + existing);
 
     return repository.save(existing);
   }
