@@ -10,6 +10,54 @@
           <a th:href="@{/items/{uuid}(uuid=${item.uuid})}" th:text="${item.title}"></a>
         </li>
       </ul>
+      <!-- Pagination component -->
+      <nav aria-label="pagination" style="margin-top: 1rem;">
+        <ul class="pagination" style="display: flex; list-style: none; gap: 0.5rem; justify-content: center; padding: 0;">
+          <!-- Previous page -->
+          <li th:if="${page > 0}">
+            <a th:href="@{/items(page=${page - 1}, limit=${limit})}" role="button" class="secondary">Previous</a>
+          </li>
+          <li th:unless="${page > 0}">
+            <span class="disabled">Previous</span>
+          </li>
+
+          <!-- Page indicator -->
+          <li th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <a th:if="${i != page}"
+              th:href="@{/items(page=${i}, limit=${limit}, q=${query})}"
+              th:text="${i}">
+            </a>
+
+            <a th:if="${i == page}"
+              th:text="${i}"
+              aria-current="page"
+              class="contrast">
+            </a>
+          </li>
+
+          <!-- Next page -->
+          <li th:if="${totalPages > page + 1}">
+            <a th:href="@{/items(page=${page + 1}, limit=${limit})}" role="button" class="secondary">Next</a>
+          </li>
+          <li th:unless="${totalPages > page + 1}">
+            <span class="disabled">Next</span>
+          </li>
+
+          <!-- Limit selection -->
+          <li>
+            <form th:action="@{/items}" method="get" style="display: inline;">
+              <label for="limit-select">Items per page:</label>
+              <select id="limit-select" name="limit" th:onchange="this.form.submit()">
+                <option th:value="5" th:selected="${limit == 5}">5</option>
+                <option th:value="10" th:selected="${limit == 10}">10</option>
+                <option th:value="20" th:selected="${limit == 20}">20</option>
+                <option th:value="50" th:selected="${limit == 50}">50</option>
+              </select>
+              <input type="hidden" name="page" th:value="${page}" />
+            </form>
+          </li>
+        </ul>
+      </nav>
     </main>
     <div th:replace="fragments/footer :: footer"></div>
   </body>
