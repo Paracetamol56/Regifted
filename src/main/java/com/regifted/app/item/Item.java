@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.user.User;
 
@@ -49,14 +51,11 @@ public class Item {
   private EState state;
 
   @ManyToMany()
+   @JsonIgnore
   private Set<User> favoriteItems;
 
   @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinTable(
-      name = "item_keyword",
-      joinColumns = @JoinColumn(name = "item_id"),
-      inverseJoinColumns = @JoinColumn(name = "keyword_id")
-  )
+   @JsonManagedReference
   private Set<Keyword> keyword;
 
   @PrePersist

@@ -10,68 +10,62 @@
     <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
     
-    <form th:action="@{/items/update/{id}(id=${item.uuid})}" 
-          th:object="${item}" 
-          method="post"
-          novalidate>
-      <input type="hidden" name="_method" value="put" />
-      
+   <form th:action="@{/items}" th:object="${item}" method="post">
       <fieldset>
-        <label for="title">Titre <span class="required">*</span></label>
-        <input id="title" type="text" th:field="*{title}" 
-               placeholder="Titre" required maxlength="100" />
-        <span th:if="${#fields.hasErrors('title')}" 
-              th:errors="*{title}" class="error"></span>
+        <label for="title">Titre</label>
+        <input id="title" th:field="*{title}" required maxlength="100"/>
       </fieldset>
-      
+
       <fieldset>
-        <label for="description">Description <span class="required">*</span></label>
-        <textarea id="description" th:field="*{description}" 
-                  placeholder="Description" required maxlength="500" 
-                  rows="4"></textarea>
-        <span th:if="${#fields.hasErrors('description')}" 
-              th:errors="*{description}" class="error"></span>
+        <label for="description">Description</label>
+        <textarea id="description" th:field="*{description}" required maxlength="500"></textarea>
       </fieldset>
-      
-      <div class="form-row">
-        <fieldset class="half-width">
-          <label for="latitude">Latitude <span class="required">*</span></label>
-          <input id="latitude" type="number" th:field="*{latitude}" 
-                 placeholder="Latitude" required step="0.000001" 
-                 min="-90" max="90" />
-          <span th:if="${#fields.hasErrors('latitude')}" 
-                th:errors="*{latitude}" class="error"></span>
-        </fieldset>
-        
-        <fieldset class="half-width">
-          <label for="longitude">Longitude <span class="required">*</span></label>
-          <input id="longitude" type="number" th:field="*{longitude}" 
-                 placeholder="Longitude" required step="0.000001" 
-                 min="-180" max="180" />
-          <span th:if="${#fields.hasErrors('longitude')}" 
-                th:errors="*{longitude}" class="error"></span>
-        </fieldset>
-      </div>
-      
+
       <fieldset>
-        <label for="state">État <span class="required">*</span></label>
-        <select id="state" th:field="*{state}" required>
-          <option value="" disabled>Sélectionner un état</option>
+        <label>Mots-clés</label>
+        <div>
+          <input th:each="kw, iter : *{keywords}"
+                th:field="*{keywords[__${iter.index}__]}"
+                placeholder="Mot-clé"/>
+        </div>
+        <button type="button" onclick="addKeyword()">Ajouter un mot-clé</button>
+      </fieldset>
+
+      <fieldset>
+        <label for="latitude">Latitude</label>
+        <input id="latitude" th:field="*{latitude}" type="number" step="0.000001" min="-90" max="90" required/>
+      </fieldset>
+
+      <fieldset>
+        <label for="longitude">Longitude</label>
+        <input id="longitude" th:field="*{longitude}" type="number" step="0.000001" min="-180" max="180" required/>
+      </fieldset>
+
+      <fieldset>
+        <label for="state">État</label>
+        <select id="state" th:field="*{state}">
+          <option value="" disabled selected>Sélectionner</option>
           <option value="RECYCLED">Recyclé</option>
           <option value="USED">Usagé</option>
           <option value="NEVER_USED">Jamais utilisé</option>
           <option value="EXPERIMENTED">Bien vécu</option>
         </select>
-        <span th:if="${#fields.hasErrors('state')}" 
-              th:errors="*{state}" class="error"></span>
       </fieldset>
-      
-      <div class="form-actions">
-        <button type="submit" class="btn-primary">Mettre à jour</button>
-        <a th:href="@{/items/{id}(id=${item.uuid})}" class="btn-secondary">Annuler</a>
-      </div>
+
+      <button type="submit">Soumettre</button>
     </form>
+
   </main>
   <div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>
+
+
+<script>
+function addKeyword() {
+  const container = document.querySelector('[th\\:each]');
+  const clone = container.cloneNode(true);
+  clone.querySelector('input').value = '';
+  container.parentNode.appendChild(clone);
+}
+</script>

@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.regifted.app.item.Item;
 
 @Data
@@ -13,12 +15,19 @@ import com.regifted.app.item.Item;
 
 public class Keyword {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String uuid;
 
   @Column(nullable = false, unique = true)
   private String name;
 
   @ManyToMany(mappedBy = "keyword")
+   @JsonBackReference
   private Set<Item> items = new HashSet<>();
+
+  @PrePersist
+  public void generateId() {
+      if (this.uuid == null) {
+          this.uuid = UUID.randomUUID().toString();
+      }
+  }
 }

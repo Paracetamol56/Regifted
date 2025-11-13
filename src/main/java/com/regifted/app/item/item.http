@@ -2,16 +2,16 @@
 GET http://localhost:8080/items
 Accept: application/json
 
-###
+
 
 ### GET HTML
 GET http://localhost:8080/items
 Accept: text/html
 
-###
+
 
 ### PUT update item
-PUT http://localhost:8080/items/update/7304fdbb-465d-4ed4-ba88-e06f7f4b6e67
+PUT http://localhost:8080/items/update/e8ba9228-35f3-47a8-b54b-a8180cb09ea2
 Content-Type: application/json
 Accept: application/json
 
@@ -36,3 +36,8 @@ Content-Type: application/json
   "state": "USED",
   "keywords": ["meuble", "bois", "recyclé"]
 }
+
+
+### Get item
+GET http://localhost:8080/items/b3d07fac-1d1d-4870-bbf1-69966b416077
+Accept: text/html
