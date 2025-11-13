@@ -20,14 +20,10 @@ public class Keyword {
   @Column(nullable = false, unique = true)
   private String name;
 
-  @ManyToMany(mappedBy = "keyword")
-   @JsonBackReference
-  private Set<Item> items = new HashSet<>();
-
   @PrePersist
   public void generateId() {
-      if (this.uuid == null) {
-          this.uuid = UUID.randomUUID().toString();
-      }
+    if (this.uuid == null) {
+      this.uuid = UUID.randomUUID().toString();
+    }
   }
 }

@@ -3,8 +3,10 @@ package com.regifted.app.item;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
@@ -46,18 +48,36 @@ public class ItemController {
   // ======================
 
   // HTML
-  @GetMapping(produces = MediaType.TEXT_HTML_VALUE)
-  public String getAllHtml(Model model) {
-    List<Item> items = itemService.getAllItems();
-    model.addAttribute("items", items);
-    return "items";
+  @GetMapping(value = "", produces = MediaType.TEXT_HTML_VALUE)
+  @Transactional(readOnly = true)
+  @ResponseBody
+  public ModelAndView getPageHtml(
+      @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+      @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
+      @RequestParam(value = "q", required = false) String q,
+      Model model) {
+    Page<Item> items = itemService.getItemSearchPage(page, limit, q);
+    model.addAttribute("items", items.getContent());
+    model.addAttribute("page", page);
+    model.addAttribute("limit", limit);
+    model.addAttribute("query", q);
+    model.addAttribute("totalItems", items.getTotalElements());
+    model.addAttribute("totalPages", items.getTotalPages());
+    return new ModelAndView("items");
   }
 
   // JSON
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Transactional(readOnly = true)
   @ResponseBody
-  public List<Item> getAllJson() {
-    return itemService.getAllItems();
+  public List<Item> getPageJson(
+      @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+      @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
+      @RequestParam(value = "q", required = false) String q) {
+
+    System.out.println("GET /items called with page=" + page + ", limit=" + limit + ", q=" + q);
+    System.out.println(itemService.getItemSearchPage(page, limit, q));
+    return itemService.getItemSearchPage(page, limit, q).getContent();
   }
 
   // ======================
@@ -66,6 +86,7 @@ public class ItemController {
 
   // JSON / XML
   @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  @Transactional(readOnly = true)
   @ResponseBody
   public Item getItemById(@PathVariable String id) {
     return itemService.getById(id);
@@ -73,6 +94,7 @@ public class ItemController {
 
   // HTML
   @GetMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
+  @Transactional(readOnly = true)
   public String getItemByIdHTML(@PathVariable String id, Model model) {
     Item item = itemService.getById(id);
     model.addAttribute("item", item);

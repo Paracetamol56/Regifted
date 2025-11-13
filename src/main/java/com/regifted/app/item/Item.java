@@ -50,12 +50,8 @@ public class Item {
   @Column(nullable = false)
   private EState state;
 
-  @ManyToMany()
-   @JsonIgnore
-  private Set<User> favoriteItems;
-
-  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-   @JsonManagedReference
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @JsonManagedReference
   private Set<Keyword> keyword;
 
   @PrePersist

@@ -1,7 +1,8 @@
 package com.regifted.app.item;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
@@ -36,7 +37,6 @@ public class ItemService {
     Instant now = Instant.now();
     item.setCreatedAt(now);
     item.setUpdatedAt(now);
-    item.setFavoriteItems(new HashSet<>());
 
     // Gestion des keywords
     Set<Keyword> keywords = new HashSet<>();
@@ -79,6 +79,15 @@ public class ItemService {
       }
       System.err.println("Erreur création keyword '" + cleanName + "': " + e.getMessage());
       return null;
+    }
+  }
+
+  public Page<Item> getItemSearchPage(int pageNumber, int pageSize, String query) {
+    PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+    if (query == null || query.trim().isEmpty()) {
+      return repository.findAll(pageable);
+    } else {
+      return repository.searchByTitleOrDescription(query, pageable);
     }
   }
 

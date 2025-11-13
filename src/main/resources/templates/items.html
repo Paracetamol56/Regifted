@@ -22,7 +22,7 @@
           </li>
 
           <!-- Page indicator -->
-          <li th:each="i : ${#numbers.sequence(1, totalPages)}">
+          <li th:if="${totalPages > 1}" th:each="i : ${#numbers.sequence(1, totalPages)}">
             <a th:if="${i != page}"
               th:href="@{/items(page=${i}, limit=${limit}, q=${query})}"
               th:text="${i}">
