@@ -1,10 +1,11 @@
 package com.regifted.app.keyword;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.regifted.app.item.Item;
 
 @Data
 @Entity
@@ -12,9 +13,12 @@ import lombok.Data;
 
 public class Keyword {
   @Id
-  @Column(nullable = false, unique = true)
-  private String id;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   @Column(nullable = false, unique = true)
-  private String keyword;
+  private String name;
+
+  @ManyToMany(mappedBy = "keyword")
+  private Set<Item> items = new HashSet<>();
 }
