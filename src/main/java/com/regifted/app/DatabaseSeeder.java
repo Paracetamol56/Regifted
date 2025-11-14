@@ -49,6 +49,12 @@ public class DatabaseSeeder {
       user2.setPassword("{noop}password");
       userRepository.save(user2);
 
+      User user3 = new User();
+      user3.setName("charlie");
+      user3.setEmail("charlie@regifted.com");
+      user3.setPassword("{noop}password");
+      userRepository.save(user3);
+
       // --- KEYWORDS ---------------------------------------------------
       Keyword k1 = new Keyword();
       k1.setName("vintage");
@@ -76,6 +82,7 @@ public class DatabaseSeeder {
 
       // --- ITEMS ------------------------------------------------------
       Item i1 = new Item();
+      i1.setUser(user1);
       i1.setTitle("Vélo enfant bleu");
       i1.setDescription("Vélo 16 pouces en bon état");
       i1.setLatitude(48.8566f);
@@ -86,6 +93,7 @@ public class DatabaseSeeder {
       i1.setUpdatedAt(Instant.now());
 
       Item i2 = new Item();
+      i2.setUser(user2);
       i2.setTitle("Table basse en bois");
       i2.setDescription("Table en chêne massif, très solide");
       i2.setLatitude(45.7640f);
@@ -96,6 +104,7 @@ public class DatabaseSeeder {
       i2.setUpdatedAt(Instant.now());
 
       Item i3 = new Item();
+      i3.setUser(user3);
       i3.setTitle("Roman de science-fiction");
       i3.setDescription("Livre en parfait état, presque neuf");
       i3.setLatitude(43.6045f);
@@ -106,6 +115,7 @@ public class DatabaseSeeder {
       i3.setUpdatedAt(Instant.now());
 
       Item i4 = new Item();
+      i4.setUser(user1);
       i4.setTitle("Lampe de bureau");
       i4.setDescription("Lampe LED avec bras flexible");
       i4.setLatitude(50.6292f);
@@ -116,6 +126,7 @@ public class DatabaseSeeder {
       i4.setUpdatedAt(Instant.now());
 
       Item i5 = new Item();
+      i5.setUser(user2);
       i5.setTitle("Chaise pliante");
       i5.setDescription("Chaise métal + tissu noir");
       i5.setLatitude(47.2184f);
@@ -126,6 +137,7 @@ public class DatabaseSeeder {
       i5.setUpdatedAt(Instant.now());
 
       Item i6 = new Item();
+      i6.setUser(user3);
       i6.setTitle("Ordinateur portable ancien");
       i6.setDescription("Fonctionne encore, batterie faible");
       i6.setLatitude(48.1173f);
@@ -136,6 +148,7 @@ public class DatabaseSeeder {
       i6.setUpdatedAt(Instant.now());
 
       Item i7 = new Item();
+      i7.setUser(user1);
       i7.setTitle("Lot de jouets pour enfants");
       i7.setDescription("Petits jouets en plastique, bon état");
       i7.setLatitude(43.2965f);
@@ -146,6 +159,7 @@ public class DatabaseSeeder {
       i7.setUpdatedAt(Instant.now());
 
       Item i8 = new Item();
+      i8.setUser(user2);
       i8.setTitle("Tapis de salon");
       i8.setDescription("Grand tapis beige 200x140 cm");
       i8.setLatitude(49.2583f);
@@ -156,6 +170,7 @@ public class DatabaseSeeder {
       i8.setUpdatedAt(Instant.now());
 
       Item i9 = new Item();
+      i9.setUser(user3);
       i9.setTitle("Micro-ondes");
       i9.setDescription("Fonctionne parfaitement, léger bruit");
       i9.setLatitude(44.8378f);
@@ -166,16 +181,18 @@ public class DatabaseSeeder {
       i9.setUpdatedAt(Instant.now());
 
       Item i10 = new Item();
+      i10.setUser(user1);
       i10.setTitle("Tondeuse à gazon");
       i10.setDescription("Tondeuse électrique, câble inclus");
       i10.setLatitude(48.5734f);
       i10.setLongitude(7.7521f);
-
+      i10.setKeywords(Set.of(k6));
       i10.setState(EState.USED);
       i10.setCreatedAt(Instant.now());
       i10.setUpdatedAt(Instant.now());
-      i10.setKeywords(Set.of(k6));
+
       Item i11 = new Item();
+      i11.setUser(user2);
       i11.setTitle("Veste d'hiver homme");
       i11.setDescription("Taille L, chaude et confortable");
       i11.setLatitude(45.1885f);
@@ -186,6 +203,7 @@ public class DatabaseSeeder {
       i11.setUpdatedAt(Instant.now());
 
       Item i12 = new Item();
+      i12.setUser(user3);
       i12.setTitle("Sac à dos de randonnée");
       i12.setDescription("50L, très bon état");
       i12.setLatitude(48.3904f);
@@ -196,6 +214,7 @@ public class DatabaseSeeder {
       i12.setUpdatedAt(Instant.now());
 
       Item i13 = new Item();
+      i13.setUser(user1);
       i13.setTitle("Boîte de Lego");
       i13.setDescription("Environ 300 pièces");
       i13.setLatitude(43.7102f);
@@ -206,6 +225,7 @@ public class DatabaseSeeder {
       i13.setUpdatedAt(Instant.now());
 
       Item i14 = new Item();
+      i14.setUser(user2);
       i14.setTitle("Cafetière italienne");
       i14.setDescription("Petit modèle 3 tasses");
       i14.setLatitude(49.4944f);
@@ -216,6 +236,7 @@ public class DatabaseSeeder {
       i14.setUpdatedAt(Instant.now());
 
       Item i15 = new Item();
+      i15.setUser(user3);
       i15.setTitle("Panier pour chat");
       i15.setDescription("Panier rond, tissu doux");
       i15.setLatitude(50.7239f);
@@ -226,6 +247,7 @@ public class DatabaseSeeder {
       i15.setUpdatedAt(Instant.now());
 
       Item i16 = new Item();
+      i16.setUser(user1);
       i16.setTitle("Étagère murale");
       i16.setDescription("Étagère blanche 60 cm");
       i16.setLatitude(46.2044f);
@@ -236,6 +258,7 @@ public class DatabaseSeeder {
       i16.setUpdatedAt(Instant.now());
 
       Item i17 = new Item();
+      i17.setUser(user2);
       i17.setTitle("Lot de vaisselle");
       i17.setDescription("Assiettes + bols, bon état");
       i17.setLatitude(49.1193f);
@@ -246,6 +269,7 @@ public class DatabaseSeeder {
       i17.setUpdatedAt(Instant.now());
 
       Item i18 = new Item();
+      i18.setUser(user3);
       i18.setTitle("Lampe de chevet");
       i18.setDescription("Abat-jour beige, fonctionne bien");
       i18.setLatitude(47.3220f);
@@ -256,6 +280,7 @@ public class DatabaseSeeder {
       i18.setUpdatedAt(Instant.now());
 
       Item i19 = new Item();
+      i19.setUser(user1);
       i19.setTitle("Vélo de route ancien");
       i19.setDescription("Vintage, encore utilisable");
       i19.setLatitude(45.8992f);
@@ -266,6 +291,7 @@ public class DatabaseSeeder {
       i19.setUpdatedAt(Instant.now());
 
       Item i20 = new Item();
+      i20.setUser(user2);
       i20.setTitle("Petit bureau pour enfant");
       i20.setDescription("Bureau en plastique bleu");
       i20.setLatitude(44.9334f);

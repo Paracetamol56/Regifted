@@ -46,7 +46,7 @@ public class ItemService {
     PageRequest pageable = PageRequest.of(pageNumber, pageSize);
     if (query != null && !query.trim().isEmpty()) {
       return repository.searchByTitleOrDescription(query, pageable);
-    } else if (keyword != null) {
+    } else if (keyword != null && !keyword.trim().isEmpty()) {
       Keyword kw = keywordService.getByName(keyword.trim().toLowerCase());
       if (kw == null) {
         return Page.empty(pageable);

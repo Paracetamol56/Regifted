@@ -59,7 +59,6 @@ public class ItemController {
   public ModelAndView getPageHtml(@Valid @ModelAttribute ItemSearchRequest req, Model model) {
     Page<Item> items = itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword());
     List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
-    System.out.println("KEYWORDS: " + keywords);
     model.addAttribute("items", items.getContent());
     model.addAttribute("keywords", keywords);
     model.addAttribute("page", req.getPage());
