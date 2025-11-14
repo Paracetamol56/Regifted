@@ -7,10 +7,10 @@
     <h1 th:text="${item.title}">Titre de l'objet</h1>
     <p th:text="${item.description}">Description de l'objet</p>
     
-    <div th:if="${item.keyword != null and !item.keyword.empty}">
+    <div th:if="${item.keywords != null and !item.keywords.empty}">
       <h3>Mots-clés :</h3>
       <ul>
-        <li th:each="k : ${item.keyword}" th:text="${k.name}">Nom du keyword</li>
+        <li th:each="k : ${item.keywords}" th:text="${k.name}">Nom du keyword</li>
       </ul>
     </div>
     

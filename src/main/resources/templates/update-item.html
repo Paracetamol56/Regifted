@@ -1,71 +1,123 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head th:replace="fragments/head :: head"></head>
-<body>
-  <div th:replace="fragments/header :: header"></div>
-  <main class="container">
-    <h1>Mise à jour de l'objet</h1>
-    
-    <!-- Message de succès/erreur -->
-    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-    
-   <form th:action="@{/items}" th:object="${item}" method="post">
-      <fieldset>
-        <label for="title">Titre</label>
-        <input id="title" th:field="*{title}" required maxlength="100"/>
-      </fieldset>
+  <head th:replace="fragments/head :: head"></head>
+  <body>
 
-      <fieldset>
-        <label for="description">Description</label>
-        <textarea id="description" th:field="*{description}" required maxlength="500"></textarea>
-      </fieldset>
+    <div th:replace="fragments/header :: header"></div>
 
-      <fieldset>
-        <label>Mots-clés</label>
-        <div>
-            <input th:each="kw, iter : *{keywords}"
-                th:field="*{keywords[__${iter.index}__].name}" type="text"
-                placeholder="Mot-clé"/>
-        </div>
-        <button type="button" onclick="addKeyword()">Ajouter un mot-clé</button>
-      </fieldset>
+    <main class="container">
+      <h1>Mise à jour de l'objet</h1>
 
-      <fieldset>
-        <label for="latitude">Latitude</label>
-        <input id="latitude" th:field="*{latitude}" type="number" step="0.000001" min="-90" max="90" required/>
-      </fieldset>
+      <form th:action="@{/items}" th:object="${item}" method="post">
+        <fieldset>
+          <label for="title">Titre</label>
+          <input id="title" th:field="*{title}" required maxlength="100"/>
+        </fieldset>
 
-      <fieldset>
-        <label for="longitude">Longitude</label>
-        <input id="longitude" th:field="*{longitude}" type="number" step="0.000001" min="-180" max="180" required/>
-      </fieldset>
+        <fieldset>
+          <label for="description">Description</label>
+          <textarea id="description" th:field="*{description}" required maxlength="500"></textarea>
+        </fieldset>
 
-      <fieldset>
-        <label for="state">État</label>
-        <select id="state" th:field="*{state}">
-          <option value="" disabled selected>Sélectionner</option>
-          <option value="RECYCLED">Recyclé</option>
-          <option value="USED">Usagé</option>
-          <option value="NEVER_USED">Jamais utilisé</option>
-          <option value="EXPERIMENTED">Bien vécu</option>
-        </select>
-      </fieldset>
+        <fieldset>
+          <label>Mots-clés</label>
 
-      <button type="submit">Soumettre</button>
-    </form>
+          <div id="keywords-container">
+            <div th:if="*{keywords == null or #lists.isEmpty(keywords)}">
+              <input th:field="*{keywords[0].name}" type="text" placeholder="Mot-clé"/>
+            </div>
 
-  </main>
-  <div th:replace="fragments/footer :: footer"></div>
-</body>
+            <div th:each="kw, iter : *{keywords}">
+              <input th:field="*{keywords[__${iter.index}__].name}" type="text" placeholder="Mot-clé"/>
+            </div>
+          </div>
+
+          <button type="button" onclick="addKeyword()">Ajouter un mot-clé</button>
+        </fieldset>
+
+        <fieldset>
+          <label>Position sur la carte</label>
+          <div id="map" style="height: 400px; width: 100%; margin-top: 5px;"></div>
+          <!-- Champs cachés pour envoyer les coordonnées au serveur -->
+          <input type="hidden" id="latitude" th:field="*{latitude}" required />
+          <input type="hidden" id="longitude" th:field="*{longitude}" required />
+        </fieldset>
+
+        <fieldset>
+          <label for="state">État</label>
+          <select id="state" th:field="*{state}">
+            <option value="" disabled selected>Sélectionner</option>
+            <option value="RECYCLED">Recyclé</option>
+            <option value="USED">Usagé</option>
+            <option value="NEVER_USED">Jamais utilisé</option>
+            <option value="EXPERIMENTED">Bien vécu</option>
+          </select>
+        </fieldset>
+
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+        <button type="submit">Soumettre</button>
+      </form>
+
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script>
+function addKeyword() {
+  const container = document.getElementById("keywords-container");
+
+  // Clone the last keyword row
+  const lastRow = container.lastElementChild;
+  const clone = lastRow.cloneNode(true);
+
+  // Clear input value
+  clone.querySelector("input").value = "";
+
+  // Fix index for Thymeleaf binding
+  const inputs = container.querySelectorAll("input");
+  const newIndex = inputs.length;
+
+  clone.querySelector("input").setAttribute("name", `keywords[${newIndex}].name`);
+
+  container.appendChild(clone);
+}
+
+const initialLat = parseFloat(document.getElementById("latitude").value);
+const initialLng = parseFloat(document.getElementById("longitude").value);
+
+let map;
+let marker;
+
+// If we have a saved position → center map on it
+if (!isNaN(initialLat) && !isNaN(initialLng) && initialLat !== 0 && initialLng !== 0) {
+  map = L.map('map').setView([initialLat, initialLng], 14);
+  marker = L.marker([initialLat, initialLng]).addTo(map);
+} else {
+  // Default world view
+  map = L.map('map').setView([0, 0], 2);
+}
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Click on map sets marker + hidden fields
+map.on('click', function(e) {
+  const { lat, lng } = e.latlng;
+
+  if (marker) {
+    marker.setLatLng([lat, lng]);
+  } else {
+    marker = L.marker([lat, lng]).addTo(map);
+  }
+
+  document.getElementById('latitude').value = lat.toFixed(6);
+  document.getElementById('longitude').value = lng.toFixed(6);
+});
+</script>
+
+  </body>
 </html>
 
 
-<script>
-function addKeyword() {
-  const container = document.querySelector('[th\\:each]');
-  const clone = container.cloneNode(true);
-  clone.querySelector('input').value = '';
-  container.parentNode.appendChild(clone);
-}
-</script>

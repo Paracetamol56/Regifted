@@ -117,7 +117,7 @@ public class ItemController {
   public String getUpdateForm(@PathVariable String id, Model model) {
     Item item = itemService.getById(id);
     model.addAttribute("item", item);
-    return "update-item"; // template Thymeleaf
+    return "update-item";
   }
 
   @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)

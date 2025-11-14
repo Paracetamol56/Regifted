@@ -1,57 +1,57 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/head :: head"></head>
+  <head th:replace="fragments/head :: head"></head>
 
-<body>
-  <div th:replace="fragments/header :: header"></div>
-  <main class="container">
-    <h1>New Item</h1>
-    <form id="itemForm" action="/items" method="POST">
-      <fieldset>
-        <label for="title">Title</label>
-        <input id="title" name="title" placeholder="Title" required maxlength="100" />
-      </fieldset>
+  <body>
+    <div th:replace="fragments/header :: header"></div>
+    <main class="container">
+      <h1>New Item</h1>
+      <form id="itemForm" action="/items" method="POST">
+        <fieldset>
+          <label for="title">Title</label>
+          <input id="title" name="title" placeholder="Title" required maxlength="100" />
+        </fieldset>
 
-      <fieldset>
-        <label for="description">Description</label>
-        <textarea id="description" name="description" placeholder="Description" required maxlength="500"></textarea>
-      </fieldset>
+        <fieldset>
+          <label for="description">Description</label>
+          <textarea id="description" name="description" placeholder="Description" required maxlength="500"></textarea>
+        </fieldset>
 
-      <fieldset>
-        <label for="state">State</label>
-        <select id="state" name="state" required>
-          <option value="" disabled selected>Select state</option>
-          <option value="RECYCLED">Recyclé</option>
-          <option value="USED">Usagé</option>
-          <option value="NEVER_USED">Jamais utilisé</option>
-          <option value="EXPERIMENTED">Bien vécu</option>
-        </select>
-      </fieldset>
+        <fieldset>
+          <label for="state">State</label>
+          <select id="state" name="state" required>
+            <option value="" disabled selected>Select state</option>
+            <option value="RECYCLED">Recyclé</option>
+            <option value="USED">Usagé</option>
+            <option value="NEVER_USED">Jamais utilisé</option>
+            <option value="EXPERIMENTED">Bien vécu</option>
+          </select>
+        </fieldset>
 
-      <fieldset>
-        <label>Mots clefs <a href="#" onclick="addKeyWord(); return false;">[+]</a></label>
-        <div id="keyword-div">
-          
-        </div>
-      </fieldset>
+        <fieldset>
+          <label>Mots clefs <a href="#" onclick="addKeyWord(); return false;">[+]</a></label>
+          <div id="keyword-div">
 
-      <fieldset>
-        <label>Position sur la carte</label>
-        <div id="map" style="height: 400px; width: 100%; margin-top: 5px;"></div>
-        <!-- Champs cachés pour envoyer les coordonnées au serveur -->
-        <input type="hidden" id="latitude" name="latitude" required>
-        <input type="hidden" id="longitude" name="longitude" required>
-      </fieldset>
+          </div>
+        </fieldset>
 
-      <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-      <button type="submit">Submit</button>
-    </form>
-  </main>
-  <div th:replace="fragments/footer :: footer"></div>
+        <fieldset>
+          <label>Position sur la carte</label>
+          <div id="map" style="height: 400px; width: 100%; margin-top: 5px;"></div>
+          <!-- Champs cachés pour envoyer les coordonnées au serveur -->
+          <input type="hidden" id="latitude" name="latitude" min="-90" max="90" required>
+          <input type="hidden" id="longitude" name="longitude" min="-180" max="180" required>
+        </fieldset>
 
-  <script>
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <button type="submit">Submit</button>
+      </form>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script>
     function addKeyWord() {
       const keywordDiv = document.getElementById("keyword-div");
 
@@ -65,34 +65,34 @@
       keywordDiv.appendChild(newInput);
     }
 
-      // Initialisation de la carte centrée sur le monde
-      const map = L.map('map').setView([0, 0], 2);
+    // Initialisation de la carte centrée sur le monde
+    const map = L.map('map').setView([0, 0], 2);
 
-      // Ajouter les tuiles OpenStreetMap
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+    // Ajouter les tuiles OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-      let marker;
+    let marker;
 
-      // L'utilisateur clique sur la carte
-      map.on('click', function(e) {
-        const { lat, lng } = e.latlng;
+    // L'utilisateur clique sur la carte
+    map.on('click', function(e) {
+      const { lat, lng } = e.latlng;
 
-        // Déplacer le marqueur
-        if (marker) {
-          marker.setLatLng([lat, lng]);
-        } else {
-          marker = L.marker([lat, lng]).addTo(map);
-        }
+      // Déplacer le marqueur
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng]).addTo(map);
+      }
 
-        // Remplie les champs cachés du formulaire
-        document.getElementById('latitude').value = lat.toFixed(6);
-        document.getElementById('longitude').value = lng.toFixed(6);
-      });
+      // Remplie les champs cachés du formulaire
+      document.getElementById('latitude').value = lat.toFixed(6);
+      document.getElementById('longitude').value = lng.toFixed(6);
+    });
 
 
-  </script>
-</body>
+    </script>
+  </body>
 
 </html>
