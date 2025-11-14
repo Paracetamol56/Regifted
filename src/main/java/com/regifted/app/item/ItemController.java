@@ -10,6 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
+import com.regifted.app.item.dto.ItemSearchRequest;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.keyword.KeywordService;
 
@@ -55,20 +56,15 @@ public class ItemController {
   @GetMapping(value = "", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
   @ResponseBody
-  public ModelAndView getPageHtml(
-      @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-      @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
-      @RequestParam(value = "q", required = false) String q,
-      @RequestParam(value = "keyword", required = false) String keyword,
-      Model model) {
-    Page<Item> items = itemService.getItemSearchPage(page, limit, q, keyword);
+  public ModelAndView getPageHtml(@Valid @ModelAttribute ItemSearchRequest req, Model model) {
+    Page<Item> items = itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword());
     List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
     System.out.println("KEYWORDS: " + keywords);
     model.addAttribute("items", items.getContent());
     model.addAttribute("keywords", keywords);
-    model.addAttribute("page", page);
-    model.addAttribute("limit", limit);
-    model.addAttribute("query", q);
+    model.addAttribute("page", req.getPage());
+    model.addAttribute("limit", req.getLimit());
+    model.addAttribute("query", req.getQ());
     model.addAttribute("totalItems", items.getTotalElements());
     model.addAttribute("totalPages", items.getTotalPages());
     return new ModelAndView("items");
@@ -79,12 +75,9 @@ public class ItemController {
   @Transactional(readOnly = true)
   @ResponseBody
   public List<Item> getPageJson(
-      @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-      @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
-      @RequestParam(value = "q", required = false) String q,
-      @RequestParam(value = "keyword", required = false) String keyword) {
+      @Valid @ModelAttribute ItemSearchRequest req) {
 
-    return itemService.getItemSearchPage(page, limit, q, keyword).getContent();
+    return itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword()).getContent();
   }
 
   // ======================
