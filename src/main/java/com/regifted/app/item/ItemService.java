@@ -42,13 +42,18 @@ public class ItemService {
     return repository.save(item);
   }
 
-  public Page<Item> getItemSearchPage(int pageNumber, int pageSize, String query) {
+  public Page<Item> getItemSearchPage(int pageNumber, int pageSize, String query, String keyword) {
     PageRequest pageable = PageRequest.of(pageNumber, pageSize);
-    if (query == null || query.trim().isEmpty()) {
-      return repository.findAll(pageable);
-    } else {
+    if (query != null && !query.trim().isEmpty()) {
       return repository.searchByTitleOrDescription(query, pageable);
+    } else if (keyword != null) {
+      Keyword kw = keywordService.getByName(keyword.trim().toLowerCase());
+      if (kw == null) {
+        return Page.empty(pageable);
+      }
+      return repository.findByKeyword(kw, pageable);
     }
+    return repository.findAll(pageable);
   }
 
   public List<Item> getAllItems() {

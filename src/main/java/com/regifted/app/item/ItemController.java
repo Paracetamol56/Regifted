@@ -59,8 +59,9 @@ public class ItemController {
       @RequestParam(value = "page", required = false, defaultValue = "0") int page,
       @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
       @RequestParam(value = "q", required = false) String q,
+      @RequestParam(value = "keyword", required = false) String keyword,
       Model model) {
-    Page<Item> items = itemService.getItemSearchPage(page, limit, q);
+    Page<Item> items = itemService.getItemSearchPage(page, limit, q, keyword);
     List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
     System.out.println("KEYWORDS: " + keywords);
     model.addAttribute("items", items.getContent());
@@ -80,11 +81,10 @@ public class ItemController {
   public List<Item> getPageJson(
       @RequestParam(value = "page", required = false, defaultValue = "0") int page,
       @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
-      @RequestParam(value = "q", required = false) String q) {
+      @RequestParam(value = "q", required = false) String q,
+      @RequestParam(value = "keyword", required = false) String keyword) {
 
-    System.out.println("GET /items called with page=" + page + ", limit=" + limit + ", q=" + q);
-    System.out.println(itemService.getItemSearchPage(page, limit, q));
-    return itemService.getItemSearchPage(page, limit, q).getContent();
+    return itemService.getItemSearchPage(page, limit, q, keyword).getContent();
   }
 
   // ======================

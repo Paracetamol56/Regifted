@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.regifted.app.keyword.Keyword;
+
 public interface ItemRepository extends JpaRepository<Item, String> {
   @Query(value = """
         SELECT * FROM item
@@ -17,4 +19,6 @@ public interface ItemRepository extends JpaRepository<Item, String> {
            OR LOWER(description) LIKE LOWER(CONCAT('%', :query, '%'))
       """, nativeQuery = true)
   Page<Item> searchByTitleOrDescription(@Param("query") String query, Pageable pageable);
+
+  Page<Item> findByKeyword(Keyword keyword, Pageable pageable);
 }

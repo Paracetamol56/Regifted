@@ -18,6 +18,10 @@ public class KeywordService {
     return keywordRepository.findMostUsedKeywords(limit);
   }
 
+  public Keyword getByName(String name) {
+    return keywordRepository.findByName(name).orElse(null);
+  }
+
   public Keyword getOrCreateKeyword(String name) {
     name = name.trim().toLowerCase();
     if (name == null || name.isEmpty()) {
