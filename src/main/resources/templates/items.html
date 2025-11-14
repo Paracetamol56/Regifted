@@ -1,71 +1,110 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-  <head th:replace="fragments/head :: head"></head>
-  <body>
-    <div th:replace="fragments/header :: header"></div>
-    <main class="container">
-      <aside>
-        <ul>
-          <li th:each="keyword : ${keywords}">
-            <a href="/items?keyword=" th:href="@{/items(keyword=${keyword.name})}" th:text="${keyword.name}"></a>
-          </li>
-        </ul>
-      </aside>
-      <h1>All Items</h1>
-      <ul>
-        <li th:each="item : ${items}">
-          <a th:href="@{/items/{uuid}(uuid=${item.uuid})}" th:text="${item.title}"></a>
+<head th:replace="fragments/head :: head"></head>
+
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<main class="container grid">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2>Keywords</h2>
+    <ul>
+      <li th:each="keyword : ${keywords}">
+        <a th:href="@{/items(keyword=${keyword.name})}" th:text="${keyword.name}"></a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN SECTION -->
+  <section class="content">
+    <h1>All Items</h1>
+
+    <!-- ITEMS AS CARDS -->
+    <div class="grid">
+      <article class="card" th:each="item : ${items}">
+        <h3 th:text="${item.title}"></h3>
+        <p><small th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}"></small></p>
+        <p th:text="${item.description.length() > 120 ? item.description.substring(0,120) + '…' : item.description}"></p>
+        <a class="contrast" th:href="@{/items/{uuid}(uuid=${item.uuid})}">View</a>
+      </article>
+    </div>
+
+    <!-- PAGINATION -->
+    <nav aria-label="pagination">
+      <ul class="pagination">
+        <li>
+          <a th:if="${page > 0}"
+             th:href="@{/items(page=${page - 1}, limit=${limit}, q=${query}, keyword=${keyword})}">Previous</a>
+          <span th:unless="${page > 0}">Previous</span>
+        </li>
+
+        <li th:each="i : ${#numbers.sequence(0, totalPages-1)}">
+          <a th:if="${i != page}"
+             th:href="@{/items(page=${i}, limit=${limit}, q=${query}, keyword=${keyword})}"
+             th:text="${i + 1}"></a>
+          <span th:if="${i == page}" th:text="${i + 1}" aria-current="page"></span>
+        </li>
+
+        <li>
+          <a th:if="${totalPages > page + 1}"
+             th:href="@{/items(page=${page + 1}, limit=${limit}, q=${query}, keyword=${keyword})}">Next</a>
+          <span th:unless="${totalPages > page + 1}">Next</span>
         </li>
       </ul>
-      <!-- Pagination component -->
-      <nav aria-label="pagination" style="margin-top: 1rem;">
-        <ul class="pagination" style="display: flex; list-style: none; gap: 0.5rem; justify-content: center; padding: 0;">
-          <!-- Previous page -->
-          <li th:if="${page > 0}">
-            <a th:href="@{/items(page=${page - 1}, limit=${limit})}" role="button" class="secondary">Previous</a>
-          </li>
-          <li th:unless="${page > 0}">
-            <span class="disabled">Previous</span>
-          </li>
 
-          <!-- Page indicator -->
-          <li th:if="${totalPages > 1}" th:each="i : ${#numbers.sequence(1, totalPages)}">
-            <a th:if="${i != page}"
-              th:href="@{/items(page=${i}, limit=${limit}, q=${query})}"
-              th:text="${i}">
-            </a>
+      <!-- Items per page -->
+      <form th:action="@{/items}" method="get">
+        <label for="limit-select">Items per page:</label>
+        <select id="limit-select" name="limit" th:onchange="this.form.submit()">
+          <option th:selected="${limit == 5}" value="5">5</option>
+          <option th:selected="${limit == 10}" value="10">10</option>
+          <option th:selected="${limit == 20}" value="20">20</option>
+          <option th:selected="${limit == 50}" value="50">50</option>
+        </select>
+        <input type="hidden" name="page" th:value="${page}" />
+        <input type="hidden" name="q" th:value="${query}" />
+        <input type="hidden" name="keyword" th:value="${keyword}" />
+      </form>
+    </nav>
 
-            <a th:if="${i == page}"
-              th:text="${i}"
-              aria-current="page"
-              class="contrast">
-            </a>
-          </li>
+  </section>
+</main>
 
-          <!-- Next page -->
-          <li th:if="${totalPages > page + 1}">
-            <a th:href="@{/items(page=${page + 1}, limit=${limit})}" role="button" class="secondary">Next</a>
-          </li>
-          <li th:unless="${totalPages > page + 1}">
-            <span class="disabled">Next</span>
-          </li>
+<div th:replace="fragments/footer :: footer"></div>
 
-          <!-- Limit selection -->
-          <li>
-            <form th:action="@{/items}" method="get" style="display: inline;">
-              <label for="limit-select">Items per page:</label>
-              <select id="limit-select" name="limit" th:onchange="this.form.submit()">
-                <option th:value="5" th:selected="${limit == 5}">5</option>
-                <option th:value="10" th:selected="${limit == 10}">10</option>
-                <option th:value="20" th:selected="${limit == 20}">20</option>
-                <option th:value="50" th:selected="${limit == 50}">50</option>
-              </select>
-              <input type="hidden" name="page" th:value="${page}" />
-            </form>
-          </li>
-        </ul>
-      </nav>
-    </main>
-    <div th:replace="fragments/footer :: footer"></div>
-  </body>
+<!-- LAYOUT CSS -->
+<style>
+/* Pico.css handles cards/buttons/colors, we only need layout */
+.container.grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .container.grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sidebar ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.sidebar ul li {
+  margin-bottom: 0.5rem;
+}
+
+.content .grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+</style>
+
+</body>
 </html>
