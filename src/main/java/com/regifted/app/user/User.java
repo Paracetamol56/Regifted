@@ -6,12 +6,15 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.regifted.app.item.Item;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -44,6 +47,10 @@ public class User {
   @UpdateTimestamp
   @Column(nullable = false)
   private Instant updatedAt;
+
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  private Set<Item> items;
 
   @ManyToMany()
   private Set<Item> favoriteItems;

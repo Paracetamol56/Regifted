@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.user.User;
@@ -22,7 +22,8 @@ public class Item {
   private String uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", updatable = false, nullable = true) // TODO: Make it not nullable later
+  @JoinColumn(name = "user_id", updatable = false, nullable = false)
+  @JsonBackReference
   private User user;
 
   @Column(nullable = false)
