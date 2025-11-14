@@ -24,8 +24,8 @@
       <fieldset>
         <label>Mots-clés</label>
         <div>
-          <input th:each="kw, iter : *{keywords}"
-                th:field="*{keywords[__${iter.index}__]}"
+            <input th:each="kw, iter : *{keywords}"
+                th:field="*{keywords[__${iter.index}__].name}" type="text"
                 placeholder="Mot-clé"/>
         </div>
         <button type="button" onclick="addKeyword()">Ajouter un mot-clé</button>

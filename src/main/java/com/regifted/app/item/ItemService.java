@@ -37,7 +37,7 @@ public class ItemService {
         }
       }
     }
-    item.setKeyword(keywords);
+    item.setKeywords(keywords);
 
     return repository.save(item);
   }
@@ -51,7 +51,7 @@ public class ItemService {
       if (kw == null) {
         return Page.empty(pageable);
       }
-      return repository.findByKeyword(kw, pageable);
+      return repository.findByKeywordsContaining(kw, pageable);
     }
     return repository.findAll(pageable);
   }
@@ -94,7 +94,7 @@ public class ItemService {
           keywords.add(keyword);
         }
       }
-      existing.setKeyword(keywords);
+      existing.setKeywords(keywords);
     }
 
     existing.setUpdatedAt(Instant.now());

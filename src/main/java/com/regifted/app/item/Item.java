@@ -52,7 +52,7 @@ public class Item {
 
   @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   @JsonManagedReference
-  private Set<Keyword> keyword;
+  private Set<Keyword> keywords;
 
   @PrePersist
   public void prePersist() {

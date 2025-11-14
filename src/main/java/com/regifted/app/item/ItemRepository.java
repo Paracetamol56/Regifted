@@ -20,5 +20,5 @@ public interface ItemRepository extends JpaRepository<Item, String> {
       """, nativeQuery = true)
   Page<Item> searchByTitleOrDescription(@Param("query") String query, Pageable pageable);
 
-  Page<Item> findByKeyword(Keyword keyword, Pageable pageable);
+  Page<Item> findByKeywordsContaining(Keyword keyword, Pageable pageable);
 }
