@@ -52,7 +52,7 @@ public class User {
   private Instant updatedAt;
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  @JsonIgnore
+  @JsonManagedReference
   private Set<Item> items;
 
   @ManyToMany(fetch = FetchType.LAZY)
