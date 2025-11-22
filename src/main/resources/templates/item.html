@@ -7,13 +7,11 @@
 
 <main class="container item-page">
   <!-- Breadcrumb -->
-  <nav class="breadcrumb">
-    <a th:href="@{/items}">← Back to items</a>
-  </nav>
+  <a class="secondary" th:href="@{/items}">← Back to items</a>
 
   <!-- Header -->
 
-  <div class="section item-header-section">
+  <section>
     <div class="item-title-row">
       <h1 th:text="${item.title}">Vintage Lamp</h1>
       <span class="favorite-heart" 
@@ -28,33 +26,39 @@
           Added by <a th:href="@{/users/{id}(id=${item.user.uuid})}" th:text="${item.user.name}"></a>
       on <time th:datetime="${item.createdAt}" th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}"></time>
     </p>
-  </div>
+  </section>
+  <hr/>
 
   <!-- Description -->
 
-  <div class="section">
+  <section>
     <h2>Description</h2>
     <p th:if="${item.description != null and !item.description.isEmpty()}" 
        th:text="${item.description}">A beautiful vintage lamp...</p>
     <p th:if="${item.description == null or item.description.isEmpty()}" 
        class="empty-state">No description provided.</p>
-  </div>
+  </section>
+  <hr/>
 
   <!-- Keywords -->
 
-  <div class="section" th:if="${keywords != null and !keywords.empty}">
+  <section>
     <h2>Keywords</h2>
-    <div class="keywords">
-      <a th:each="k : ${keywords}" 
-         th:href="@{/items(keyword=${k.name})}"
-         th:text="${k.name}"
-         class="keyword-badge"></a>
-    </div>
-  </div>
+    <p th:if="${#lists.isEmpty(item.keywords)}" class="empty-state">No keywords associated with this item.</p>
+    <ul th:unless="${#lists.isEmpty(item.keywords)}">
+      <li>
+        <a th:each="k : ${item.keywords}" 
+          th:href="@{/items(keyword=${k.name})}"
+          th:text="${k.name}"
+          class="keyword-badge"></a>
+      </li>
+    </ul>
+  </section>
+  <hr/>
 
   <!-- Details -->
 
-  <div class="section">
+  <section>
     <h2>Details</h2>
     <div class="details-grid">
       <div class="detail-card">
@@ -75,13 +79,13 @@
            target="_blank" rel="noopener">View map ↗</a>
       </div>
     </div>
-  </div>
+  </section>
+  <hr/>
 
   <!-- Actions -->
-
-  <div class="actions">
-    <a th:href="@{/items/update/{id}(id=${item.uuid})}" role="button" class="btn btn-edit">Edit item</a>
-  </div>
+  <section>
+    <a th:href="@{/items/update/{id}(id=${item.uuid})}" role="button">Edit item</a>
+  </section>
 </main>
 
 <div th:replace="fragments/footer :: footer"></div>
@@ -131,16 +135,9 @@
   .item-page { max-width: 900px; }
 
   /* Sections avec séparation plus marquée */
-  .section {
-      border-top: 2px solid #ccc; /* séparation plus visible */
+  section {
       padding: 2rem 0;            /* plus d'espace vertical */
       margin-top: 1rem;
-  }
-
-  .section:first-of-type {
-      border-top: none;
-      padding-top: 0;
-      margin-top: 0;
   }
 
   h2 {
@@ -220,10 +217,6 @@
   .btn { padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; }
   .btn-edit { border: 1px solid #333; }
   .btn-back { border: 1px solid #999; }
-
-  .breadcrumb { margin-bottom: 1.5rem; }
-  .breadcrumb a { font-size: 0.9rem; text-decoration: none; color: #666; }
-  .breadcrumb a:hover { color: #000; }
 
   .empty-state { color: #666; font-style: italic; }
 </style>

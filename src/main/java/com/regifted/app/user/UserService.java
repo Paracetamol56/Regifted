@@ -1,9 +1,8 @@
 package com.regifted.app.user;
 
+import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.item.Item;
 import com.regifted.app.user.dto.UserPostRequest;
-
-import jakarta.persistence.EntityNotFoundException;
 
 import com.regifted.app.item.ItemRepository;
 
@@ -34,18 +33,18 @@ public class UserService {
 
   public void addLike(String userUuid, String itemUuid) {
     User user = repository.findById(userUuid)
-        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userUuid));
+        .orElseThrow(() -> new NotFoundException(userUuid));
 
     Item item = itemRepository.findById(itemUuid)
-        .orElseThrow(() -> new EntityNotFoundException("Item not found: " + itemUuid));
+        .orElseThrow(() -> new NotFoundException(itemUuid));
 
     // Initialize favorites if null
-    if (user.getFavoriteItems() == null) {
-      user.setFavoriteItems(new HashSet<>());
+    if (user.getLikedItems() == null) {
+      user.setLikedItems(new HashSet<>());
     }
 
-    if (!user.getFavoriteItems().contains(item)) {
-      user.getFavoriteItems().add(item);
+    if (!user.getLikedItems().contains(item)) {
+      user.getLikedItems().add(item);
     }
 
     repository.save(user);
@@ -53,13 +52,13 @@ public class UserService {
 
   public void removeLike(String userUuid, String itemUuid) {
     User user = repository.findById(userUuid)
-        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userUuid));
+        .orElseThrow(() -> new NotFoundException(userUuid));
 
     Item item = itemRepository.findById(itemUuid)
-        .orElseThrow(() -> new EntityNotFoundException("Item not found: " + itemUuid));
+        .orElseThrow(() -> new NotFoundException(itemUuid));
 
-    if (user.getFavoriteItems() != null && user.getFavoriteItems().contains(item)) {
-      user.getFavoriteItems().remove(item);
+    if (user.getLikedItems() != null && user.getLikedItems().contains(item)) {
+      user.getLikedItems().remove(item);
     }
 
     repository.save(user);

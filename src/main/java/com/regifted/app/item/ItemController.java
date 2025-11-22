@@ -109,7 +109,7 @@ public class ItemController {
       return new ModelAndView("item");
     }
     User currentUser = this.userService.getByEmail(principal.getUsername());
-    boolean favorited = currentUser != null && currentUser.getFavoriteItems().contains(item);
+    boolean favorited = currentUser != null && currentUser.getLikedItems().contains(item);
 
     model.addAttribute("item", item);
     model.addAttribute("currentUser", currentUser);

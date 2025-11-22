@@ -3,9 +3,10 @@ package com.regifted.app.item;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
-import com.regifted.app.item.exception.ItemNotFoundException;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.keyword.KeywordService;
 
@@ -62,12 +63,12 @@ public class ItemService {
 
   public Item getById(String id) {
     return repository.findById(id)
-        .orElseThrow(() -> new ItemNotFoundException(id));
+        .orElseThrow(() -> new NotFoundException(id));
   }
 
   public Item updateItemById(String id, ItemPutRequest req) {
     Item existing = repository.findById(id)
-        .orElseThrow(() -> new ItemNotFoundException(id));
+        .orElseThrow(() -> new NotFoundException(id));
 
     if (req.getTitle() != null) {
       existing.setTitle(req.getTitle());

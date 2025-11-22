@@ -58,11 +58,8 @@ public class User {
   private Set<Item> items;
 
   @ManyToMany(fetch = FetchType.LAZY)
-  // @JoinTable(name = "user_favorite_items", joinColumns = @JoinColumn(name =
-  // "user_uuid", referencedColumnName = "uuid"), inverseJoinColumns =
-  // @JoinColumn(name = "item_uuid", referencedColumnName = "uuid"))
   @JsonManagedReference
-  private Set<Item> favoriteItems;
+  private Set<Item> likedItems;
 
   @PrePersist
   public void prePersist() {

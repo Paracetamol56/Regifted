@@ -71,7 +71,7 @@ public class Item {
   @JsonManagedReference
   private Set<Keyword> keywords;
 
-  @ManyToMany(mappedBy = "favoriteItems", fetch = FetchType.LAZY)
+  @ManyToMany(mappedBy = "likedItems", fetch = FetchType.LAZY)
   @JsonIgnore
   private Set<User> likedByUsers;
 
