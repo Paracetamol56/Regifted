@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.regifted.app.item.Item;
@@ -51,10 +52,11 @@ public class User {
   private Instant updatedAt;
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  @JsonManagedReference
+  @JsonIgnore
   private Set<Item> items;
 
-  @ManyToMany()
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JsonManagedReference
   private Set<Item> favoriteItems;
 
   @PrePersist

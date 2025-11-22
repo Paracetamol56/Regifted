@@ -15,6 +15,10 @@ public class UserService {
     return repository.save(req.toUser());
   }
 
+  public User getByEmail(String email) {
+    return repository.findByEmail(email).orElse(null);
+  }
+
   public User getByUuid(String uuid) {
     return repository.findById(uuid).orElse(null);
   }

@@ -22,7 +22,6 @@ public class Item {
   private String uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", updatable = false, nullable = false)
   @JsonBackReference
   private User user;
 
@@ -54,6 +53,10 @@ public class Item {
   @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   @JsonManagedReference
   private Set<Keyword> keywords;
+
+  @ManyToMany(mappedBy = "favoriteItems", fetch = FetchType.LAZY)
+  @JsonBackReference
+  private Set<User> favoredByUsers;
 
   @PrePersist
   public void prePersist() {
