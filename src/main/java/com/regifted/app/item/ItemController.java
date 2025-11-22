@@ -72,7 +72,7 @@ public class ItemController {
     model.addAttribute("query", req.getQ());
     model.addAttribute("totalItems", items.getTotalElements());
     model.addAttribute("totalPages", items.getTotalPages());
-    return new ModelAndView("items");
+    return new ModelAndView("items/index");
   }
 
   // JSON
@@ -114,7 +114,7 @@ public class ItemController {
     model.addAttribute("item", item);
     model.addAttribute("currentUser", currentUser);
     model.addAttribute("favorited", favorited);
-    return new ModelAndView("item");
+    return new ModelAndView("items/{uuid}");
   }
 
   // ======================

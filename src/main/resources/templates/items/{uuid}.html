@@ -12,7 +12,7 @@
   <!-- Header -->
 
   <section>
-    <div class="item-title-row">
+    <hgroup>
       <h1 th:text="${item.title}">Vintage Lamp</h1>
       <span class="favorite-heart" 
             th:classappend="${favorited} ? 'favorited' : ''" 
@@ -21,13 +21,12 @@
         ♥
       </span>
       <span class="badge" th:text="${item.donateAt == null} ? 'Available' : 'Unavailable'"></span>
-    </div>
+    </hgroup>
     <p class="item-meta">
           Added by <a th:href="@{/users/{id}(id=${item.user.uuid})}" th:text="${item.user.name}"></a>
       on <time th:datetime="${item.createdAt}" th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}"></time>
     </p>
   </section>
-  <hr/>
 
   <!-- Description -->
 
@@ -44,13 +43,13 @@
 
   <section>
     <h2>Keywords</h2>
-    <p th:if="${#lists.isEmpty(item.keywords)}" class="empty-state">No keywords associated with this item.</p>
+    <p th:if="${#lists.isEmpty(item.keywords)}">No keywords associated with this item.</p>
     <ul th:unless="${#lists.isEmpty(item.keywords)}">
-      <li>
-        <a th:each="k : ${item.keywords}" 
+      <li th:each="k : ${item.keywords}">
+        <a
           th:href="@{/items(keyword=${k.name})}"
           th:text="${k.name}"
-          class="keyword-badge"></a>
+        ></a>
       </li>
     </ul>
   </section>
@@ -146,14 +145,14 @@
       text-transform: uppercase;
   }
 
-  .item-title-row {
+  hgroup {
       display: flex;
       align-items: flex-start;
       gap: 1rem;
       flex-wrap: wrap;
   }
 
-  .item-title-row h1 { margin: 0; flex: 1; }
+  hgroup h1 { margin: 0; flex: 1; }
 
   .item-meta {
       color: #666;
@@ -168,20 +167,6 @@
       font-size: 0.8rem;
       font-weight: 600;
       text-transform: uppercase;
-  }
-
-  .keywords { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-
-  .keyword-badge {
-      padding: 0.35rem 0.75rem;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      text-decoration: none;
-      transition: background 0.2s;
-  }
-
-  .keyword-badge:hover {
-      color: #000;
   }
 
   .details-grid {

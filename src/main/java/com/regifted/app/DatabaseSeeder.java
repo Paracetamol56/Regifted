@@ -87,8 +87,8 @@ public class DatabaseSeeder {
       // --- ITEMS ------------------------------------------------------
       Item i1 = new Item();
       i1.setUser(user1);
-      i1.setTitle("Vélo enfant bleu");
-      i1.setDescription("Vélo 16 pouces en bon état");
+      i1.setTitle("Blue children's bike");
+      i1.setDescription("16-inch bike in good condition");
       i1.setLatitude(48.8566f);
       i1.setLongitude(2.3522f);
       i1.setKeywords(Set.of(k1, k4));
@@ -98,8 +98,8 @@ public class DatabaseSeeder {
 
       Item i2 = new Item();
       i2.setUser(user2);
-      i2.setTitle("Table basse en bois");
-      i2.setDescription("Table en chêne massif, très solide");
+      i2.setTitle("Wooden coffee table");
+      i2.setDescription("Solid oak table, very sturdy");
       i2.setLatitude(45.7640f);
       i2.setLongitude(4.8357f);
       i2.setKeywords(Set.of(k3, k5));
@@ -109,8 +109,8 @@ public class DatabaseSeeder {
 
       Item i3 = new Item();
       i3.setUser(user3);
-      i3.setTitle("Roman de science-fiction");
-      i3.setDescription("Livre en parfait état, presque neuf");
+      i3.setTitle("Science fiction novel");
+      i3.setDescription("Book in perfect condition, almost new");
       i3.setLatitude(43.6045f);
       i3.setLongitude(1.4442f);
       i3.setState(EState.NEVER_USED);
@@ -120,8 +120,8 @@ public class DatabaseSeeder {
 
       Item i4 = new Item();
       i4.setUser(user1);
-      i4.setTitle("Lampe de bureau");
-      i4.setDescription("Lampe LED avec bras flexible");
+      i4.setTitle("Desk lamp");
+      i4.setDescription("LED lamp with flexible arm");
       i4.setLatitude(50.6292f);
       i4.setLongitude(3.0573f);
       i4.setKeywords(Set.of(k2, k3));
@@ -131,8 +131,8 @@ public class DatabaseSeeder {
 
       Item i5 = new Item();
       i5.setUser(user2);
-      i5.setTitle("Chaise pliante");
-      i5.setDescription("Chaise métal + tissu noir");
+      i5.setTitle("Folding chair");
+      i5.setDescription("Metal chair with black fabric");
       i5.setLatitude(47.2184f);
       i5.setLongitude(-1.5536f);
       i5.setKeywords(Set.of(k5));
@@ -142,8 +142,8 @@ public class DatabaseSeeder {
 
       Item i6 = new Item();
       i6.setUser(user3);
-      i6.setTitle("Ordinateur portable ancien");
-      i6.setDescription("Fonctionne encore, batterie faible");
+      i6.setTitle("Old laptop");
+      i6.setDescription("Still works, weak battery");
       i6.setLatitude(48.1173f);
       i6.setLongitude(-1.6778f);
       i6.setKeywords(Set.of(k1));
@@ -153,8 +153,8 @@ public class DatabaseSeeder {
 
       Item i7 = new Item();
       i7.setUser(user1);
-      i7.setTitle("Lot de jouets pour enfants");
-      i7.setDescription("Petits jouets en plastique, bon état");
+      i7.setTitle("Lot of children's toys");
+      i7.setDescription("Small plastic toys, good condition");
       i7.setLatitude(43.2965f);
       i7.setLongitude(5.3698f);
       i7.setKeywords(Set.of(k8, k4));
@@ -164,8 +164,8 @@ public class DatabaseSeeder {
 
       Item i8 = new Item();
       i8.setUser(user2);
-      i8.setTitle("Tapis de salon");
-      i8.setDescription("Grand tapis beige 200x140 cm");
+      i8.setTitle("Living room rug");
+      i8.setDescription("Large beige rug, 200x140 cm");
       i8.setLatitude(49.2583f);
       i8.setLongitude(4.0317f);
       i8.setKeywords(Set.of(k3, k5));
@@ -175,8 +175,8 @@ public class DatabaseSeeder {
 
       Item i9 = new Item();
       i9.setUser(user3);
-      i9.setTitle("Micro-ondes");
-      i9.setDescription("Fonctionne parfaitement, léger bruit");
+      i9.setTitle("Microwave");
+      i9.setDescription("Works perfectly, slight noise");
       i9.setLatitude(44.8378f);
       i9.setLongitude(-0.5792f);
       i9.setKeywords(Set.of(k2, k6));
@@ -186,8 +186,8 @@ public class DatabaseSeeder {
 
       Item i10 = new Item();
       i10.setUser(user1);
-      i10.setTitle("Tondeuse à gazon");
-      i10.setDescription("Tondeuse électrique, câble inclus");
+      i10.setTitle("Lawn mower");
+      i10.setDescription("Electric mower, cable included");
       i10.setLatitude(48.5734f);
       i10.setLongitude(7.7521f);
       i10.setKeywords(Set.of(k6));
@@ -197,8 +197,8 @@ public class DatabaseSeeder {
 
       Item i11 = new Item();
       i11.setUser(user2);
-      i11.setTitle("Veste d'hiver homme");
-      i11.setDescription("Taille L, chaude et confortable");
+      i11.setTitle("Men’s winter jacket");
+      i11.setDescription("Size L, warm and comfortable");
       i11.setLatitude(45.1885f);
       i11.setLongitude(5.7245f);
       i11.setKeywords(Set.of(k1));
@@ -208,8 +208,8 @@ public class DatabaseSeeder {
 
       Item i12 = new Item();
       i12.setUser(user3);
-      i12.setTitle("Sac à dos de randonnée");
-      i12.setDescription("50L, très bon état");
+      i12.setTitle("Hiking backpack");
+      i12.setDescription("50L, very good condition");
       i12.setLatitude(48.3904f);
       i12.setLongitude(-4.4861f);
       i12.setKeywords(Set.of(k5));
@@ -219,8 +219,8 @@ public class DatabaseSeeder {
 
       Item i13 = new Item();
       i13.setUser(user1);
-      i13.setTitle("Boîte de Lego");
-      i13.setDescription("Environ 300 pièces");
+      i13.setTitle("Lego box");
+      i13.setDescription("Around 300 pieces");
       i13.setLatitude(43.7102f);
       i13.setLongitude(7.2620f);
       i13.setKeywords(Set.of(k8));
@@ -230,8 +230,8 @@ public class DatabaseSeeder {
 
       Item i14 = new Item();
       i14.setUser(user2);
-      i14.setTitle("Cafetière italienne");
-      i14.setDescription("Petit modèle 3 tasses");
+      i14.setTitle("Italian coffee maker");
+      i14.setDescription("Small 3-cup model");
       i14.setLatitude(49.4944f);
       i14.setLongitude(0.1079f);
       i14.setKeywords(Set.of(k6));
@@ -241,8 +241,8 @@ public class DatabaseSeeder {
 
       Item i15 = new Item();
       i15.setUser(user3);
-      i15.setTitle("Panier pour chat");
-      i15.setDescription("Panier rond, tissu doux");
+      i15.setTitle("Cat bed");
+      i15.setDescription("Round bed, soft fabric");
       i15.setLatitude(50.7239f);
       i15.setLongitude(1.6133f);
       i15.setKeywords(Set.of(k4));
@@ -252,8 +252,8 @@ public class DatabaseSeeder {
 
       Item i16 = new Item();
       i16.setUser(user1);
-      i16.setTitle("Étagère murale");
-      i16.setDescription("Étagère blanche 60 cm");
+      i16.setTitle("Wall shelf");
+      i16.setDescription("White 60 cm shelf");
       i16.setLatitude(46.2044f);
       i16.setLongitude(6.1432f);
       i16.setKeywords(Set.of(k5));
@@ -263,8 +263,8 @@ public class DatabaseSeeder {
 
       Item i17 = new Item();
       i17.setUser(user2);
-      i17.setTitle("Lot de vaisselle");
-      i17.setDescription("Assiettes + bols, bon état");
+      i17.setTitle("Set of dishes");
+      i17.setDescription("Plates + bowls, good condition");
       i17.setLatitude(49.1193f);
       i17.setLongitude(6.1757f);
       i17.setKeywords(Set.of(k5, k6));
@@ -274,8 +274,8 @@ public class DatabaseSeeder {
 
       Item i18 = new Item();
       i18.setUser(user3);
-      i18.setTitle("Lampe de chevet");
-      i18.setDescription("Abat-jour beige, fonctionne bien");
+      i18.setTitle("Bedside lamp");
+      i18.setDescription("Beige lampshade, works well");
       i18.setLatitude(47.3220f);
       i18.setLongitude(5.0415f);
       i18.setKeywords(Set.of(k3, k5));
@@ -285,8 +285,8 @@ public class DatabaseSeeder {
 
       Item i19 = new Item();
       i19.setUser(user1);
-      i19.setTitle("Vélo de route ancien");
-      i19.setDescription("Vintage, encore utilisable");
+      i19.setTitle("Old road bike");
+      i19.setDescription("Vintage, still usable");
       i19.setLatitude(45.8992f);
       i19.setLongitude(6.1294f);
       i19.setKeywords(Set.of(k1));
@@ -296,8 +296,8 @@ public class DatabaseSeeder {
 
       Item i20 = new Item();
       i20.setUser(user2);
-      i20.setTitle("Petit bureau pour enfant");
-      i20.setDescription("Bureau en plastique bleu");
+      i20.setTitle("Small children's desk");
+      i20.setDescription("Blue plastic desk");
       i20.setLatitude(44.9334f);
       i20.setLongitude(4.8924f);
       i20.setKeywords(Set.of(k5, k4));
