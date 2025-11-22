@@ -2,9 +2,12 @@ package com.regifted.app.user;
 
 import com.regifted.app.item.Item;
 import com.regifted.app.user.dto.UserPostRequest;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import com.regifted.app.item.ItemRepository;
 
-import java.util.Set;
+import java.util.HashSet;
 
 @org.springframework.stereotype.Service
 public class UserService {
@@ -29,37 +32,37 @@ public class UserService {
     return repository.findById(uuid).orElse(null);
   }
 
-  public boolean toggleFavorite(String uuidItem, String uuidUser) {
-    // Récupération de l'utilisateur
-    User user = repository.findById(uuidUser).orElse(null);
-    if (user == null) {
-      System.out.println("User not found: " + uuidUser);
-      return false;
+  public void addLike(String userUuid, String itemUuid) {
+    User user = repository.findById(userUuid)
+        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userUuid));
+
+    Item item = itemRepository.findById(itemUuid)
+        .orElseThrow(() -> new EntityNotFoundException("Item not found: " + itemUuid));
+
+    // Initialize favorites if null
+    if (user.getFavoriteItems() == null) {
+      user.setFavoriteItems(new HashSet<>());
     }
 
-    // Récupération de l'item
-    Item item = itemRepository.findById(uuidItem).orElse(null);
-    if (item == null) {
-      System.out.println("Item not found: " + uuidItem);
-      return false;
-    }
-
-    Set<Item> favorites = user.getFavoriteItems();
-    boolean isNowFavorite;
-
-    if (favorites.contains(item)) {
-      favorites.remove(item);
-      isNowFavorite = false;
-    } else {
-      favorites.add(item);
-      isNowFavorite = true;
+    if (!user.getFavoriteItems().contains(item)) {
+      user.getFavoriteItems().add(item);
     }
 
     repository.save(user);
+  }
 
-    System.out.println("Toggle favorite for user " + uuidUser + " and item " + uuidItem
-        + " -> now favorite: " + isNowFavorite);
-    return isNowFavorite;
+  public void removeLike(String userUuid, String itemUuid) {
+    User user = repository.findById(userUuid)
+        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userUuid));
+
+    Item item = itemRepository.findById(itemUuid)
+        .orElseThrow(() -> new EntityNotFoundException("Item not found: " + itemUuid));
+
+    if (user.getFavoriteItems() != null && user.getFavoriteItems().contains(item)) {
+      user.getFavoriteItems().remove(item);
+    }
+
+    repository.save(user);
   }
 
 }

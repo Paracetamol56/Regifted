@@ -68,13 +68,20 @@ public class UserController {
     return res;
   }
 
-  @PatchMapping(value = "favorite/{itemUuid}/{userUuid}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Boolean> toggleFavorite(
-      @PathVariable String itemUuid,
-      @PathVariable String userUuid) {
-    System.out.println("Received toggle favorite request for user " + userUuid + " and item " + itemUuid);
-    boolean result = userService.toggleFavorite(itemUuid, userUuid);
-    return ResponseEntity.ok(result);
+  @PostMapping(value = "/me/likes", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Void> addLike(@RequestParam("item") String itemUuid,
+      @AuthenticationPrincipal UserDetails principal) {
+    User currentUser = userService.getByEmail(principal.getUsername());
+    userService.addLike(currentUser.getUuid(), itemUuid);
+    return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping(value = "/me/likes", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Void> removeLike(@RequestParam("item") String itemUuid,
+      @AuthenticationPrincipal UserDetails principal) {
+    User currentUser = userService.getByEmail(principal.getUsername());
+    userService.removeLike(currentUser.getUuid(), itemUuid);
+    return ResponseEntity.ok().build();
   }
 
 }
