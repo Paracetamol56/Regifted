@@ -46,13 +46,21 @@ public class UserController {
   }
 
   @GetMapping(value = "/me", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-  @Transactional(readOnly = true)
   @ResponseBody
   public User getMe(@AuthenticationPrincipal UserDetails principal) {
     return svc.getByEmail(principal.getUsername());
   }
 
+  @GetMapping(value = "/{uuid}", produces = { MediaType.TEXT_HTML_VALUE })
+  public ModelAndView getUser(@PathVariable String uuid, Model model) {
+    User user = svc.getByUuid(uuid);
+    model.addAttribute("user", user);
+
+    return new ModelAndView("users/{uuid}");
+  }
+
   @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  @ResponseBody
   public User getUser(@PathVariable String uuid) {
     return svc.getByUuid(uuid);
   }

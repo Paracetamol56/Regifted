@@ -84,18 +84,18 @@ public class ItemController {
   // ======================
 
   // JSON / XML
-  @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @Transactional(readOnly = true)
   @ResponseBody
-  public Item getItemById(@PathVariable String id) {
-    return itemService.getById(id);
+  public Item getItemById(@PathVariable String uuid) {
+    return itemService.getById(uuid);
   }
 
   // HTML
-  @GetMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
+  @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
-  public String getItemByIdHTML(@PathVariable String id, Model model) {
-    Item item = itemService.getById(id);
+  public String getItemByIdHTML(@PathVariable String uuid, Model model) {
+    Item item = itemService.getById(uuid);
     model.addAttribute("item", item);
     return "item";
   }
@@ -105,23 +105,23 @@ public class ItemController {
   // ======================
 
   // Form HTML
-  @GetMapping(value = "/update/{id}", produces = MediaType.TEXT_HTML_VALUE)
-  public String getUpdateForm(@PathVariable String id, Model model) {
-    Item item = itemService.getById(id);
+  @GetMapping(value = "/update/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
+  public String getUpdateForm(@PathVariable String uuid, Model model) {
+    Item item = itemService.getById(uuid);
     model.addAttribute("item", item);
     return "update-item";
   }
 
-  @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String updateItemHTML(@PathVariable String id, @Valid ItemPutRequest req) {
-    Item updated = itemService.updateItemById(id, req);
+  @PutMapping(value = "/{uuid}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String updateItemHTML(@PathVariable String uuid, @Valid ItemPutRequest req) {
+    Item updated = itemService.updateItemById(uuid, req);
     return "redirect:/items/" + updated.getUuid();
   }
 
   // JSON
-  @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public Item updateItemJson(@PathVariable String id, @RequestBody @Valid ItemPutRequest req) {
-    return itemService.updateItemById(id, req);
+  public Item updateItemJson(@PathVariable String uuid, @RequestBody @Valid ItemPutRequest req) {
+    return itemService.updateItemById(uuid, req);
   }
 }

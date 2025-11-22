@@ -22,6 +22,7 @@ public class Item {
   private String uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user", nullable = false)
   @JsonBackReference
   private User user;
 
@@ -54,7 +55,7 @@ public class Item {
   @JsonManagedReference
   private Set<Keyword> keywords;
 
-  @OneToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.LAZY)
   @JsonBackReference
   private Set<User> favoredByUsers;
 

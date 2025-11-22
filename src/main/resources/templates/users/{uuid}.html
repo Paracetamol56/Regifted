@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <div th:replace="fragments/header :: header"></div>
+    <main class="container">
+      <h1 th:text="${user.name}"></h1>
+      <section>
+        <p>
+          <strong>Member since:</strong>
+          <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}"></span>
+        </p>
+      </section>
+
+      <section>
+        <h2>Items for donation</h2>
+        <p th:if="${#lists.isEmpty(user.items)}">This user has no items for donation.</p>
+        <ul th:unless="${#lists.isEmpty(user.items)}">
+          <li th:each="i : ${user.items}">
+            <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
+          </li>
+        </ul>
+      </section>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+  </body>
+</html>

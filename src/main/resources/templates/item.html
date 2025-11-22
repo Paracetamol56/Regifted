@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/head :: head"></head>
-<body>
-  <div th:replace="fragments/header :: header"></div>
-  <main class="container">
-    <h1 th:text="${item.title}">Titre de l'objet</h1>
-    <p th:text="${item.description}">Description de l'objet</p>
-    
-    <div th:if="${item.keywords != null and !item.keywords.empty}">
-      <h3>Mots-clés :</h3>
-      <ul>
-        <li th:each="k : ${item.keywords}" th:text="${k.name}">Nom du keyword</li>
-      </ul>
-    </div>
-    
-    <p><strong>État :</strong> <span th:text="${item.state}">État de l'objet</span></p>
-    
-    <a th:href="@{/items/update/{id}(id=${item.uuid})}" class="btn">Mettre à jour l'objet</a>
-  </main>
-  <div th:replace="fragments/footer :: footer"></div>
-</body>
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <div th:replace="fragments/header :: header"></div>
+    <main class="container">
+      <h1 th:text="${item.title}">Titre de l'objet</h1>
+      <p>
+        Posted by <a th:href="@{/users/{id}(id=${item.user.uuid})}" th:text="${item.user.name}"></a>
+        on <span th:text="${#dates.format(item.createdAt, 'dd/MM/yyyy')}"></span>
+      </p>
+      <p th:text="${item.description}">Description de l'objet</p>
+
+      <div th:if="${item.keywords != null and !item.keywords.empty}">
+        <h3>Mots-clés :</h3>
+        <ul>
+          <li th:each="k : ${item.keywords}" th:text="${k.name}">Nom du keyword</li>
+        </ul>
+      </div>
+
+      <p><strong>État :</strong> <span th:text="${item.state}">État de l'objet</span></p>
+
+      <a th:href="@{/items/update/{id}(id=${item.uuid})}" class="btn">Mettre à jour l'objet</a>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+  </body>
 </html>
