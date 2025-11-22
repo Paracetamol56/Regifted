@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.regifted.app.item.EState;
 import com.regifted.app.item.Item;
@@ -19,6 +21,9 @@ import com.regifted.app.user.UserRepository;
 
 @Configuration
 public class DatabaseSeeder {
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Bean
   CommandLineRunner seedDatabase(
@@ -40,19 +45,19 @@ public class DatabaseSeeder {
       User user1 = new User();
       user1.setName("alice");
       user1.setEmail("alice@regifted.com");
-      user1.setPassword("{noop}password"); // or BCrypt
+      user1.setPassword(this.passwordEncoder.encode("password"));
       userRepository.save(user1);
 
       User user2 = new User();
       user2.setName("bob");
       user2.setEmail("bob@regifted.com");
-      user2.setPassword("{noop}password");
+      user2.setPassword(this.passwordEncoder.encode("password"));
       userRepository.save(user2);
 
       User user3 = new User();
       user3.setName("charlie");
       user3.setEmail("charlie@regifted.com");
-      user3.setPassword("{noop}password");
+      user3.setPassword(this.passwordEncoder.encode("password"));
       userRepository.save(user3);
 
       // --- KEYWORDS ---------------------------------------------------
