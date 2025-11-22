@@ -5,20 +5,31 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.user.User;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "item")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Item {
 
   @Id
   @Column(nullable = false, unique = true)
+  @EqualsAndHashCode.Include
   private String uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -55,9 +66,15 @@ public class Item {
   @JsonManagedReference
   private Set<Keyword> keywords;
 
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JsonBackReference
-  private Set<User> favoredByUsers;
+  @ManyToMany(mappedBy = "favoriteItems", fetch = FetchType.LAZY)
+  @JsonIgnore
+  private Set<User> likedByUsers;
+
+  @Transient
+  @JsonProperty("likesCount")
+  public int getLikesCount() {
+    return likedByUsers != null ? likedByUsers.size() : 0;
+  }
 
   @PrePersist
   public void prePersist() {

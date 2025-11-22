@@ -14,9 +14,9 @@
 
       <section>
         <h2>Items for donation</h2>
-        <p th:if="${#lists.isEmpty(user.items)}">This user has no items for donation.</p>
-        <ul th:unless="${#lists.isEmpty(user.items)}">
-          <li th:each="i : ${user.items}">
+        <!--<p th:if="${#lists.isEmpty(user.items)}">This user has no items for donation.</p>-->
+        <ul>
+          <li th:each="i : ${user.getItems()}">
             <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
           </li>
         </ul>
