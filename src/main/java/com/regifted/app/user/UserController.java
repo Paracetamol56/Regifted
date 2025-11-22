@@ -1,10 +1,7 @@
 package com.regifted.app.user;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -67,4 +64,15 @@ public class UserController {
 
     return res;
   }
+
+
+ @PatchMapping(value = "favorite/{itemUuid}/{userUuid}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Boolean> toggleFavorite(
+          @PathVariable String itemUuid,
+          @PathVariable String userUuid) {
+      System.out.println("Received toggle favorite request for user " + userUuid + " and item " + itemUuid);
+      boolean result = svc.toggleFavorite(itemUuid, userUuid);
+      return ResponseEntity.ok(result);
+  }
+
 }

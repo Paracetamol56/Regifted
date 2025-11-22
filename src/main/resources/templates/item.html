@@ -1,27 +1,232 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-  <head th:replace="fragments/head :: head"></head>
-  <body>
-    <div th:replace="fragments/header :: header"></div>
-    <main class="container">
-      <h1 th:text="${item.title}">Titre de l'objet</h1>
-      <p>
-        Posted by <a th:href="@{/users/{id}(id=${item.user.uuid})}" th:text="${item.user.name}"></a>
-        on <span th:text="${#dates.format(item.createdAt, 'dd/MM/yyyy')}"></span>
-      </p>
-      <p th:text="${item.description}">Description de l'objet</p>
 
-      <div th:if="${item.keywords != null and !item.keywords.empty}">
-        <h3>Mots-clés :</h3>
-        <ul>
-          <li th:each="k : ${item.keywords}" th:text="${k.name}">Nom du keyword</li>
-        </ul>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="fragments/head :: head"></head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<main class="container item-page">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a th:href="@{/items}">← Back to items</a>
+  </nav>
+
+  <!-- Header -->
+
+  <div class="section item-header-section">
+    <div class="item-title-row">
+      <h1 th:text="${item.title}">Vintage Lamp</h1>
+      <span class="favorite-heart" 
+            th:classappend="${favorited} ? 'favorited' : ''" 
+            th:attr="data-item-id=${item.uuid}, data-user-id=${currentUser.uuid}"
+            onclick="toggleFavorite(this)">
+        ♥
+      </span>
+      <span class="badge" th:text="${item.donateAt == null} ? 'Available' : 'Unavailable'"></span>
+    </div>
+    <p class="item-meta">
+      Added <time th:datetime="${item.createdAt}" 
+                  th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}">15 Nov 2024</time>
+    </p>
+  </div>
+
+  <!-- Description -->
+
+  <div class="section">
+    <h2>Description</h2>
+    <p th:if="${item.description != null and !item.description.isEmpty()}" 
+       th:text="${item.description}">A beautiful vintage lamp...</p>
+    <p th:if="${item.description == null or item.description.isEmpty()}" 
+       class="empty-state">No description provided.</p>
+  </div>
+
+  <!-- Keywords -->
+
+  <div class="section" th:if="${keywords != null and !keywords.empty}">
+    <h2>Keywords</h2>
+    <div class="keywords">
+      <a th:each="k : ${keywords}" 
+         th:href="@{/items(keyword=${k.name})}"
+         th:text="${k.name}"
+         class="keyword-badge"></a>
+    </div>
+  </div>
+
+  <!-- Details -->
+
+  <div class="section">
+    <h2>Details</h2>
+    <div class="details-grid">
+      <div class="detail-card">
+        <strong>Status</strong>
+        <span th:text="${item.state}">Available</span>
       </div>
+      <div class="detail-card" th:if="${owner != null}">
+        <strong>Owner</strong>
+        <span th:text="${owner}">Ajouter le user</span>
+      </div>
+      <div class="detail-card" th:if="${item.donateAt != null}">
+        <strong>Donated</strong>
+        <span th:text="${#temporals.format(item.donateAt, 'dd MMM yyyy')}"></span>
+      </div>
+      <div class="detail-card">
+        <strong>Location</strong>
+        <a th:href="'https://www.google.com/maps?q=' + ${item.latitude} + ',' + ${item.longitude}" 
+           target="_blank" rel="noopener">View map ↗</a>
+      </div>
+    </div>
+  </div>
 
-      <p><strong>État :</strong> <span th:text="${item.state}">État de l'objet</span></p>
+  <!-- Actions -->
 
-      <a th:href="@{/items/update/{id}(id=${item.uuid})}" class="btn">Mettre à jour l'objet</a>
-    </main>
-    <div th:replace="fragments/footer :: footer"></div>
-  </body>
+  <div class="actions">
+    <a th:href="@{/items/update/{id}(id=${item.uuid})}" role="button" class="btn btn-edit">Edit item</a>
+  </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script>
+  async function toggleFavorite(element) {
+    const itemId = element.getAttribute('data-item-id');
+    const userId = element.getAttribute('data-user-id');
+
+    try {
+      const response = await fetch(`/users/favorite/${itemId}/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const isFavorited = await response.json();
+        if (isFavorited) {
+          element.classList.add('favorited');
+        } else {
+          element.classList.remove('favorited');
+        }
+      } else {
+        console.error('Failed to toggle favorite status');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+</script>
+
+<style>
+
+  .favorite-heart {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ccc;
+    transition: color 0.3s;
+  }
+  .favorite-heart:hover {
+      color: #f00;
+  }
+  .favorite-heart.favorited {
+      color: #f00;
+  }
+
+  .item-page { max-width: 900px; }
+
+  /* Sections avec séparation plus marquée */
+  .section {
+      border-top: 2px solid #ccc; /* séparation plus visible */
+      padding: 2rem 0;            /* plus d'espace vertical */
+      margin-top: 1rem;
+  }
+
+  .section:first-of-type {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
+  }
+
+  h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+  }
+
+  .item-title-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+  }
+
+  .item-title-row h1 { margin: 0; flex: 1; }
+
+  .item-meta {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+  }
+
+  .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+  }
+
+  .keywords { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .keyword-badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: background 0.2s;
+  }
+
+  .keyword-badge:hover {
+      color: #000;
+  }
+
+  .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+  }
+
+  .detail-card {
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      text-align: center;
+  }
+
+  .detail-card strong {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+      margin-bottom: 0.5rem;
+  }
+
+  .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #ccc;
+  }
+
+  .btn { padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; }
+  .btn-edit { border: 1px solid #333; }
+  .btn-back { border: 1px solid #999; }
+
+  .breadcrumb { margin-bottom: 1.5rem; }
+  .breadcrumb a { font-size: 0.9rem; text-decoration: none; color: #666; }
+  .breadcrumb a:hover { color: #000; }
+
+  .empty-state { color: #666; font-style: italic; }
+</style>
+
+</body>
 </html>

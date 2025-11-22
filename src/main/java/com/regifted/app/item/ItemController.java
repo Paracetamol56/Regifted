@@ -13,6 +13,8 @@ import com.regifted.app.item.dto.ItemPutRequest;
 import com.regifted.app.item.dto.ItemSearchRequest;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.keyword.KeywordService;
+import com.regifted.app.user.UserService;
+import com.regifted.app.user.User;
 
 import jakarta.validation.Valid;
 
@@ -24,10 +26,12 @@ public class ItemController {
 
   private final ItemService itemService;
   private final KeywordService keywordService;
+  private final UserService userService;
 
-  public ItemController(ItemService itemService, KeywordService keywordService) {
+  public ItemController(ItemService itemService, KeywordService keywordService, UserService userService) {
     this.itemService = itemService;
     this.keywordService = keywordService;
+    this.userService = userService;
   }
 
   // ======================
@@ -94,9 +98,18 @@ public class ItemController {
   // HTML
   @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
-  public String getItemByIdHTML(@PathVariable String uuid, Model model) {
-    Item item = itemService.getById(uuid);
+  public String getItemByIdHTML(@PathVariable String id, Model model) {
+    Item item = itemService.getById(id);
+    if (item == null) {
+        return "redirect:/items"; // redirige si item introuvable
+    }
+    User currentUser = this.userService.getByUuid("9e43a702-3574-4466-8fc4-d57c6aa5d0af"); // Remplacez par la logique d'authentification réelle
+    // Vérifie si l'item est dans les favoris de l'utilisateur courant
+    boolean favorited = currentUser != null && currentUser.getFavoriteItems().contains(item);
+
     model.addAttribute("item", item);
+    model.addAttribute("currentUser", currentUser);
+    model.addAttribute("favorited", favorited);
     return "item";
   }
 

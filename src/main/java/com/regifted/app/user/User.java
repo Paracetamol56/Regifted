@@ -1,8 +1,10 @@
 package com.regifted.app.user;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -31,6 +33,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EqualsAndHashCode(exclude = { "items", "favoriteItems" })
 @Table(name = "user")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
@@ -65,7 +68,8 @@ public class User {
   @JsonManagedReference
   private Set<Item> items;
 
-  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "user_favorite_items", joinColumns = @JoinColumn(name = "user_uuid", referencedColumnName = "uuid"), inverseJoinColumns = @JoinColumn(name = "item_uuid", referencedColumnName = "uuid"))
   @JsonManagedReference
   private Set<Item> favoriteItems;
 
@@ -73,10 +77,6 @@ public class User {
   public void prePersist() {
     if (this.uuid == null) {
       this.uuid = UUID.randomUUID().toString();
-    }
-    this.updatedAt = Instant.now();
-    if (this.createdAt == null) {
-      this.createdAt = this.updatedAt;
     }
   }
 }

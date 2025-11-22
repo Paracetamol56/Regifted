@@ -37,34 +37,33 @@ public class Item {
   @JsonBackReference
   private User user;
 
-  @Column(nullable = false)
-  private String title;
+    @Column(nullable = false)
+    private String title;
 
-  @Column(updatable = true)
-  private String description;
+    @Column
+    private String description;
 
-  @Column(nullable = false)
-  private Instant createdAt;
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 
-  @Column(nullable = false)
-  private Instant updatedAt;
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private Instant updatedAt;
 
-  @Column(nullable = true)
-  private Instant donateAt;
+    @Column(nullable = true)
+    private Instant donateAt;
 
-  @Column(nullable = false)
-  private Float latitude;
+    @Column(nullable = false)
+    private Float latitude;
 
-  @Column(nullable = false)
-  private Float longitude;
+    @Column(nullable = false)
+    private Float longitude;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private EState state;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EState state;
 
-  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-  @JsonManagedReference
-  private Set<Keyword> keywords;
 
   @ManyToMany(mappedBy = "favoriteItems", fetch = FetchType.LAZY)
   @JsonIgnore
@@ -81,9 +80,4 @@ public class Item {
     if (this.uuid == null) {
       this.uuid = UUID.randomUUID().toString();
     }
-    this.updatedAt = Instant.now();
-    if (this.createdAt == null) {
-      this.createdAt = this.updatedAt;
-    }
-  }
 }
