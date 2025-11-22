@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.user.dto.UserPostRequest;
+import com.regifted.app.user.dto.UserPublicResponse;
 
 import jakarta.validation.Valid;
 
@@ -61,7 +62,9 @@ public class UserController {
 
   @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @ResponseBody
-  public User getUser(@PathVariable String uuid) {
-    return svc.getByUuid(uuid);
+  public UserPublicResponse getUser(@PathVariable String uuid) {
+    UserPublicResponse res = UserPublicResponse.fromUser(svc.getByUuid(uuid));
+
+    return res;
   }
 }
