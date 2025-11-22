@@ -2,6 +2,9 @@ package com.regifted.app.user;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -14,10 +17,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/users")
 public class UserController {
 
-  private final UserService svc;
+  private final UserService userService;
 
   public UserController(UserService svc) {
-    this.svc = svc;
+    this.userService = svc;
   }
 
   @PostMapping(value = "", produces = {
@@ -28,7 +31,7 @@ public class UserController {
       MediaType.APPLICATION_JSON_VALUE
   })
   public User createUser(@RequestBody @Valid UserPostRequest req) {
-    return svc.createUser(req);
+    return userService.createUser(req);
   }
 
   @GetMapping(value = "/me", produces = { MediaType.TEXT_HTML_VALUE })
@@ -37,7 +40,7 @@ public class UserController {
       return new ModelAndView("redirect:/login");
     }
 
-    User user = svc.getByEmail(principal.getUsername());
+    User user = userService.getByEmail(principal.getUsername());
     model.addAttribute("user", user);
 
     return new ModelAndView("users/me");
@@ -46,12 +49,12 @@ public class UserController {
   @GetMapping(value = "/me", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @ResponseBody
   public User getMe(@AuthenticationPrincipal UserDetails principal) {
-    return svc.getByEmail(principal.getUsername());
+    return userService.getByEmail(principal.getUsername());
   }
 
   @GetMapping(value = "/{uuid}", produces = { MediaType.TEXT_HTML_VALUE })
   public ModelAndView getUser(@PathVariable String uuid, Model model) {
-    User user = svc.getByUuid(uuid);
+    User user = userService.getByUuid(uuid);
     model.addAttribute("user", user);
 
     return new ModelAndView("users/{uuid}");
@@ -60,19 +63,18 @@ public class UserController {
   @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @ResponseBody
   public UserPublicResponse getUser(@PathVariable String uuid) {
-    UserPublicResponse res = UserPublicResponse.fromUser(svc.getByUuid(uuid));
+    UserPublicResponse res = UserPublicResponse.fromUser(userService.getByUuid(uuid));
 
     return res;
   }
 
-
- @PatchMapping(value = "favorite/{itemUuid}/{userUuid}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PatchMapping(value = "favorite/{itemUuid}/{userUuid}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Boolean> toggleFavorite(
-          @PathVariable String itemUuid,
-          @PathVariable String userUuid) {
-      System.out.println("Received toggle favorite request for user " + userUuid + " and item " + itemUuid);
-      boolean result = svc.toggleFavorite(itemUuid, userUuid);
-      return ResponseEntity.ok(result);
+      @PathVariable String itemUuid,
+      @PathVariable String userUuid) {
+    System.out.println("Received toggle favorite request for user " + userUuid + " and item " + itemUuid);
+    boolean result = userService.toggleFavorite(itemUuid, userUuid);
+    return ResponseEntity.ok(result);
   }
 
 }

@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -37,33 +40,36 @@ public class Item {
   @JsonBackReference
   private User user;
 
-    @Column(nullable = false)
-    private String title;
+  @Column(nullable = false)
+  private String title;
 
-    @Column
-    private String description;
+  @Column
+  private String description;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private Instant createdAt;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private Instant updatedAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private Instant updatedAt;
 
-    @Column(nullable = true)
-    private Instant donateAt;
+  @Column(nullable = true)
+  private Instant donateAt;
 
-    @Column(nullable = false)
-    private Float latitude;
+  @Column(nullable = false)
+  private Float latitude;
 
-    @Column(nullable = false)
-    private Float longitude;
+  @Column(nullable = false)
+  private Float longitude;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EState state;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private EState state;
 
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @JsonManagedReference
+  private Set<Keyword> keywords;
 
   @ManyToMany(mappedBy = "favoriteItems", fetch = FetchType.LAZY)
   @JsonIgnore
@@ -80,4 +86,5 @@ public class Item {
     if (this.uuid == null) {
       this.uuid = UUID.randomUUID().toString();
     }
+  }
 }

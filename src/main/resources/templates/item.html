@@ -25,8 +25,8 @@
       <span class="badge" th:text="${item.donateAt == null} ? 'Available' : 'Unavailable'"></span>
     </div>
     <p class="item-meta">
-      Added <time th:datetime="${item.createdAt}" 
-                  th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}">15 Nov 2024</time>
+          Added by <a th:href="@{/users/{id}(id=${item.user.uuid})}" th:text="${item.user.name}"></a>
+      on <time th:datetime="${item.createdAt}" th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}"></time>
     </p>
   </div>
 

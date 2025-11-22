@@ -2,6 +2,8 @@ package com.regifted.app.item;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -98,19 +100,21 @@ public class ItemController {
   // HTML
   @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
-  public String getItemByIdHTML(@PathVariable String id, Model model) {
-    Item item = itemService.getById(id);
-    if (item == null) {
-        return "redirect:/items"; // redirige si item introuvable
+  public ModelAndView getItemByIdHTML(@PathVariable String uuid, @AuthenticationPrincipal UserDetails principal,
+      Model model) {
+    Item item = itemService.getById(uuid);
+    if (principal == null) {
+      model.addAttribute("item", item);
+      model.addAttribute("favorited", false);
+      return new ModelAndView("item");
     }
-    User currentUser = this.userService.getByUuid("9e43a702-3574-4466-8fc4-d57c6aa5d0af"); // Remplacez par la logique d'authentification réelle
-    // Vérifie si l'item est dans les favoris de l'utilisateur courant
+    User currentUser = this.userService.getByEmail(principal.getUsername());
     boolean favorited = currentUser != null && currentUser.getFavoriteItems().contains(item);
 
     model.addAttribute("item", item);
     model.addAttribute("currentUser", currentUser);
     model.addAttribute("favorited", favorited);
-    return "item";
+    return new ModelAndView("item");
   }
 
   // ======================
