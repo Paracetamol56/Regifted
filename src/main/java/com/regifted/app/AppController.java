@@ -34,6 +34,11 @@ public class AppController {
     return "register";
   }
 
+  @GetMapping("/login")
+  public String login() {
+    return "login";
+  }
+
   @GetMapping("/new-item")
   public String newItem() {
     return "new-item";

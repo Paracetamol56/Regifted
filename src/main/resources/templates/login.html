@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <div th:replace="fragments/header :: header"></div>
+    <main class="container">
+      <h1>Login</h1>
+      <form th:action="@{/login}" method="POST">
+        <fieldset>
+          <label>
+            Email
+          </label>
+          <input name="username" type="email" placeholder="Email" required />
+        </fieldset>
+        <fieldset>
+          <label>
+            Password
+          </label>
+          <input name="password" type="password" placeholder="Password" required />
+        </fieldset>
+        <button type="submit">Submit</button>
+        <p th:if="${param.error}" style="text: '#e01b24';">Invalid login</p>
+      </form>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+  </body>
+</html>
