@@ -5,7 +5,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -17,6 +16,7 @@ import com.regifted.app.item.dto.ItemPutRequest;
 import com.regifted.app.item.dto.ItemSearchRequest;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.keyword.KeywordService;
+import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.UserService;
 import com.regifted.app.user.User;
 
@@ -109,7 +109,7 @@ public class ItemController {
   // HTML
   @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
-  public ModelAndView getItemByIdHTML(@PathVariable String uuid, @AuthenticationPrincipal UserDetails principal,
+  public ModelAndView getItemByIdHTML(@PathVariable String uuid, @AuthenticationPrincipal CustomUserPrincipal principal,
       Model model) {
     Item item = itemService.getById(uuid);
     if (principal == null) {

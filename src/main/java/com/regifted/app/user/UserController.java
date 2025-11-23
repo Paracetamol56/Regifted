@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.item.Item;
+import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.dto.UserPostRequest;
 import com.regifted.app.user.dto.UserPublicResponse;
 
@@ -36,7 +37,7 @@ public class UserController {
   }
 
   @GetMapping(value = "/me", produces = { MediaType.TEXT_HTML_VALUE })
-  public ModelAndView getMe(@AuthenticationPrincipal UserDetails principal, Model model) {
+  public ModelAndView getMe(@AuthenticationPrincipal CustomUserPrincipal principal, Model model) {
     if (principal == null) {
       return new ModelAndView("redirect:/login");
     }
@@ -49,7 +50,7 @@ public class UserController {
 
   @GetMapping(value = "/me", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @ResponseBody
-  public User getMe(@AuthenticationPrincipal UserDetails principal) {
+  public User getMe(@AuthenticationPrincipal CustomUserPrincipal principal) {
     return userService.getByEmail(principal.getUsername());
   }
 
@@ -71,8 +72,10 @@ public class UserController {
 
   @PostMapping(value = "/me/likes", produces = MediaType.APPLICATION_JSON_VALUE)
   public ModelAndView addLike(@RequestParam("item") String itemUuid,
-      @AuthenticationPrincipal UserDetails principal, Model model) {
+      @AuthenticationPrincipal CustomUserPrincipal principal, Model model) {
+    // We need a full refresh of the user to get the liked items (lazy loaded)
     User currentUser = userService.getByEmail(principal.getUsername());
+    System.out.println("Adding like for user: " + currentUser);
     Item item = userService.addLike(currentUser, itemUuid);
 
     model.addAttribute("liked", true);
@@ -83,7 +86,8 @@ public class UserController {
 
   @DeleteMapping(value = "/me/likes", produces = MediaType.APPLICATION_JSON_VALUE)
   public ModelAndView removeLike(@RequestParam("item") String itemUuid,
-      @AuthenticationPrincipal UserDetails principal, Model model) {
+      @AuthenticationPrincipal CustomUserPrincipal principal, Model model) {
+    // We need a full refresh of the user to get the liked items (lazy loaded)
     User currentUser = userService.getByEmail(principal.getUsername());
     Item item = userService.removeLike(currentUser, itemUuid);
 

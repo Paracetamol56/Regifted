@@ -8,7 +8,15 @@
       <li><a th:href="@{/new-item}">Add Item</a></li>
     </ul>
     <ul>
-      <li><a th:href="@{/register}" class="secondary">Register</a></li>
+      <!-- Show Register when NOT logged in -->
+      <li sec:authorize="isAnonymous()">
+        <a th:href="@{/register}" class="secondary">Register</a>
+      </li>
+
+      <!-- Show Profile when logged in -->
+      <li sec:authorize="isAuthenticated()">
+        <a th:href="@{/users/me}">Profile</a>
+      </li>
       <li>
         <select id="theme-select" aria-label="Select color theme">
           <option value="auto">Auto</option>

@@ -25,14 +25,16 @@ public class SecurityConfig {
             .requestMatchers("/", "/register", "/login").permitAll()
             .requestMatchers(org.springframework.http.HttpMethod.POST, "/users").permitAll()
             .anyRequest().authenticated())
-        .formLogin(form -> form
-            .loginPage("/login")
-            .loginProcessingUrl("/login")
-            .defaultSuccessUrl("/", true)
-            .failureUrl("/login?error")
-            .permitAll())
+        /*
+         * .formLogin(form -> form
+         * .loginPage("/login")
+         * .loginProcessingUrl("/login")
+         * .defaultSuccessUrl("/", true)
+         * .failureUrl("/login?error")
+         * .permitAll())
+         */
         .userDetailsService(userDetailsService)
-        .httpBasic(httpBasic -> httpBasic.disable());
+        .httpBasic();
 
     return http.build();
   }
