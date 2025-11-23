@@ -63,7 +63,12 @@ public class ItemController {
   @Transactional(readOnly = true)
   @ResponseBody
   public ModelAndView getPageHtml(@Valid @ModelAttribute ItemSearchRequest req, Model model) {
-    Page<Item> items = itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword(), null,
+    Page<Item> items = itemService.getItemSearchPage(
+        req.getPage(),
+        req.getLimit(),
+        req.getQ(),
+        req.getKeyword(),
+        null,
         null);
     List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
     model.addAttribute("items", items.getContent());
@@ -107,7 +112,7 @@ public class ItemController {
     Item item = itemService.getById(uuid);
     if (principal == null) {
       model.addAttribute("item", item);
-      model.addAttribute("favorited", false);
+      model.addAttribute("liked", false);
       return new ModelAndView("item");
     }
     User currentUser = this.userService.getByEmail(principal.getUsername());

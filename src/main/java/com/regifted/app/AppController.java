@@ -23,9 +23,6 @@ public class AppController {
     Page<Item> lastAddedItems = itemService.getItemSearchPage(0, 3, null, null, "createdAt", "desc");
     model.addAttribute("lastAddedItems", lastAddedItems);
 
-    Page<Item> mostLikedItems = itemService.getItemSearchPage(0, 3, null, null, "likes", "desc");
-    model.addAttribute("mostLikedItems", mostLikedItems);
-
     return new ModelAndView("index");
   }
 

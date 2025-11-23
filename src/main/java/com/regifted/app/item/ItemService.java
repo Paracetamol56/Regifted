@@ -114,15 +114,20 @@ public class ItemService {
 
   // Helper method to build Sort object
   private Sort buildSort(String sortBy, String direction) {
-    Sort.Direction dir = ("desc".equalsIgnoreCase(direction)) ? Sort.Direction.DESC : Sort.Direction.ASC;
+    // Default direction
+    Sort.Direction dir = Sort.Direction.ASC; // default
+    if (direction != null && !direction.isBlank()) {
+      if (direction.equalsIgnoreCase("desc")) {
+        dir = Sort.Direction.DESC;
+      }
+    }
 
+    // Default sortBy
     if (sortBy == null || sortBy.isBlank()) {
-      return Sort.by(dir, "title"); // default sort
+      return Sort.by(dir, "title"); // default
     }
 
     switch (sortBy.toLowerCase()) {
-      case "likes":
-        return Sort.by(dir, "likes");
       case "createdat":
         return Sort.by(dir, "createdAt");
       case "title":

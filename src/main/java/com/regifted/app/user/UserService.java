@@ -44,6 +44,7 @@ public class UserService {
       user.getLikedItems().add(item);
     }
     repository.save(user);
+    item.setLikes(item.getLikes() + 1);
 
     return item;
   }
@@ -56,6 +57,7 @@ public class UserService {
       user.getLikedItems().remove(item);
     }
     repository.save(user);
+    item.setLikes(item.getLikes() - 1);
 
     return item;
   }
