@@ -13,7 +13,7 @@
 
   <section>
     <hgroup>
-      <h1 th:text="${item.title}">Vintage Lamp</h1>
+      <h1 th:text="${item.title}"></h1>
       
       <!-- Like / Unlike button -->
       <div th:replace="items/like-button :: likeButton(${item}, ${liked})"></div>
@@ -57,24 +57,34 @@
 
   <section>
     <h2>Details</h2>
-    <div class="details-grid">
-      <div class="detail-card">
-        <strong>Status</strong>
-        <span th:text="${item.state}">Available</span>
-      </div>
-      <div class="detail-card" th:if="${owner != null}">
-        <strong>Owner</strong>
-        <span th:text="${owner}">Ajouter le user</span>
-      </div>
-      <div class="detail-card" th:if="${item.donateAt != null}">
-        <strong>Donated</strong>
-        <span th:text="${#temporals.format(item.donateAt, 'dd MMM yyyy')}"></span>
-      </div>
-      <div class="detail-card">
-        <strong>Location</strong>
-        <a th:href="'https://www.google.com/maps?q=' + ${item.latitude} + ',' + ${item.longitude}" 
-           target="_blank" rel="noopener">View map ↗</a>
-      </div>
+    <div class="grid">
+      <article>
+        <header>
+          <h3>Status</h3>
+        </header>
+        <p th:text="${item.state}">Available</p>
+      </article>
+      <article th:if="${owner != null}">
+        <header>
+          <h3>Owner</h3>
+        </header>
+        <p th:text="${owner}">Ajouter le user</p>
+      </article>
+      <article th:if="${item.donateAt != null}">
+        <header>
+          <h3>Donated</h3>
+        </header>
+        <p th:text="${#temporals.format(item.donateAt, 'dd MMM yyyy')}"></p>
+      </article>
+      <article>
+        <header>
+          <h3>Location</h3>
+        </header>
+        <p>
+          <a th:href="'https://www.google.com/maps?q=' + ${item.latitude} + ',' + ${item.longitude}" 
+            target="_blank" rel="noopener">View map ↗</a>
+        </p>
+      </article>
     </div>
   </section>
   <hr/>
@@ -88,93 +98,15 @@
 <div th:replace="fragments/footer :: footer"></div>
 
 <style>
-
-  .favorite-heart {
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: #ccc;
-    transition: color 0.3s;
-  }
-  .favorite-heart:hover {
-      color: #f00;
-  }
-  .favorite-heart.favorited {
-      color: #f00;
-  }
-
-  .item-page { max-width: 900px; }
-
-  /* Sections avec séparation plus marquée */
-  section {
-      padding: 2rem 0;            /* plus d'espace vertical */
-      margin-top: 1rem;
-  }
-
-  h2 {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-      text-transform: uppercase;
-  }
-
   hgroup {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: space-between;
       gap: 1rem;
       flex-wrap: wrap;
   }
 
-  hgroup h1 { margin: 0; flex: 1; }
-
-  .item-meta {
-      color: #666;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-  }
-
-  .badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      border: 1px solid #ccc;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-  }
-
-  .details-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-  }
-
-  .detail-card {
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      text-align: center;
-  }
-
-  .detail-card strong {
-      display: block;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #666;
-      margin-bottom: 0.5rem;
-  }
-
-  .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      padding-top: 1.5rem;
-      border-top: 2px solid #ccc;
-  }
-
-  .btn { padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; }
-  .btn-edit { border: 1px solid #333; }
-  .btn-back { border: 1px solid #999; }
-
-  .empty-state { color: #666; font-style: italic; }
+  hgroup h1 { flex: 1; }
 </style>
 
 </body>

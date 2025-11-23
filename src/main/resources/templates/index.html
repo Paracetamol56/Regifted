@@ -9,6 +9,37 @@
         <input name="q" type="q" placeholder="Search" />
         <input type="submit" value="Search" />
       </form>
+      <hr>
+      <h2>Last added items</h2>
+      <div class="grid">
+        <article class="card" th:each="item : ${lastAddedItems}">
+          <header>
+            <h3 th:text="${item.title}"></h3>
+          </header>
+          <p><small th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}"></small></p>
+          <p th:text="${item.description.length() > 120 ? item.description.substring(0,120) + '…' : item.description}"></p>
+          <footer>
+            <a class="contrast" th:href="@{/items/{uuid}(uuid=${item.uuid})}" role="button">View</a>
+          </footer>
+        </article>
+      </div>
+
+      <hr>
+      <h2>Most liked items</h2>
+      <div class="grid">
+        <article class="card" th:each="item : ${mostLikedItems}">
+          <header>
+            <h3 th:text="${item.title}"></h3>
+          </header>
+          <p><small th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}"></small></p>
+          <p th:text="${item.description.length() > 120 ? item.description.substring(0,120) + '…' : item.description}"></p>
+          <footer>
+            <a class="contrast" th:href="@{/items/{uuid}(uuid=${item.uuid})}" role="button">View</a>
+          </footer>
+        </article>
+      </div>
+
+
     </main>
     <div th:replace="fragments/footer :: footer"></div>
   </body>

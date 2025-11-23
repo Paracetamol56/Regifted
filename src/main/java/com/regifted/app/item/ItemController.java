@@ -63,7 +63,8 @@ public class ItemController {
   @Transactional(readOnly = true)
   @ResponseBody
   public ModelAndView getPageHtml(@Valid @ModelAttribute ItemSearchRequest req, Model model) {
-    Page<Item> items = itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword());
+    Page<Item> items = itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword(), null,
+        null);
     List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
     model.addAttribute("items", items.getContent());
     model.addAttribute("keywords", keywords);
@@ -82,7 +83,8 @@ public class ItemController {
   public List<Item> getPageJson(
       @Valid @ModelAttribute ItemSearchRequest req) {
 
-    return itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword()).getContent();
+    return itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword(), null, null)
+        .getContent();
   }
 
   // ======================

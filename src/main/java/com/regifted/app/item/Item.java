@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -75,11 +76,8 @@ public class Item {
   @JsonIgnore
   private Set<User> likedByUsers;
 
-  @Transient
-  @JsonProperty("likesCount")
-  public int getLikesCount() {
-    return likedByUsers != null ? likedByUsers.size() : 0;
-  }
+  @Formula("(SELECT COUNT(*) FROM user_liked_items uli WHERE uli.liked_items_uuid = uuid)")
+  private int likes;
 
   @PrePersist
   public void prePersist() {

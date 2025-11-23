@@ -2,6 +2,7 @@ package com.regifted.app.item;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.regifted.app.exception.NotFoundException;
@@ -43,8 +44,16 @@ public class ItemService {
     return repository.save(item);
   }
 
-  public Page<Item> getItemSearchPage(int pageNumber, int pageSize, String query, String keyword) {
-    PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+  public Page<Item> getItemSearchPage(
+      int pageNumber,
+      int pageSize,
+      String query,
+      String keyword,
+      String sortBy,
+      String direction) {
+    Sort sort = buildSort(sortBy, direction);
+    PageRequest pageable = PageRequest.of(pageNumber, pageSize, sort);
+
     if (query != null && !query.trim().isEmpty()) {
       return repository.searchByTitleOrDescription(query, pageable);
     } else if (keyword != null && !keyword.trim().isEmpty()) {
@@ -54,6 +63,7 @@ public class ItemService {
       }
       return repository.findByKeywordsContaining(kw, pageable);
     }
+
     return repository.findAll(pageable);
   }
 
@@ -100,5 +110,24 @@ public class ItemService {
 
     existing.setUpdatedAt(Instant.now());
     return repository.save(existing);
+  }
+
+  // Helper method to build Sort object
+  private Sort buildSort(String sortBy, String direction) {
+    Sort.Direction dir = ("desc".equalsIgnoreCase(direction)) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+    if (sortBy == null || sortBy.isBlank()) {
+      return Sort.by(dir, "title"); // default sort
+    }
+
+    switch (sortBy.toLowerCase()) {
+      case "likes":
+        return Sort.by(dir, "likes");
+      case "createdat":
+        return Sort.by(dir, "createdAt");
+      case "title":
+      default:
+        return Sort.by(dir, "title");
+    }
   }
 }
