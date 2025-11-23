@@ -1,0 +1,17 @@
+<div id="like-btn" th:fragment="likeButton(item, liked)">
+  <button th:if="${liked}"
+          th:hx-delete="@{/users/me/likes(item=${item.uuid})}"
+          hx-target="#like-btn"
+          hx-swap="outerHTML">
+    ♥
+  </button>
+
+  <button th:unless="${liked}"
+          th:hx-post="@{/users/me/likes(item=${item.uuid})}"
+          hx-target="#like-btn"
+          hx-swap="outerHTML">
+    ♥
+  </button>
+
+  <span th:text="${item.likesCount}">0</span>
+</div>

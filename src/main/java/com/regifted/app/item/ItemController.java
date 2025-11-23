@@ -109,11 +109,11 @@ public class ItemController {
       return new ModelAndView("item");
     }
     User currentUser = this.userService.getByEmail(principal.getUsername());
-    boolean favorited = currentUser != null && currentUser.getLikedItems().contains(item);
+    boolean liked = this.userService.hasLikedItem(currentUser, item);
 
     model.addAttribute("item", item);
     model.addAttribute("currentUser", currentUser);
-    model.addAttribute("favorited", favorited);
+    model.addAttribute("liked", liked);
     return new ModelAndView("items/{uuid}");
   }
 

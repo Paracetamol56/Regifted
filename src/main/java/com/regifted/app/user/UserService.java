@@ -31,10 +31,7 @@ public class UserService {
     return repository.findById(uuid).orElse(null);
   }
 
-  public void addLike(String userUuid, String itemUuid) {
-    User user = repository.findById(userUuid)
-        .orElseThrow(() -> new NotFoundException(userUuid));
-
+  public Item addLike(User user, String itemUuid) {
     Item item = itemRepository.findById(itemUuid)
         .orElseThrow(() -> new NotFoundException(itemUuid));
 
@@ -46,22 +43,25 @@ public class UserService {
     if (!user.getLikedItems().contains(item)) {
       user.getLikedItems().add(item);
     }
-
     repository.save(user);
+
+    return item;
   }
 
-  public void removeLike(String userUuid, String itemUuid) {
-    User user = repository.findById(userUuid)
-        .orElseThrow(() -> new NotFoundException(userUuid));
-
+  public Item removeLike(User user, String itemUuid) {
     Item item = itemRepository.findById(itemUuid)
         .orElseThrow(() -> new NotFoundException(itemUuid));
 
     if (user.getLikedItems() != null && user.getLikedItems().contains(item)) {
       user.getLikedItems().remove(item);
     }
-
     repository.save(user);
+
+    return item;
+  }
+
+  public boolean hasLikedItem(User user, Item item) {
+    return user.getLikedItems() != null && user.getLikedItems().contains(item);
   }
 
 }

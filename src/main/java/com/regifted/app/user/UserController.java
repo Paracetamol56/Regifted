@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.regifted.app.item.Item;
 import com.regifted.app.user.dto.UserPostRequest;
 import com.regifted.app.user.dto.UserPublicResponse;
 
@@ -69,19 +70,27 @@ public class UserController {
   }
 
   @PostMapping(value = "/me/likes", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Void> addLike(@RequestParam("item") String itemUuid,
-      @AuthenticationPrincipal UserDetails principal) {
+  public ModelAndView addLike(@RequestParam("item") String itemUuid,
+      @AuthenticationPrincipal UserDetails principal, Model model) {
     User currentUser = userService.getByEmail(principal.getUsername());
-    userService.addLike(currentUser.getUuid(), itemUuid);
-    return ResponseEntity.ok().build();
+    Item item = userService.addLike(currentUser, itemUuid);
+
+    model.addAttribute("liked", true);
+    model.addAttribute("item", item);
+
+    return new ModelAndView("items/like-button");
   }
 
   @DeleteMapping(value = "/me/likes", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Void> removeLike(@RequestParam("item") String itemUuid,
-      @AuthenticationPrincipal UserDetails principal) {
+  public ModelAndView removeLike(@RequestParam("item") String itemUuid,
+      @AuthenticationPrincipal UserDetails principal, Model model) {
     User currentUser = userService.getByEmail(principal.getUsername());
-    userService.removeLike(currentUser.getUuid(), itemUuid);
-    return ResponseEntity.ok().build();
+    Item item = userService.removeLike(currentUser, itemUuid);
+
+    model.addAttribute("liked", false);
+    model.addAttribute("item", item);
+
+    return new ModelAndView("items/like-button");
   }
 
 }

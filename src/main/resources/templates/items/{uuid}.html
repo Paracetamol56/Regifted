@@ -14,12 +14,10 @@
   <section>
     <hgroup>
       <h1 th:text="${item.title}">Vintage Lamp</h1>
-      <span class="favorite-heart" 
-            th:classappend="${favorited} ? 'favorited' : ''" 
-            th:attr="data-item-id=${item.uuid}, data-user-id=${currentUser.uuid}"
-            onclick="toggleFavorite(this)">
-        ♥
-      </span>
+      
+      <!-- Like / Unlike button -->
+      <div th:replace="items/like-button :: likeButton(${item}, ${liked})"></div>
+
       <span class="badge" th:text="${item.donateAt == null} ? 'Available' : 'Unavailable'"></span>
     </hgroup>
     <p class="item-meta">
@@ -88,33 +86,6 @@
 </main>
 
 <div th:replace="fragments/footer :: footer"></div>
-
-<script>
-  async function toggleFavorite(element) {
-    const itemId = element.getAttribute('data-item-id');
-    const userId = element.getAttribute('data-user-id');
-
-    try {
-      const response = await fetch(`/users/favorite/${itemId}/${userId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      if (response.ok) {
-        const isFavorited = await response.json();
-        if (isFavorited) {
-          element.classList.add('favorited');
-        } else {
-          element.classList.remove('favorited');
-        }
-      } else {
-        console.error('Failed to toggle favorite status');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-</script>
 
 <style>
 

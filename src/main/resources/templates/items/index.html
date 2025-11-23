@@ -27,7 +27,7 @@
         <h3 th:text="${item.title}"></h3>
         <p><small th:text="${#temporals.format(item.createdAt, 'dd MMM yyyy')}"></small></p>
         <p th:text="${item.description.length() > 120 ? item.description.substring(0,120) + '…' : item.description}"></p>
-        <a class="contrast" th:href="@{/items/{uuid}(uuid=${item.uuid})}">View</a>
+        <a class="contrast" th:href="@{/items/{uuid}(uuid=${item.uuid})}" role="button">View</a>
       </article>
     </div>
 
