@@ -112,6 +112,12 @@ public class ItemService {
     return repository.save(existing);
   }
 
+  public void deleteItemById(String id) {
+    Item existing = repository.findById(id)
+        .orElseThrow(() -> new NotFoundException(id));
+    repository.delete(existing);
+  }
+
   // Helper method to build Sort object
   private Sort buildSort(String sortBy, String direction) {
     // Default direction
@@ -128,6 +134,8 @@ public class ItemService {
     }
 
     switch (sortBy.toLowerCase()) {
+      case "likes":
+        return Sort.by(dir, "likes");
       case "createdat":
         return Sort.by(dir, "createdAt");
       case "title":

@@ -1,7 +1,9 @@
 package com.regifted.app.item;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -119,7 +121,7 @@ public class ItemController {
     boolean liked = this.userService.hasLikedItem(currentUser, item);
 
     model.addAttribute("item", item);
-    model.addAttribute("currentUser", currentUser);
+    model.addAttribute("isOwner", currentUser.equals(item.getUser()));
     model.addAttribute("liked", liked);
     return new ModelAndView("items/{uuid}");
   }
@@ -147,5 +149,19 @@ public class ItemController {
   @ResponseBody
   public Item updateItemJson(@PathVariable String uuid, @RequestBody @Valid ItemPutRequest req) {
     return itemService.updateItemById(uuid, req);
+  }
+
+  // ======================
+  // DELETE ITEM
+  // ====================
+
+  @DeleteMapping("/{uuid}")
+  public ResponseEntity<Void> deleteItem(@PathVariable String uuid) {
+    itemService.deleteItemById(uuid);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("HX-Redirect", "/items");
+
+    return ResponseEntity.ok().headers(headers).build();
   }
 }

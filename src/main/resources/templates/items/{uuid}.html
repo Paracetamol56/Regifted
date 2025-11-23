@@ -90,8 +90,13 @@
   <hr/>
 
   <!-- Actions -->
-  <section>
+  <section th:if="${isOwner}">
     <a th:href="@{/items/update/{id}(id=${item.uuid})}" role="button">Edit item</a>
+    <button aria-label="Delete item"
+            th:hx-delete="@{/items/{id}(id=${item.uuid})}"
+            hx-confirm="Are you sure you want to delete this item?">
+      Delete item
+    </button>
   </section>
 </main>
 

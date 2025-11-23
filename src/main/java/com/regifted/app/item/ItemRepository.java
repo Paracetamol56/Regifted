@@ -9,15 +9,11 @@ import org.springframework.data.repository.query.Param;
 import com.regifted.app.keyword.Keyword;
 
 public interface ItemRepository extends JpaRepository<Item, String> {
-  @Query(value = """
-        SELECT * FROM item
-        WHERE LOWER(title) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(description) LIKE LOWER(CONCAT('%', :query, '%'))
-      """, countQuery = """
-        SELECT COUNT(*) FROM item
-        WHERE LOWER(title) LIKE LOWER(CONCAT('%', :query, '%'))
-           OR LOWER(description) LIKE LOWER(CONCAT('%', :query, '%'))
-      """, nativeQuery = true)
+  @Query("""
+          SELECT i FROM Item i
+          WHERE LOWER(i.title) LIKE LOWER(CONCAT('%', :query, '%'))
+             OR LOWER(i.description) LIKE LOWER(CONCAT('%', :query, '%'))
+      """)
   Page<Item> searchByTitleOrDescription(@Param("query") String query, Pageable pageable);
 
   Page<Item> findByKeywordsContaining(Keyword keyword, Pageable pageable);
