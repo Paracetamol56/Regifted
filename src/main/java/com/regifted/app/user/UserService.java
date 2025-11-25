@@ -8,7 +8,9 @@ import com.regifted.app.item.ItemRepository;
 
 import java.util.HashSet;
 
-@org.springframework.stereotype.Service
+import org.springframework.stereotype.Service;
+
+@Service
 public class UserService {
 
   private final UserRepository repository;
