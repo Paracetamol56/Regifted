@@ -21,6 +21,11 @@
           <strong>Notifications enabled:</strong>
           <span th:text="${user.notification ? 'Yes' : 'No'}"></span>
         </p>
+
+        <!-- logout button (forget the http basic auth and redirect to home) -->
+        <form th:action="@{/logout}" method="post">
+          <button type="submit">Logout</button>
+        </form>
       </section>
 
       <section>

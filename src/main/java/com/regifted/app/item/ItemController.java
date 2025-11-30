@@ -153,7 +153,7 @@ public class ItemController {
 
   // ======================
   // DELETE ITEM
-  // ====================
+  // ======================
 
   @DeleteMapping("/{uuid}")
   public ResponseEntity<Void> deleteItem(@PathVariable String uuid) {
@@ -164,4 +164,5 @@ public class ItemController {
 
     return ResponseEntity.ok().headers(headers).build();
   }
+
 }

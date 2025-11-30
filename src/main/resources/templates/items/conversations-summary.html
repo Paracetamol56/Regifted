@@ -1,0 +1,11 @@
+<li th:each="conv : ${conversations.content}" class="message-item">
+  <a th:href="@{/conversations/{id}(id=${conv.id})}"></a>
+    <article class="message-card">
+      <header>
+        <strong th:text="${conv.participantName}"></strong>
+        <small th:text="At ${#temporals.format(conv.lastMessageTimestamp, 'yyyy-MM-dd HH:mm')}"></small>
+      </header>
+      <p th:text="${conv.lastMessageSnippet}"></p>
+    </article>
+  </a>
+</li>

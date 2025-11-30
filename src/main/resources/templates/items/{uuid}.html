@@ -98,6 +98,33 @@
       Delete item
     </button>
   </section>
+
+  <!-- Messages -->
+  <section th:unless="${isOwner}">
+    <h3>Message</h3>
+    
+    <ul
+      id="message-list"
+      th:hx-get="@{/items/{uuid}/messages(uuid=${item.uuid}, page=0)}"
+      hx-trigger="load"
+      hx-target="#message-list"
+      hx-swap="innerHTML"
+      hx-headers='{"Accept": "text/html"}'
+    >
+    </ul>
+
+    <form
+      th:hx-post="@{/items/{uuid}/messages(uuid=${item.uuid})}"
+      hx-target="#message-list"
+      hx-swap="beforeend"
+      hx-on="htmx:afterOnLoad: this.reset()"
+    >
+      <div>
+        <label for="messageContent">Send a message to the owner:</label>
+        <textarea id="messageContent" name="content" rows="4" required></textarea>
+      </div>
+      <button type="submit">Send</button>
+  </section>
 </main>
 
 <div th:replace="fragments/footer :: footer"></div>
