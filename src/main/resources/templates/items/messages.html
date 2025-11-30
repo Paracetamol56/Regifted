@@ -1,3 +1,12 @@
+<li th:unless="${messages.last}" id="load-more-messages" class="message-item">
+  <a href="#"
+     th:hx-get="@{/items/{uuid}/messages(uuid=${item.uuid}, page=${messages.number + 1}, user=${participant != null ? participant.uuid : ''})}"
+     hx-target="#load-more-messages"
+     hx-swap="outerHTML"
+     hx-headers='{"Accept": "text/html"}'>
+    Load more messages
+  </a>
+</li>
 <li th:each="msg : ${messages.content}" class="message-item">
   <article class="message-card">
     <header>
