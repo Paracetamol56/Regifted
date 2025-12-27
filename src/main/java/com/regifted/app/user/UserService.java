@@ -8,19 +8,29 @@ import com.regifted.app.item.ItemRepository;
 
 import java.util.HashSet;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @org.springframework.stereotype.Service
 public class UserService {
 
   private final UserRepository repository;
   private final ItemRepository itemRepository;
 
-  public UserService(UserRepository repo, ItemRepository itemRepository) {
+  private PasswordEncoder PasswordEncoder;
+
+  public UserService(UserRepository repo, ItemRepository itemRepository , PasswordEncoder passwordEncoder) {
     this.repository = repo;
     this.itemRepository = itemRepository;
+    this.PasswordEncoder = passwordEncoder;
   }
 
   public User createUser(UserPostRequest req) {
-    return repository.save(req.toUser());
+
+    User user = req.toUser();
+
+    user.setPassword(this.PasswordEncoder.encode(req.getPassword()));
+
+    return repository.save(user);
   }
 
   public User getByEmail(String email) {

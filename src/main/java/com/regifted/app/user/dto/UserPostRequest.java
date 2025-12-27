@@ -1,8 +1,6 @@
 package com.regifted.app.user.dto;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.regifted.app.user.User;
 
 import jakarta.validation.constraints.Email;
@@ -13,8 +11,6 @@ import lombok.Data;
 
 @Data
 public class UserPostRequest {
-  @Autowired
-  private PasswordEncoder passwordEncoder;
 
   @NotBlank(message = "Name is required")
   @Size(max = 100, message = "Name must be at most 100 characters")
@@ -35,7 +31,7 @@ public class UserPostRequest {
     User user = new User();
     user.setName(this.name);
     user.setEmail(this.email);
-    user.setPassword(passwordEncoder.encode(this.password));
+    user.setPassword(this.password);
     user.setNotification(this.notification != null ? this.notification : true);
     return user;
   }

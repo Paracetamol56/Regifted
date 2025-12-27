@@ -6,12 +6,17 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.item.Item;
 import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.dto.UserPostRequest;
 import com.regifted.app.user.dto.UserPublicResponse;
+
+
 
 import jakarta.validation.Valid;
 
@@ -25,15 +30,17 @@ public class UserController {
     this.userService = svc;
   }
 
-  @PostMapping(value = "", produces = {
-      MediaType.APPLICATION_JSON_VALUE,
-      MediaType.APPLICATION_XML_VALUE
-  }, consumes = {
-      MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-      MediaType.APPLICATION_JSON_VALUE
-  })
-  public User createUser(@RequestBody @Valid UserPostRequest req) {
-    return userService.createUser(req);
+  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseStatus(HttpStatus.CREATED)
+  public User createUserApi(@Valid @RequestBody UserPostRequest req) {
+      return userService.createUser(req);
+  }
+
+  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public ModelAndView registerFromWeb(@Valid @ModelAttribute UserPostRequest req, Model model) {
+      User user = userService.createUser(req);
+      model.addAttribute("user", user);
+      return new ModelAndView("users/me");
   }
 
   @GetMapping(value = "/me", produces = { MediaType.TEXT_HTML_VALUE })
