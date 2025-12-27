@@ -50,25 +50,6 @@ public class MessageController {
   // CREATE MESSAGE
   // =============================
 
-  private Message createMessage(String itemId, MessagePostRequest req, User sender) {
-    Item item = itemService.getById(itemId);
-    if (item == null) {
-      throw new NotFoundException(itemId);
-    }
-    User receiver = userService.getByUuid(req.getReceiver().toString());
-    // If the sender is not the owner, the receiver must be the owner
-    if (!sender.getUuid().equals(item.getUser().getUuid())
-        && !receiver.getUuid().equals(item.getUser().getUuid())) {
-      throw new IllegalArgumentException("Receiver must be the item owner.");
-    }
-
-    return messageService.createMessage(
-        sender,
-        receiver,
-        item,
-        req.getContent());
-  }
-
   @PostMapping(value = "/items/{itemId}/messages", consumes = {
       MediaType.APPLICATION_FORM_URLENCODED_VALUE }, produces = MediaType.TEXT_HTML_VALUE)
   public ModelAndView createMessageHtml(
@@ -77,7 +58,11 @@ public class MessageController {
       @AuthenticationPrincipal CustomUserPrincipal principal,
       Model model) {
 
-    Message created = createMessage(itemId, req, principal.getUser());
+    Message created = messageService.createMessage(
+        principal.getUser(),
+        itemService.getById(itemId).getUser(),
+        itemService.getById(itemId),
+        req.getContent());
 
     // Add the view model
     MessageGetResponse view = MessageGetResponse.fromMessage(created);
@@ -95,7 +80,11 @@ public class MessageController {
       @Valid @RequestBody MessagePostRequest req,
       @AuthenticationPrincipal CustomUserPrincipal principal) {
 
-    Message created = createMessage(itemId, req, principal.getUser());
+    Message created = messageService.createMessage(
+        principal.getUser(),
+        itemService.getById(itemId).getUser(),
+        itemService.getById(itemId),
+        req.getContent());
 
     URI location = URI.create("/items/" + itemId + "/messages/" + created.getUuid());
 
@@ -156,7 +145,7 @@ public class MessageController {
       Page<ConversationSummaryResponse> summaries = messageService.getConversationSummariesForItem(item, pageable);
 
       model.addAttribute("conversations", summaries);
-      return new ModelAndView("items/conversations-summary", model.asMap());
+      return new ModelAndView("messages/conversations-summary", model.asMap());
     }
 
     // CASE 2 — OWNER SELECTS A SPECIFIC USER
@@ -169,7 +158,7 @@ public class MessageController {
     model.addAttribute("messages", conversation);
     model.addAttribute("participant", participant);
 
-    return new ModelAndView("items/messages", model.asMap());
+    return new ModelAndView("messages/messages", model.asMap());
   }
 
 }

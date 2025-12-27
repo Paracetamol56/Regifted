@@ -10,9 +10,9 @@ import com.regifted.app.item.Item;
 import com.regifted.app.user.User;
 
 public interface MessageRepository extends JpaRepository<Message, String> {
-  Page<Message> findAllBySenderOrReceiverOrderByCreatedAtAsc(User sender, User receiver, Pageable pageable);
+  Page<Message> findAllBySenderOrReceiverOrderByCreatedAtDesc(User sender, User receiver, Pageable pageable);
 
-  Page<Message> findAllByItemAndSenderOrReceiverOrderByCreatedAtAsc(Item item, User sender, User receiver,
+  Page<Message> findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(Item item, User sender, User receiver,
       Pageable pageable);
 
   @Query("""

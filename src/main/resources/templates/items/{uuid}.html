@@ -103,47 +103,9 @@
   <section>
     <h3>Messages</h3>
     
-    <div th:unless="${isOwner}" id="not-owner-messages-container">
-      <ul
-        id="message-list"
-        th:hx-get="@{/items/{uuid}/messages(uuid=${item.uuid}, page=0)}"
-        hx-trigger="load"
-        hx-target="#message-list"
-        hx-swap="innerHTML"
-        hx-headers='{"Accept": "text/html"}'
-        style="list-style: none; padding: 0;"
-      >
-      </ul>
-
-      <form
-        th:hx-post="@{/items/{uuid}/messages(uuid=${item.uuid})}"
-        hx-target="#message-list"
-        hx-swap="beforeend"
-        hx-on="htmx:afterOnLoad: this.reset()"
-      >
-        <div>
-          <label for="messageContent">Send a message to the owner:</label>
-          <textarea id="messageContent" name="content" rows="4" required></textarea>
-        </div>
-        <button type="submit">Send</button>
-      </form>
-    </div>
-
-    <!-- Container for either conversation list or messages -->
-    <div th:if="${isOwner}" id="owner-messages-container">
-      <ul id="conversation-list"
-          th:hx-get="@{/items/{uuid}/messages(uuid=${item.uuid})}"
-          hx-trigger="load"
-          hx-target="#conversation-list"
-          hx-swap="innerHTML"
-          hx-headers='{"Accept": "text/html"}'
-          style="list-style: none; padding: 0;">
-      </ul>
-    </div>
+    <a th:href="@{/items/{uuid}/messages(uuid=${item.uuid})}" role="button">Messages</a>
   </section>
 
-    
-  </section>
 </main>
 
 <div th:replace="fragments/footer :: footer"></div>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+
+<body>
+  <div th:replace="fragments/header :: header"></div>
+
+  <main class="container">
+
+    <form
+      th:hx-post="@{/items/{uuid}/messages(uuid=${item.uuid})}"
+      hx-target="#messages-list"
+      hx-swap="beforeend"
+      hx-on="htmx:afterLoad: this.reset()"
+    >
+      <legend>Send a message to <span th:text="${item.user.name}">Item Owner</span></legend>
+      <div>
+        <label for="message-content">Your Message:</label>
+        <textarea id="message-content" name="content" required></textarea>
+      </div>
+      <div>
+        <button type="submit">Send Message</button>
+      </div>
+    </form>
+
+    <ul id="messages-list">
+      <li th:each="msg : ${messages.content}">
+        <article class="message-card">
+          <header>
+            <strong th:text="${msg.sender.name}"></strong>
+            <small th:text="${#temporals.format(msg.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
+          </header>
+          <p th:text="${msg.content}"></p>
+        </article>
+      </li>
+    </ul>
+
+  </main>
+
+  <div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

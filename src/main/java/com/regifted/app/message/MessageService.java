@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +53,7 @@ public class MessageService {
   }
 
   public Page<MessageGetResponse> getConversationForItemWithUser(Item item, User user, Pageable pageable) {
-    Page<Message> page = repo.findAllByItemAndSenderOrReceiverOrderByCreatedAtAsc(item, user, user, pageable);
+    Page<Message> page = repo.findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(item, user, user, pageable);
 
     return page.map(MessageGetResponse::fromMessage);
   }
