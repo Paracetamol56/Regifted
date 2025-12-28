@@ -52,12 +52,28 @@ public class MessageService {
   }
 
   public Message createMessage(User sender, User receiver, Item item, String content) {
+    validateCreateMessage(sender, receiver, content);
+
     Message m = new Message();
     m.setContent(content);
     m.setSender(sender);
     m.setReceiver(receiver);
     m.setItem(item);
     return repo.save(m);
+  }
+
+  private void validateCreateMessage(User sender, User receiver, String content) {
+    if (sender == null || receiver == null) {
+      throw new IllegalArgumentException("Sender and receiver must not be null");
+    }
+
+    if (sender.equals(receiver)) {
+      throw new IllegalArgumentException("Sender cannot send a message to themselves");
+    }
+
+    if (content == null || content.isBlank()) {
+      throw new IllegalArgumentException("Message content must not be blank");
+    }
   }
 
   private String snippet(String content) {
