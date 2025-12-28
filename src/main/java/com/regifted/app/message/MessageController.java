@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,12 +14,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.item.Item;
 import com.regifted.app.item.ItemService;
 import com.regifted.app.message.dto.ConversationSummaryResponse;
@@ -30,7 +27,6 @@ import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.User;
 import com.regifted.app.user.UserService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -50,7 +46,8 @@ public class MessageController {
   // CREATE MESSAGE
   // =============================
 
-  @PostMapping(value = "/items/{itemId}/messages", consumes = {
+  @PostMapping(value = "/items/{itemId}/messages", consumes = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE,
       MediaType.APPLICATION_FORM_URLENCODED_VALUE }, produces = MediaType.TEXT_HTML_VALUE)
   public ModelAndView createMessageHtml(
       @PathVariable String itemId,
@@ -60,16 +57,13 @@ public class MessageController {
 
     Message created = messageService.createMessage(
         principal.getUser(),
-        itemService.getById(itemId).getUser(),
+        userService.getByUuid(req.getReceiverUuid()),
         itemService.getById(itemId),
         req.getContent());
 
-    // Add the view model
-    MessageGetResponse view = MessageGetResponse.fromMessage(created);
-    model.addAttribute("message", view);
+    model.addAttribute("message", MessageGetResponse.fromMessage(created));
 
-    // Return a Thymeleaf fragment
-    return new ModelAndView("items/message", model.asMap());
+    return new ModelAndView("messages/message", model.asMap());
   }
 
   @PostMapping(value = "/items/{itemId}/messages", consumes = { MediaType.APPLICATION_JSON_VALUE,
@@ -106,7 +100,6 @@ public class MessageController {
     Item item = itemService.getById(itemId);
     User requester = principal.getUser();
     User owner = item.getUser();
-
     boolean isOwner = requester.getUuid().equals(owner.getUuid());
 
     // CASE 1 — OWNER: LIST ALL CONVERSATIONS
@@ -142,22 +135,26 @@ public class MessageController {
 
     // CASE 1 — OWNER: LIST ALL CONVERSATIONS
     if (isOwner && userId == null) {
-      Page<ConversationSummaryResponse> summaries = messageService.getConversationSummariesForItem(item, pageable);
+      Page<ConversationSummaryResponse> result = messageService.getConversationSummariesForItem(item, pageable);
 
-      model.addAttribute("conversations", summaries);
-      return new ModelAndView("messages/conversations-summary", model.asMap());
+      model.addAttribute("conversations", result);
+      return new ModelAndView("messages/conversations", model.asMap());
     }
 
-    // CASE 2 — OWNER SELECTS A SPECIFIC USER
-    User participant = isOwner && userId != null
-        ? userService.getByUuid(userId)
-        : requester;
+    // CASE 2 — OWNER WITH A SPECIFIC USER SELECTED
+    if (isOwner && userId != null) {
+      User participant = userService.getByUuid(userId);
+      Page<MessageGetResponse> result = messageService.getConversationForItemWithUser(item, participant, pageable);
 
-    Page<MessageGetResponse> conversation = messageService.getConversationForItemWithUser(item, participant, pageable);
+      model.addAttribute("messages", result);
+      model.addAttribute("participant", participant);
+      return new ModelAndView("messages/messages", model.asMap());
+    }
 
-    model.addAttribute("messages", conversation);
-    model.addAttribute("participant", participant);
-
+    // CASE 3 — NON-OWNER → Only show the requester's own conversation
+    Page<MessageGetResponse> result = messageService.getConversationForItemWithUser(item, requester, pageable);
+    model.addAttribute("messages", result);
+    model.addAttribute("participant", requester);
     return new ModelAndView("messages/messages", model.asMap());
   }
 
