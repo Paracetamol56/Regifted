@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.item.Item;
+import com.regifted.app.message.dto.ConversationQuery;
+import com.regifted.app.message.dto.ConversationResult;
 import com.regifted.app.message.dto.ConversationSummaryResponse;
 import com.regifted.app.message.dto.MessageGetResponse;
 import com.regifted.app.user.User;
@@ -24,35 +26,64 @@ public class MessageService {
         .orElseThrow(() -> new NotFoundException(id));
   }
 
-  public Page<ConversationSummaryResponse> getConversationSummariesForItem(
-      Item item, Pageable pageable) {
+  public ConversationResult getConversations(
+      ConversationQuery query,
+      Pageable pageable) {
 
-    Page<Message> lastMessages = repo.findLastMessagesByItemGroupedByParticipant(
-        item, pageable);
+    Item item = query.item();
+    User requester = query.requester();
+    User owner = item.getUser();
+    User requested = query.requestedParticipant();
 
-    return lastMessages.map(msg -> {
-      User participant = msg.getSender().equals(item.getUser())
-          ? msg.getReceiver()
-          : msg.getSender();
+    boolean isOwner = requester.equals(owner);
 
-      return new ConversationSummaryResponse(
-          participant.getName(),
-          participant.getUuid(),
-          item.getTitle(),
-          item.getUuid(),
-          snippet(msg.getContent()),
-          msg.getCreatedAt());
-    });
+    // CASE 1 — OWNER: ALL CONVERSATIONS
+    if (isOwner && requested == null) {
+      Page<ConversationSummaryResponse> conversations = getConversationSummariesForItem(item, pageable);
+
+      return ConversationResult.conversations(conversations);
+    }
+
+    // CASE 2 — OWNER WITH SPECIFIC USER
+    if (isOwner && requested != null) {
+      Page<MessageGetResponse> messages = getConversationForItemWithUser(item, requested, pageable);
+
+      return ConversationResult.messages(messages, requested);
+    }
+
+    // CASE 3 — NON-OWNER → ONLY OWN CONVERSATION
+    Page<MessageGetResponse> messages = getConversationForItemWithUser(item, requester, pageable);
+
+    return ConversationResult.messages(messages, requester);
   }
 
-  public Page<MessageGetResponse> getConversationForItemWithUser(Item item, User user, Pageable pageable) {
-    Page<Message> page = repo.findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(item, user, user, pageable);
+  public Page<ConversationSummaryResponse> getConversationSummariesForItem(
+      Item item, Pageable pageable) {
+    return repo.findLastMessagesByItemGroupedByParticipant(item, pageable)
+        .map(msg -> {
+          User participant = msg.getSender().equals(item.getUser())
+              ? msg.getReceiver()
+              : msg.getSender();
 
-    return page.map(MessageGetResponse::fromMessage);
+          return new ConversationSummaryResponse(
+              participant.getName(),
+              participant.getUuid(),
+              item.getTitle(),
+              item.getUuid(),
+              snippet(msg.getContent()),
+              msg.getCreatedAt());
+        });
+  }
+
+  public Page<MessageGetResponse> getConversationForItemWithUser(
+      Item item, User user, Pageable pageable) {
+    return repo
+        .findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(item, user, user, pageable)
+        .map(MessageGetResponse::fromMessage);
   }
 
   public Message createMessage(User sender, User receiver, Item item, String content) {
-    validateCreateMessage(sender, receiver, content);
+    validateCreateMessage(sender, receiver, item, content);
 
     Message m = new Message();
     m.setContent(content);
@@ -62,17 +93,23 @@ public class MessageService {
     return repo.save(m);
   }
 
-  private void validateCreateMessage(User sender, User receiver, String content) {
-    if (sender == null || receiver == null) {
-      throw new IllegalArgumentException("Sender and receiver must not be null");
-    }
+  private void validateCreateMessage(User sender, User receiver, Item item, String content) {
 
     if (sender.equals(receiver)) {
-      throw new IllegalArgumentException("Sender cannot send a message to themselves");
+      throw new IllegalArgumentException("Sender cannot message themselves");
     }
 
     if (content == null || content.isBlank()) {
       throw new IllegalArgumentException("Message content must not be blank");
+    }
+
+    User owner = item.getUser();
+    boolean senderRelated = sender.equals(owner);
+    boolean receiverRelated = receiver.equals(owner);
+
+    if (!senderRelated && !receiverRelated) {
+      throw new IllegalArgumentException(
+          "At least one participant must be related to the item");
     }
   }
 

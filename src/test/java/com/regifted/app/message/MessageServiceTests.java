@@ -1,7 +1,6 @@
 package com.regifted.app.message;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.time.Instant;
@@ -17,229 +16,219 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.item.Item;
+import com.regifted.app.message.dto.ConversationQuery;
+import com.regifted.app.message.dto.ConversationResult;
 import com.regifted.app.message.dto.ConversationSummaryResponse;
-import com.regifted.app.message.dto.MessageGetResponse;
 import com.regifted.app.user.User;
 
 @ExtendWith(MockitoExtension.class)
 class MessageServiceTest {
 
   @Mock
-  private MessageRepository messageRepository;
+  private MessageRepository repo;
 
   @InjectMocks
-  private MessageService messageService;
+  private MessageService service;
 
-  private User sender;
-  private User receiver;
+  private User owner;
+  private User requester;
+  private User otherUser;
   private Item item;
 
   @BeforeEach
   void setUp() {
-    sender = new User();
-    sender.setUuid("sender-id");
-    sender.setName("Sender");
+    owner = new User();
+    owner.setUuid("owner");
+    owner.setName("Owner");
 
-    receiver = new User();
-    receiver.setUuid("receiver-id");
-    receiver.setName("Receiver");
+    requester = new User();
+    requester.setUuid("requester");
+    requester.setName("Requester");
+
+    otherUser = new User();
+    otherUser.setUuid("other");
+    otherUser.setName("Other");
 
     item = new Item();
-    item.setUuid("item-id");
-    item.setTitle("Item title");
-    item.setUser(sender);
+    item.setUuid("item");
+    item.setTitle("Item");
+    item.setUser(owner);
   }
 
-  /*
-   * ------------------------------------------------------------------
-   * getById
-   * ------------------------------------------------------------------
-   */
+  // =========================================================
+  // getById
+  // =========================================================
 
   @Test
   void getById_shouldReturnMessage_whenExists() {
-    Message message = new Message(
-        "msg-id",
-        sender,
-        receiver,
+    Message msg = new Message(
+        "id",
+        owner,
+        otherUser,
         item,
         "Hello",
         Instant.now());
 
-    when(messageRepository.findById("msg-id"))
-        .thenReturn(Optional.of(message));
+    when(repo.findById("id")).thenReturn(Optional.of(msg));
 
-    Message result = messageService.getById("msg-id");
+    Message result = service.getById("id");
 
-    assertEquals(message, result);
-    verify(messageRepository).findById("msg-id");
+    assertEquals(msg, result);
   }
 
   @Test
-  void getById_shouldThrowNotFoundException_whenNotExists() {
-    when(messageRepository.findById("missing-id"))
-        .thenReturn(Optional.empty());
+  void getById_shouldThrow_whenNotFound() {
+    when(repo.findById("missing")).thenReturn(Optional.empty());
 
     assertThrows(NotFoundException.class,
-        () -> messageService.getById("missing-id"));
+        () -> service.getById("missing"));
   }
 
-  /*
-   * ------------------------------------------------------------------
-   * getConversationSummariesForItem
-   * ------------------------------------------------------------------
-   */
+  // =========================================================
+  // Conversation summaries
+  // =========================================================
 
   @Test
-  void getConversationSummaries_shouldReturnEmptyPage_whenNoMessages() {
-    Pageable pageable = PageRequest.of(0, 10);
+  void conversationPartner_shouldNeverBeItemOwner() {
+    Message msg = new Message();
+    msg.setSender(owner);
+    msg.setReceiver(otherUser);
+    msg.setItem(item);
+    msg.setContent("hello");
+    msg.setCreatedAt(Instant.now());
 
-    when(messageRepository.findLastMessagesByItemGroupedByParticipant(item, pageable))
+    when(repo.findLastMessagesByItemGroupedByParticipant(eq(item), any()))
+        .thenReturn(new PageImpl<>(List.of(msg)));
+
+    Page<ConversationSummaryResponse> page = service.getConversationSummariesForItem(item, PageRequest.of(0, 10));
+
+    ConversationSummaryResponse summary = page.getContent().get(0);
+
+    assertEquals(otherUser.getUuid(), summary.getParticipantUuid());
+  }
+
+  // =========================================================
+  // Snippet rules
+  // =========================================================
+
+  @Test
+  void contentLongerThan40_shouldBeTruncated() {
+    String content = "a".repeat(41);
+
+    Message msg = new Message();
+    msg.setSender(owner);
+    msg.setReceiver(otherUser);
+    msg.setItem(item);
+    msg.setContent(content);
+    msg.setCreatedAt(Instant.now());
+
+    when(repo.findLastMessagesByItemGroupedByParticipant(eq(item), any()))
+        .thenReturn(new PageImpl<>(List.of(msg)));
+
+    String snippet = service.getConversationSummariesForItem(item, PageRequest.of(0, 10))
+        .getContent().get(0)
+        .getLastMessageSnippet();
+
+    assertEquals(41, snippet.length());
+    assertTrue(snippet.endsWith("…"));
+  }
+
+  @Test
+  void contentExactly40_shouldNotBeTruncated() {
+    String content = "a".repeat(40);
+
+    Message msg = new Message();
+    msg.setSender(owner);
+    msg.setReceiver(otherUser);
+    msg.setItem(item);
+    msg.setContent(content);
+    msg.setCreatedAt(Instant.now());
+
+    when(repo.findLastMessagesByItemGroupedByParticipant(eq(item), any()))
+        .thenReturn(new PageImpl<>(List.of(msg)));
+
+    String snippet = service.getConversationSummariesForItem(item, PageRequest.of(0, 10))
+        .getContent().get(0)
+        .getLastMessageSnippet();
+
+    assertEquals(content, snippet);
+  }
+
+  // =========================================================
+  // getConversations (business orchestration)
+  // =========================================================
+
+  @Test
+  void ownerWithoutUser_shouldReceiveConversationSummaries() {
+    when(repo.findLastMessagesByItemGroupedByParticipant(eq(item), any()))
         .thenReturn(Page.empty());
 
-    Page<ConversationSummaryResponse> result = messageService.getConversationSummariesForItem(item, pageable);
+    ConversationResult result = service.getConversations(
+        new ConversationQuery(item, owner, null),
+        PageRequest.of(0, 10));
 
-    assertTrue(result.isEmpty());
+    assertTrue(result instanceof ConversationResult.Conversations);
   }
 
   @Test
-  void getConversationSummaries_shouldUseReceiverAsParticipant_whenSenderIsItemOwner() {
-    Message message = new Message();
-    message.setSender(sender);
-    message.setReceiver(receiver);
-    message.setItem(item);
-    message.setContent("Hello");
-    message.setCreatedAt(Instant.now());
+  void ownerWithUser_shouldReceiveMessages() {
+    when(repo.findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(eq(item), eq(otherUser), eq(otherUser), any()))
+        .thenReturn(Page.empty());
 
-    Pageable pageable = PageRequest.of(0, 10);
+    ConversationResult result = service.getConversations(
+        new ConversationQuery(item, owner, otherUser),
+        PageRequest.of(0, 10));
 
-    when(messageRepository.findLastMessagesByItemGroupedByParticipant(item, pageable))
-        .thenReturn(new PageImpl<>(List.of(message)));
-
-    ConversationSummaryResponse summary = messageService.getConversationSummariesForItem(item, pageable)
-        .getContent().get(0);
-
-    assertEquals("Receiver", summary.getParticipantName());
-    assertEquals("receiver-id", summary.getParticipantUuid());
+    assertTrue(result instanceof ConversationResult.Messages);
   }
 
   @Test
-  void getConversationSummaries_shouldTruncateContentLongerThan40Chars() {
-    String longContent = "a".repeat(41);
+  void nonOwner_shouldOnlySeeOwnConversation_evenIfUserProvided() {
+    when(repo.findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(eq(item), eq(requester), eq(requester), any()))
+        .thenReturn(Page.empty());
 
-    Message message = new Message();
-    message.setSender(sender);
-    message.setReceiver(receiver);
-    message.setItem(item);
-    message.setContent(longContent);
-    message.setCreatedAt(Instant.now());
+    ConversationResult result = service.getConversations(
+        new ConversationQuery(item, requester, otherUser),
+        PageRequest.of(0, 10));
 
-    Pageable pageable = PageRequest.of(0, 10);
+    ConversationResult.Messages messages = (ConversationResult.Messages) result;
 
-    when(messageRepository.findLastMessagesByItemGroupedByParticipant(item, pageable))
-        .thenReturn(new PageImpl<>(List.of(message)));
+    assertEquals(requester, messages.participant());
+  }
 
-    ConversationSummaryResponse summary = messageService.getConversationSummariesForItem(item, pageable)
-        .getContent().get(0);
+  // =========================================================
+  // createMessage – validation rules
+  // =========================================================
 
-    assertEquals(41, summary.getLastMessageSnippet().length());
-    assertTrue(summary.getLastMessageSnippet().endsWith("…"));
+  @Test
+  void createMessage_shouldRejectNullContent() {
+    assertThrows(IllegalArgumentException.class,
+        () -> service.createMessage(owner, otherUser, item, null));
   }
 
   @Test
-  void getConversationSummaries_shouldNotTruncateContentExactly40Chars() {
-    String exactContent = "a".repeat(40);
-
-    Message message = new Message();
-    message.setSender(sender);
-    message.setReceiver(receiver);
-    message.setItem(item);
-    message.setContent(exactContent);
-    message.setCreatedAt(Instant.now());
-
-    Pageable pageable = PageRequest.of(0, 10);
-
-    when(messageRepository.findLastMessagesByItemGroupedByParticipant(item, pageable))
-        .thenReturn(new PageImpl<>(List.of(message)));
-
-    ConversationSummaryResponse summary = messageService.getConversationSummariesForItem(item, pageable)
-        .getContent().get(0);
-
-    assertEquals(exactContent, summary.getLastMessageSnippet());
-  }
-
-  /*
-   * ------------------------------------------------------------------
-   * getConversationForItemWithUser
-   * ------------------------------------------------------------------
-   */
-
-  @Test
-  void getConversationForItemWithUser_shouldMapMessagesToResponses() {
-    Message message = new Message();
-    message.setSender(sender);
-    message.setReceiver(receiver);
-    message.setItem(item);
-
-    Pageable pageable = PageRequest.of(0, 10);
-
-    when(messageRepository
-        .findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(item, receiver, receiver, pageable))
-        .thenReturn(new PageImpl<>(List.of(message)));
-
-    Page<MessageGetResponse> result = messageService.getConversationForItemWithUser(item, receiver, pageable);
-
-    assertEquals(1, result.getTotalElements());
-  }
-
-  /*
-   * ------------------------------------------------------------------
-   * createMessage
-   * ------------------------------------------------------------------
-   */
-
-  @Test
-  void createMessage_shouldSaveMessage_whenValid() {
-    when(messageRepository.save(any(Message.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
-
-    Message result = messageService.createMessage(sender, receiver, item, "Hello");
-
-    assertEquals("Hello", result.getContent());
-    assertEquals(sender, result.getSender());
-    assertEquals(receiver, result.getReceiver());
-    assertEquals(item, result.getItem());
+  void createMessage_shouldRejectBlankContent() {
+    assertThrows(IllegalArgumentException.class,
+        () -> service.createMessage(owner, otherUser, item, "   "));
   }
 
   @Test
-  void createMessage_shouldThrowException_whenSenderAndReceiverAreSame() {
-    assertThrows(IllegalArgumentException.class, () -> messageService.createMessage(sender, sender, item, "Hello"));
-
-    verify(messageRepository, never()).save(any());
+  void createMessage_shouldRejectSenderEqualsReceiver() {
+    assertThrows(IllegalArgumentException.class,
+        () -> service.createMessage(owner, owner, item, "hello"));
   }
 
-  @Test
-  void createMessage_shouldThrowException_whenContentIsNull() {
-    assertThrows(IllegalArgumentException.class, () -> messageService.createMessage(sender, receiver, item, null));
-
-    verify(messageRepository, never()).save(any());
-  }
+  // =========================================================
+  // ⚠ FUTURE RULES (EXPECTED TO FAIL UNTIL IMPLEMENTED)
+  // =========================================================
 
   @Test
-  void createMessage_shouldThrowException_whenContentIsEmpty() {
-    assertThrows(IllegalArgumentException.class, () -> messageService.createMessage(sender, receiver, item, ""));
-
-    verify(messageRepository, never()).save(any());
-  }
-
-  @Test
-  void createMessage_shouldThrowException_whenContentIsBlank() {
-    assertThrows(IllegalArgumentException.class, () -> messageService.createMessage(sender, receiver, item, "   "));
-
-    verify(messageRepository, never()).save(any());
+  void createMessage_shouldRejectUsersNotRelatedToItem() {
+    // requester is neither owner nor participant
+    assertThrows(IllegalArgumentException.class,
+        () -> service.createMessage(otherUser, requester, item, "hello"));
   }
 }

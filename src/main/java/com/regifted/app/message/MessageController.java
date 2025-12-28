@@ -20,6 +20,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.regifted.app.item.Item;
 import com.regifted.app.item.ItemService;
+import com.regifted.app.message.dto.ConversationQuery;
+import com.regifted.app.message.dto.ConversationResult;
 import com.regifted.app.message.dto.ConversationSummaryResponse;
 import com.regifted.app.message.dto.MessageGetResponse;
 import com.regifted.app.message.dto.MessagePostRequest;
@@ -87,75 +89,57 @@ public class MessageController {
   }
 
   // =============================
-  // GET MESSAGES FOR ITEM
+  // GET MESSAGES — API
   // =============================
 
   @GetMapping(value = "/items/{itemId}/messages", produces = { MediaType.APPLICATION_JSON_VALUE,
       MediaType.APPLICATION_XML_VALUE })
-  public Object getMessagesForItem(
+  public ConversationResult getMessagesForItemApi(
       @PathVariable String itemId,
       @RequestParam(name = "user", required = false) String userId,
       @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable,
       @AuthenticationPrincipal CustomUserPrincipal principal) {
+
     Item item = itemService.getById(itemId);
     User requester = principal.getUser();
-    User owner = item.getUser();
-    boolean isOwner = requester.getUuid().equals(owner.getUuid());
+    User requested = userId != null ? userService.getByUuid(userId) : null;
 
-    // CASE 1 — OWNER: LIST ALL CONVERSATIONS
-    if (isOwner && userId == null) {
-      // Return a page of ConversationSummaryResponse
-      return messageService.getConversationSummariesForItem(item, pageable);
-    }
-
-    // CASE 2 — OWNER WITH A SPECIFIC USER SELECTED
-    if (isOwner && userId != null) {
-      User participant = userService.getByUuid(userId);
-      return messageService.getConversationForItemWithUser(item, participant, pageable);
-    }
-
-    // CASE 3 — NON-OWNER → Only show the requester's own conversation
-    return messageService.getConversationForItemWithUser(item, requester, pageable);
+    return messageService.getConversations(
+        new ConversationQuery(item, requester, requested),
+        pageable);
   }
 
+  // =============================
+  // GET MESSAGES — HTML
+  // =============================
+
   @GetMapping(value = "/items/{itemId}/messages", produces = MediaType.TEXT_HTML_VALUE)
-  public ModelAndView viewMessagesForItemHtml(
+  public ModelAndView getMessagesForItemHtml(
       @PathVariable String itemId,
       @RequestParam(name = "user", required = false) String userId,
       @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable,
       Model model,
       @AuthenticationPrincipal CustomUserPrincipal principal) {
+
     Item item = itemService.getById(itemId);
     User requester = principal.getUser();
-    User owner = item.getUser();
-    boolean isOwner = requester.getUuid().equals(owner.getUuid());
+    User requested = userId != null ? userService.getByUuid(userId) : null;
+
+    ConversationResult result = messageService.getConversations(
+        new ConversationQuery(item, requester, requested),
+        pageable);
 
     model.addAttribute("item", item);
-    model.addAttribute("isOwner", isOwner);
+    model.addAttribute("isOwner", requester.equals(item.getUser()));
 
-    // CASE 1 — OWNER: LIST ALL CONVERSATIONS
-    if (isOwner && userId == null) {
-      Page<ConversationSummaryResponse> result = messageService.getConversationSummariesForItem(item, pageable);
-
-      model.addAttribute("conversations", result);
+    if (result instanceof ConversationResult.Conversations c) {
+      model.addAttribute("conversations", c.page());
       return new ModelAndView("messages/conversations", model.asMap());
     }
 
-    // CASE 2 — OWNER WITH A SPECIFIC USER SELECTED
-    if (isOwner && userId != null) {
-      User participant = userService.getByUuid(userId);
-      Page<MessageGetResponse> result = messageService.getConversationForItemWithUser(item, participant, pageable);
-
-      model.addAttribute("messages", result);
-      model.addAttribute("participant", participant);
-      return new ModelAndView("messages/messages", model.asMap());
-    }
-
-    // CASE 3 — NON-OWNER → Only show the requester's own conversation
-    Page<MessageGetResponse> result = messageService.getConversationForItemWithUser(item, requester, pageable);
-    model.addAttribute("messages", result);
-    model.addAttribute("participant", requester);
+    ConversationResult.Messages m = (ConversationResult.Messages) result;
+    model.addAttribute("messages", m.page());
+    model.addAttribute("participant", m.participant());
     return new ModelAndView("messages/messages", model.asMap());
   }
-
 }
