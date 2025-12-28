@@ -10,8 +10,12 @@ import com.regifted.app.item.Item;
 import com.regifted.app.user.User;
 
 public interface MessageRepository extends JpaRepository<Message, String> {
-  Page<Message> findAllBySenderOrReceiverOrderByCreatedAtDesc(User sender, User receiver, Pageable pageable);
-
+  @Query("""
+      SELECT m FROM Message m
+      WHERE m.item = :item
+        AND (m.sender = :sender OR m.receiver = :receiver)
+      ORDER BY m.createdAt DESC
+      """)
   Page<Message> findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(Item item, User sender, User receiver,
       Pageable pageable);
 

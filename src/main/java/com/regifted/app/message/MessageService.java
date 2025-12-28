@@ -1,21 +1,14 @@
 package com.regifted.app.message;
 
-import java.time.Instant;
-import java.util.UUID;
-
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.item.Item;
-import com.regifted.app.item.ItemRepository;
 import com.regifted.app.message.dto.ConversationSummaryResponse;
 import com.regifted.app.message.dto.MessageGetResponse;
-import com.regifted.app.message.dto.MessagePostRequest;
 import com.regifted.app.user.User;
-import com.regifted.app.user.UserRepository;
 
 @Service
 public class MessageService {
