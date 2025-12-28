@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+
+<body>
+  <div th:replace="fragments/header :: header"></div>
+
+  <main class="container">
+
+    <ul id="conversation-list">
+      <li th:each="cnv : ${conversations.content}">
+        <a th:href="@{/items/{uuid}/messages(uuid=${item.uuid}, user=${cnv.participantUuid})}">
+          <article class="message-card">
+            <header>
+              <strong th:text="${cnv.participantName}"></strong>
+              <small th:text="${#temporals.format(cnv.lastMessageTimestamp, 'yyyy-MM-dd HH:mm')}"></small>
+            </header>
+            <p th:text="${cnv.lastMessageSnippet}"></p>
+          </article>
+        </a>
+      </li>
+    </ul>
+
+  </main>
+
+  <div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>
