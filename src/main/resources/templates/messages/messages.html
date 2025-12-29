@@ -41,7 +41,8 @@
       hx-swap="beforeend"
       hx-on="htmx:afterLoad: this.reset()"
     >
-      <input type="hidden" name="receiverUuid" th:value="${participant.uuid}" />
+      <input th:if="${isOwner}" type="hidden" name="receiverUuid" th:value="${participant.uuid}" />
+      <input th:unless="${isOwner}" type="hidden" name="receiverUuid" th:value="${item.user.uuid}" />
       <legend th:if="${isOwner}">
         Send a message to <span th:text="${participant.name}">Participant</span>
       </legend>
