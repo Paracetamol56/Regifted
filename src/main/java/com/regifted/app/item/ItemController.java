@@ -1,6 +1,7 @@
 package com.regifted.app.item;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -87,11 +88,10 @@ public class ItemController {
   @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @Transactional(readOnly = true)
   @ResponseBody
-  public List<Item> getPageJson(
+  public Page<Item> getPageJson(
       @Valid @ModelAttribute ItemSearchRequest req) {
 
-    return itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword(), null, null)
-        .getContent();
+    return itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword(), null, null);
   }
 
   // ======================
@@ -153,7 +153,7 @@ public class ItemController {
 
   // ======================
   // DELETE ITEM
-  // ====================
+  // ======================
 
   @DeleteMapping("/{uuid}")
   public ResponseEntity<Void> deleteItem(@PathVariable String uuid) {
@@ -164,4 +164,5 @@ public class ItemController {
 
     return ResponseEntity.ok().headers(headers).build();
   }
+
 }

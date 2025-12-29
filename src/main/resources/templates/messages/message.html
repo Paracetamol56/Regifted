@@ -1,0 +1,9 @@
+<li class="message-item">
+<article class="message-card">
+  <header>
+    <strong th:text="${message.sender.name}"></strong>
+    <small th:text="${#temporals.format(message.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
+  </header>
+  <p th:text="${message.content}"></p>
+</article>
+</li>

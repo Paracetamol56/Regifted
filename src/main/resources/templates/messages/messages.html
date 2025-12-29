@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+
+<body>
+  <div th:replace="fragments/header :: header"></div>
+
+  <main class="container">
+
+    <a th:href="@{/items/{uuid}(uuid=${item.uuid})}">← Back to Item Details</a>
+    
+    <center>
+        <a th:href="@{/items/{uuid}/messages(uuid=${item.uuid}, user=${participant.uuid}, page=${messages.number + 1})}"
+         th:unless="${messages.last}">
+        Older message
+      </a>
+    </center>
+
+    <ul id="messages-list" style="list-style-type: none; padding: 0; display: flex; flex-direction: column-reverse;">
+      <li th:each="msg : ${messages.content}">
+        <article class="message-card">
+          <header>
+            <strong th:text="${msg.sender.name}"></strong>
+            <small th:text="${#temporals.format(msg.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
+          </header>
+          <p th:text="${msg.content}"></p>
+        </article>
+      </li>
+    </ul>
+
+    <center>
+        <a th:href="@{/items/{uuid}/messages(uuid=${item.uuid}, user=${participant.uuid}, page=${messages.number - 1})}"
+         th:unless="${messages.first}">
+        Newer message
+      </a>
+    </center>
+
+    <form
+      th:hx-post="@{/items/{uuid}/messages(uuid=${item.uuid})}"
+      hx-target="#messages-list"
+      hx-swap="beforeend"
+      hx-on="htmx:afterLoad: this.reset()"
+    >
+      <input type="hidden" name="receiverUuid" th:value="${participant.uuid}" />
+      <legend th:if="${isOwner}">
+        Send a message to <span th:text="${participant.name}">Participant</span>
+      </legend>
+      <legend th:unless="${isOwner}">
+        Send a message to <span th:text="${item.user.name}">Item Owner</span>
+      </legend>
+      <div>
+        <label for="message-content">Your Message:</label>
+        <textarea id="message-content" name="content" required></textarea>
+      </div>
+      <div>
+        <button type="submit">Send Message</button>
+      </div>
+    </form>
+
+  </main>
+
+  <div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

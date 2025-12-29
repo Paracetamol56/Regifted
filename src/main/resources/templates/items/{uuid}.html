@@ -98,6 +98,14 @@
       Delete item
     </button>
   </section>
+
+  <!-- Messages -->
+  <section>
+    <h3>Messages</h3>
+    
+    <a th:href="@{/items/{uuid}/messages(uuid=${item.uuid})}" role="button">Messages</a>
+  </section>
+
 </main>
 
 <div th:replace="fragments/footer :: footer"></div>
