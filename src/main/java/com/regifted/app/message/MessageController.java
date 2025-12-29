@@ -2,7 +2,6 @@ package com.regifted.app.message;
 
 import java.net.URI;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -22,7 +21,6 @@ import com.regifted.app.item.Item;
 import com.regifted.app.item.ItemService;
 import com.regifted.app.message.dto.ConversationQuery;
 import com.regifted.app.message.dto.ConversationResult;
-import com.regifted.app.message.dto.ConversationSummaryResponse;
 import com.regifted.app.message.dto.MessageGetResponse;
 import com.regifted.app.message.dto.MessagePostRequest;
 import com.regifted.app.security.CustomUserPrincipal;
