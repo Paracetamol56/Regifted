@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.regifted.app.exception.NotFoundException;
+import com.regifted.app.exception.SelfMessagingException;
+import com.regifted.app.exception.UnrelatedParticipantException;
 import com.regifted.app.item.Item;
 import com.regifted.app.message.dto.ConversationQuery;
 import com.regifted.app.message.dto.ConversationResult;
@@ -96,7 +98,7 @@ public class MessageService {
   private void validateCreateMessage(User sender, User receiver, Item item, String content) {
 
     if (sender.equals(receiver)) {
-      throw new IllegalArgumentException("Sender cannot message themselves");
+      throw new SelfMessagingException(sender.getUuid());
     }
 
     if (content == null || content.isBlank()) {
@@ -108,8 +110,11 @@ public class MessageService {
     boolean receiverRelated = receiver.equals(owner);
 
     if (!senderRelated && !receiverRelated) {
-      throw new IllegalArgumentException(
-          "At least one participant must be related to the item");
+      throw new UnrelatedParticipantException(
+          item.getUuid(),
+          sender.getUuid(),
+          receiver.getUuid());
+
     }
   }
 
