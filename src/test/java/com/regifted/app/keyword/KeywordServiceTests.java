@@ -1,5 +1,6 @@
 package com.regifted.app.keyword;
 
+import com.regifted.app.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,15 +8,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,706 +33,536 @@ class KeywordServiceTest {
   private KeywordService keywordService;
 
   private Keyword createKeyword(String uuid, String name) {
-    Keyword keyword = new Keyword();
-    keyword.setUuid(uuid);
-    keyword.setName(name);
+    Keyword keyword = new Keyword(
+        uuid,
+        name,
+        Set.of());
     return keyword;
   }
 
+  private Page<Keyword> createPage(List<Keyword> keywords, Pageable pageable) {
+    return new PageImpl<>(keywords, pageable, keywords.size());
+  }
+
   // =============================
-  // GET MOST USED KEYWORDS TESTS
+  // GET ALL KEYWORDS TESTS
   // =============================
 
   @Test
-  @DisplayName("Should return correct number of most used keywords")
-  void testGetMostUsedKeywords_ReturnsCorrectNumber() {
+  @DisplayName("Should return paginated keywords")
+  void testGetAllKeywords_ReturnsPaginatedResults() {
     // Given
-    int limit = 5;
+    Pageable pageable = PageRequest.of(0, 20, Sort.by("name"));
     List<Keyword> keywords = Arrays.asList(
-        createKeyword("uuid-1", "vintage"),
-        createKeyword("uuid-2", "retro"),
-        createKeyword("uuid-3", "antique"),
-        createKeyword("uuid-4", "classic"),
-        createKeyword("uuid-5", "old"));
-
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(keywords);
+        createKeyword("uuid-1", "antique"),
+        createKeyword("uuid-2", "vintage"),
+        createKeyword("uuid-3", "retro"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findAll(pageable)).thenReturn(page);
 
     // When
-    List<Keyword> result = keywordService.getMostUsedKeywords(limit);
+    Page<Keyword> result = keywordService.getAllKeywords(pageable);
 
     // Then
-    assertThat(result).hasSize(5);
-    verify(keywordRepository, times(1)).findMostUsedKeywords(limit);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).hasSize(3);
+    assertThat(result.getContent()).containsExactlyElementsOf(keywords);
   }
 
   @Test
-  @DisplayName("Should return keywords in correct order")
-  void testGetMostUsedKeywords_ReturnsCorrectOrder() {
+  @DisplayName("Should call repository with correct pageable")
+  void testGetAllKeywords_CallsRepositoryWithPageable() {
     // Given
-    int limit = 3;
-    Keyword vintage = createKeyword("uuid-1", "vintage");
-    Keyword retro = createKeyword("uuid-2", "retro");
-    Keyword antique = createKeyword("uuid-3", "antique");
-    List<Keyword> keywords = Arrays.asList(vintage, retro, antique);
-
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(keywords);
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Keyword> emptyPage = Page.empty(pageable);
+    when(keywordRepository.findAll(pageable)).thenReturn(emptyPage);
 
     // When
-    List<Keyword> result = keywordService.getMostUsedKeywords(limit);
+    keywordService.getAllKeywords(pageable);
 
     // Then
-    assertThat(result).containsExactly(vintage, retro, antique);
+    verify(keywordRepository, times(1)).findAll(pageable);
   }
 
   @Test
-  @DisplayName("Should call repository with correct limit")
-  void testGetMostUsedKeywords_CallsRepository() {
+  @DisplayName("Should handle empty result")
+  void testGetAllKeywords_HandlesEmptyResult() {
     // Given
-    int limit = 10;
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(Collections.emptyList());
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Keyword> emptyPage = Page.empty(pageable);
+    when(keywordRepository.findAll(pageable)).thenReturn(emptyPage);
 
     // When
-    keywordService.getMostUsedKeywords(limit);
+    Page<Keyword> result = keywordService.getAllKeywords(pageable);
 
     // Then
-    verify(keywordRepository, times(1)).findMostUsedKeywords(limit);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).isEmpty();
+    assertThat(result.getTotalElements()).isZero();
   }
 
-  @Test
-  @DisplayName("Should return empty list when no keywords exist")
-  void testGetMostUsedKeywords_ReturnsEmptyList() {
-    // Given
-    int limit = 5;
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(Collections.emptyList());
+  // =============================
+  // SEARCH KEYWORDS TESTS
+  // =============================
 
-    // When
-    List<Keyword> result = keywordService.getMostUsedKeywords(limit);
-
-    // Then
-    assertThat(result).isEmpty();
-  }
+  // Basic Search Tests
 
   @Test
-  @DisplayName("Should handle zero limit")
-  void testGetMostUsedKeywords_WithZeroLimit() {
+  @DisplayName("Should find keywords containing query (case-insensitive)")
+  void testSearchKeywords_FindsMatchingKeywords() {
     // Given
-    int limit = 0;
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(Collections.emptyList());
-
-    // When
-    List<Keyword> result = keywordService.getMostUsedKeywords(limit);
-
-    // Then
-    assertThat(result).isEmpty();
-    verify(keywordRepository, times(1)).findMostUsedKeywords(0);
-  }
-
-  @Test
-  @DisplayName("Should handle negative limit")
-  void testGetMostUsedKeywords_WithNegativeLimit() {
-    // Given
-    int limit = -1;
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(Collections.emptyList());
-
-    // When
-    List<Keyword> result = keywordService.getMostUsedKeywords(limit);
-
-    // Then
-    assertThat(result).isEmpty();
-    verify(keywordRepository, times(1)).findMostUsedKeywords(-1);
-  }
-
-  @Test
-  @DisplayName("Should handle large limit")
-  void testGetMostUsedKeywords_WithLargeLimit() {
-    // Given
-    int limit = 1000;
+    String query = "fur";
+    Pageable pageable = PageRequest.of(0, 20);
     List<Keyword> keywords = Arrays.asList(
+        createKeyword("uuid-1", "furniture"),
+        createKeyword("uuid-2", "furry"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("fur", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(2);
+    assertThat(result.getContent()).extracting(Keyword::getName)
+        .containsExactly("furniture", "furry");
+  }
+
+  @Test
+  @DisplayName("Should return paginated search results")
+  void testSearchKeywords_ReturnsPaginatedResults() {
+    // Given
+    String query = "vintage";
+    Pageable pageable = PageRequest.of(0, 10);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "vintage"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("vintage", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).hasSize(1);
+  }
+
+  @Test
+  @DisplayName("Should call repository with normalized query")
+  void testSearchKeywords_CallsRepositoryWithNormalizedQuery() {
+    // Given
+    String query = "  VINTAGE  ";
+    String normalized = "vintage";
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Keyword> emptyPage = Page.empty(pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase(normalized, pageable))
+        .thenReturn(emptyPage);
+
+    // When
+    keywordService.searchKeywords(query, pageable);
+
+    // Then
+    verify(keywordRepository, times(1))
+        .findByNameContainingIgnoreCase(eq(normalized), eq(pageable));
+  }
+
+  @Test
+  @DisplayName("Should return empty page when no matches")
+  void testSearchKeywords_NoMatches() {
+    // Given
+    String query = "nonexistent";
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Keyword> emptyPage = Page.empty(pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("nonexistent", pageable))
+        .thenReturn(emptyPage);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).isEmpty();
+  }
+
+  // Query Normalization Tests
+
+  @Test
+  @DisplayName("Should trim whitespace from query")
+  void testSearchKeywords_TrimsWhitespace() {
+    // Given
+    String query = "  vintage  ";
+    String trimmed = "vintage";
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Keyword> page = Page.empty(pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase(trimmed, pageable))
+        .thenReturn(page);
+
+    // When
+    keywordService.searchKeywords(query, pageable);
+
+    // Then
+    verify(keywordRepository).findByNameContainingIgnoreCase(eq(trimmed), any());
+  }
+
+  @Test
+  @DisplayName("Should convert query to lowercase")
+  void testSearchKeywords_ConvertsToLowercase() {
+    // Given
+    String query = "VINTAGE";
+    String lowercase = "vintage";
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Keyword> page = Page.empty(pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase(lowercase, pageable))
+        .thenReturn(page);
+
+    // When
+    keywordService.searchKeywords(query, pageable);
+
+    // Then
+    verify(keywordRepository).findByNameContainingIgnoreCase(eq(lowercase), any());
+  }
+
+  @Test
+  @DisplayName("Should handle mixed case query")
+  void testSearchKeywords_MixedCase() {
+    // Given
+    String query = "ViNtAgE";
+    String normalized = "vintage";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "vintage"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase(normalized, pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+    verify(keywordRepository).findByNameContainingIgnoreCase(eq(normalized), any());
+  }
+
+  @Test
+  @DisplayName("Should normalize query before search")
+  void testSearchKeywords_NormalizesQuery() {
+    // Given
+    String query = "  VINTAGE  ";
+    String normalized = "vintage";
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<Keyword> page = Page.empty(pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase(normalized, pageable))
+        .thenReturn(page);
+
+    // When
+    keywordService.searchKeywords(query, pageable);
+
+    // Then
+    ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+    verify(keywordRepository).findByNameContainingIgnoreCase(queryCaptor.capture(), any());
+    assertThat(queryCaptor.getValue()).isEqualTo(normalized);
+  }
+
+  // Edge Cases Tests
+
+  @Test
+  @DisplayName("Should return all keywords when query is empty string")
+  void testSearchKeywords_EmptyQuery() {
+    // Given
+    String query = "";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> allKeywords = Arrays.asList(
         createKeyword("uuid-1", "vintage"),
         createKeyword("uuid-2", "retro"));
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(keywords);
+    Page<Keyword> page = createPage(allKeywords, pageable);
+    when(keywordRepository.findAll(pageable)).thenReturn(page);
 
     // When
-    List<Keyword> result = keywordService.getMostUsedKeywords(limit);
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
 
     // Then
-    assertThat(result).hasSize(2);
+    assertThat(result.getContent()).hasSize(2);
+    verify(keywordRepository).findAll(pageable);
+    verify(keywordRepository, never()).findByNameContainingIgnoreCase(any(), any());
   }
 
   @Test
-  @DisplayName("Should handle limit exceeding total keywords")
-  void testGetMostUsedKeywords_LimitExceedsTotalKeywords() {
+  @DisplayName("Should return all keywords when query is blank")
+  void testSearchKeywords_BlankQuery() {
     // Given
-    int limit = 100;
+    String query = "   ";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> allKeywords = Collections.singletonList(createKeyword("uuid-1", "vintage"));
+    Page<Keyword> page = createPage(allKeywords, pageable);
+    when(keywordRepository.findAll(pageable)).thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+    verify(keywordRepository).findAll(pageable);
+  }
+
+  @Test
+  @DisplayName("Should handle query with special characters")
+  void testSearchKeywords_WithSpecialCharacters() {
+    // Given
+    String query = "art&craft";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "art&craft"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("art&craft", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+  }
+
+  @Test
+  @DisplayName("Should handle query with accents")
+  void testSearchKeywords_WithAccents() {
+    // Given
+    String query = "café";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "café"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("café", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+  }
+
+  @Test
+  @DisplayName("Should handle single character query")
+  void testSearchKeywords_SingleCharacter() {
+    // Given
+    String query = "a";
+    Pageable pageable = PageRequest.of(0, 20);
     List<Keyword> keywords = Arrays.asList(
-        createKeyword("uuid-1", "vintage"),
-        createKeyword("uuid-2", "retro"),
-        createKeyword("uuid-3", "antique"));
-    when(keywordRepository.findMostUsedKeywords(limit)).thenReturn(keywords);
+        createKeyword("uuid-1", "antique"),
+        createKeyword("uuid-2", "art"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("a", pageable))
+        .thenReturn(page);
 
     // When
-    List<Keyword> result = keywordService.getMostUsedKeywords(limit);
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
 
     // Then
-    assertThat(result).hasSize(3);
+    assertThat(result.getContent()).hasSize(2);
+  }
+
+  @Test
+  @DisplayName("Should find partial matches")
+  void testSearchKeywords_PartialMatches() {
+    // Given
+    String query = "fur";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Arrays.asList(
+        createKeyword("uuid-1", "furniture"),
+        createKeyword("uuid-2", "furry"),
+        createKeyword("uuid-3", "sulfur"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("fur", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(3);
+  }
+
+  @Test
+  @DisplayName("Should find keywords at start of name")
+  void testSearchKeywords_MatchesAtStart() {
+    // Given
+    String query = "vin";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "vintage"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("vin", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).getName()).startsWith("vin");
+  }
+
+  @Test
+  @DisplayName("Should find keywords at end of name")
+  void testSearchKeywords_MatchesAtEnd() {
+    // Given
+    String query = "age";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "vintage"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("age", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).getName()).endsWith("age");
+  }
+
+  @Test
+  @DisplayName("Should find keywords in middle of name")
+  void testSearchKeywords_MatchesInMiddle() {
+    // Given
+    String query = "nta";
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "vintage"));
+    Page<Keyword> page = createPage(keywords, pageable);
+    when(keywordRepository.findByNameContainingIgnoreCase("nta", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result = keywordService.searchKeywords(query, pageable);
+
+    // Then
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).getName()).contains("nta");
+  }
+
+  @Test
+  @DisplayName("Should not be case sensitive in search")
+  void testSearchKeywords_CaseInsensitive() {
+    // Given
+    Pageable pageable = PageRequest.of(0, 20);
+    List<Keyword> keywords = Collections.singletonList(createKeyword("uuid-1", "vintage"));
+    Page<Keyword> page = createPage(keywords, pageable);
+
+    when(keywordRepository.findByNameContainingIgnoreCase("vintage", pageable))
+        .thenReturn(page);
+
+    // When
+    Page<Keyword> result1 = keywordService.searchKeywords("VINTAGE", pageable);
+    Page<Keyword> result2 = keywordService.searchKeywords("vintage", pageable);
+    Page<Keyword> result3 = keywordService.searchKeywords("ViNtAgE", pageable);
+
+    // Then
+    assertThat(result1.getContent()).hasSize(1);
+    assertThat(result2.getContent()).hasSize(1);
+    assertThat(result3.getContent()).hasSize(1);
   }
 
   // =============================
-  // GET BY NAME TESTS
+  // GET BY ID TESTS
   // =============================
 
+  // Success Cases
+
   @Test
-  @DisplayName("Should return keyword when found by name")
-  void testGetByName_Success() {
+  @DisplayName("Should return keyword when found by UUID")
+  void testGetById_Success() {
     // Given
-    String name = "vintage";
-    Keyword keyword = createKeyword("uuid-1", name);
-    when(keywordRepository.findByName(name)).thenReturn(Optional.of(keyword));
+    String uuid = "550e8400-e29b-41d4-a716-446655440000";
+    Keyword keyword = createKeyword(uuid, "vintage");
+    when(keywordRepository.findByUuid(uuid)).thenReturn(Optional.of(keyword));
 
     // When
-    Keyword result = keywordService.getByName(name);
+    Keyword result = keywordService.getByUuid(uuid);
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getName()).isEqualTo(name);
-    verify(keywordRepository, times(1)).findByName(name);
+    assertThat(result.getUuid()).isEqualTo(uuid);
+    assertThat(result.getName()).isEqualTo("vintage");
   }
 
   @Test
-  @DisplayName("Should return null when keyword not found")
-  void testGetByName_ReturnsNull() {
+  @DisplayName("Should call repository findByUuid")
+  void testGetById_CallsRepository() {
     // Given
-    String name = "nonexistent";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
+    String uuid = "550e8400-e29b-41d4-a716-446655440000";
+    Keyword keyword = createKeyword(uuid, "vintage");
+    when(keywordRepository.findByUuid(uuid)).thenReturn(Optional.of(keyword));
 
     // When
-    Keyword result = keywordService.getByName(name);
+    keywordService.getByUuid(uuid);
 
     // Then
-    assertThat(result).isNull();
+    verify(keywordRepository, times(1)).findByUuid(uuid);
   }
 
   @Test
-  @DisplayName("Should call repository findByName")
-  void testGetByName_CallsRepository() {
+  @DisplayName("Should return correct keyword data")
+  void testGetById_ReturnsCorrectData() {
     // Given
-    String name = "vintage";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
+    String uuid = "123e4567-e89b-12d3-a456-426614174000";
+    Keyword keyword = createKeyword(uuid, "vintage-camera");
+    when(keywordRepository.findByUuid(uuid)).thenReturn(Optional.of(keyword));
 
     // When
-    keywordService.getByName(name);
+    Keyword result = keywordService.getByUuid(uuid);
 
     // Then
-    verify(keywordRepository, times(1)).findByName(name);
+    assertThat(result.getUuid()).isEqualTo(uuid);
+    assertThat(result.getName()).isEqualTo("vintage-camera");
   }
 
-  @Test
-  @DisplayName("Should find keyword with exact match")
-  void testGetByName_ExactMatch() {
-    // Given
-    String name = "vintage";
-    Keyword keyword = createKeyword("uuid-1", name);
-    when(keywordRepository.findByName(name)).thenReturn(Optional.of(keyword));
-
-    // When
-    Keyword result = keywordService.getByName(name);
-
-    // Then
-    assertThat(result.getName()).isEqualTo(name);
-  }
+  // Error Cases
 
   @Test
-  @DisplayName("Should handle null name in getByName")
-  void testGetByName_WithNull() {
+  @DisplayName("Should throw NotFoundException when keyword not found")
+  void testGetById_ThrowsNotFoundException() {
     // Given
-    when(keywordRepository.findByName(null)).thenReturn(Optional.empty());
-
-    // When
-    Keyword result = keywordService.getByName(null);
-
-    // Then
-    assertThat(result).isNull();
-  }
-
-  @Test
-  @DisplayName("Should handle empty string in getByName")
-  void testGetByName_WithEmptyString() {
-    // Given
-    when(keywordRepository.findByName("")).thenReturn(Optional.empty());
-
-    // When
-    Keyword result = keywordService.getByName("");
-
-    // Then
-    assertThat(result).isNull();
-  }
-
-  @Test
-  @DisplayName("Should handle blank string in getByName")
-  void testGetByName_WithBlankString() {
-    // Given
-    String name = "   ";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-
-    // When
-    Keyword result = keywordService.getByName(name);
-
-    // Then
-    assertThat(result).isNull();
-  }
-
-  @Test
-  @DisplayName("Should handle special characters in getByName")
-  void testGetByName_WithSpecialCharacters() {
-    // Given
-    String name = "vintage&retro";
-    Keyword keyword = createKeyword("uuid-1", name);
-    when(keywordRepository.findByName(name)).thenReturn(Optional.of(keyword));
-
-    // When
-    Keyword result = keywordService.getByName(name);
-
-    // Then
-    assertThat(result).isNotNull();
-    assertThat(result.getName()).isEqualTo(name);
-  }
-
-  // =============================
-  // GET OR CREATE KEYWORD TESTS
-  // =============================
-
-  @Test
-  @DisplayName("Should return existing keyword when found")
-  void testGetOrCreateKeyword_ReturnsExisting() {
-    // Given
-    String name = "vintage";
-    Keyword existingKeyword = createKeyword("uuid-1", name);
-    when(keywordRepository.findByName(name)).thenReturn(Optional.of(existingKeyword));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result).isNotNull();
-    assertThat(result.getUuid()).isEqualTo("uuid-1");
-    assertThat(result.getName()).isEqualTo(name);
-    verify(keywordRepository, times(1)).findByName(name);
-    verify(keywordRepository, never()).save(any());
-  }
-
-  @Test
-  @DisplayName("Should not create duplicate when keyword exists")
-  void testGetOrCreateKeyword_DoesNotCreateDuplicate() {
-    // Given
-    String name = "vintage";
-    Keyword existingKeyword = createKeyword("uuid-1", name);
-    when(keywordRepository.findByName(name)).thenReturn(Optional.of(existingKeyword));
-
-    // When
-    keywordService.getOrCreateKeyword(name);
-
-    // Then
-    verify(keywordRepository, never()).save(any());
-  }
-
-  @Test
-  @DisplayName("Should call findByName when getting or creating")
-  void testGetOrCreateKeyword_CallsFindByName() {
-    // Given
-    String name = "vintage";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    keywordService.getOrCreateKeyword(name);
-
-    // Then
-    verify(keywordRepository, times(1)).findByName(name);
-  }
-
-  @Test
-  @DisplayName("Should create new keyword when not found")
-  void testGetOrCreateKeyword_CreatesNew() {
-    // Given
-    String name = "vintage";
-    Keyword newKeyword = createKeyword("uuid-1", name);
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any(Keyword.class))).thenReturn(newKeyword);
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result).isNotNull();
-    assertThat(result.getName()).isEqualTo(name);
-    verify(keywordRepository, times(1)).save(any(Keyword.class));
-  }
-
-  @Test
-  @DisplayName("Should call save when creating new keyword")
-  void testGetOrCreateKeyword_CallsSave() {
-    // Given
-    String name = "vintage";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    keywordService.getOrCreateKeyword(name);
-
-    // Then
-    ArgumentCaptor<Keyword> captor = ArgumentCaptor.forClass(Keyword.class);
-    verify(keywordRepository, times(1)).save(captor.capture());
-    assertThat(captor.getValue().getName()).isEqualTo(name);
-  }
-
-  @Test
-  @DisplayName("Should save normalized name when creating")
-  void testGetOrCreateKeyword_SavesNormalizedName() {
-    // Given
-    String input = "  VINTAGE  ";
-    String normalized = "vintage";
-    when(keywordRepository.findByName(normalized)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", normalized));
-
-    // When
-    keywordService.getOrCreateKeyword(input);
-
-    // Then
-    ArgumentCaptor<Keyword> captor = ArgumentCaptor.forClass(Keyword.class);
-    verify(keywordRepository).save(captor.capture());
-    assertThat(captor.getValue().getName()).isEqualTo(normalized);
-  }
-
-  // Normalization Logic Tests
-
-  @Test
-  @DisplayName("Should trim whitespace from keyword name")
-  void testGetOrCreateKeyword_TrimsWhitespace() {
-    // Given
-    String input = "  vintage  ";
-    String trimmed = "vintage";
-    when(keywordRepository.findByName(trimmed)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", trimmed));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    verify(keywordRepository).findByName(trimmed);
-    assertThat(result.getName()).isEqualTo(trimmed);
-  }
-
-  @Test
-  @DisplayName("Should convert to lowercase")
-  void testGetOrCreateKeyword_ConvertsToLowercase() {
-    // Given
-    String input = "VINTAGE";
-    String lowercase = "vintage";
-    when(keywordRepository.findByName(lowercase)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", lowercase));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    verify(keywordRepository).findByName(lowercase);
-    assertThat(result.getName()).isEqualTo(lowercase);
-  }
-
-  @Test
-  @DisplayName("Should trim and convert to lowercase")
-  void testGetOrCreateKeyword_TrimAndLowercase() {
-    // Given
-    String input = "  VINTAGE  ";
-    String normalized = "vintage";
-    when(keywordRepository.findByName(normalized)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", normalized));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    verify(keywordRepository).findByName(normalized);
-    assertThat(result.getName()).isEqualTo(normalized);
-  }
-
-  @Test
-  @DisplayName("Should preserve hyphens in keyword name")
-  void testGetOrCreateKeyword_PreservesHyphens() {
-    // Given
-    String name = "art-deco";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result.getName()).isEqualTo(name);
-  }
-
-  @Test
-  @DisplayName("Should preserve numbers in keyword name")
-  void testGetOrCreateKeyword_PreservesNumbers() {
-    // Given
-    String name = "1980s";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result.getName()).isEqualTo(name);
-  }
-
-  // Null and Empty String Tests
-
-  @Test
-  @DisplayName("Should document null check order bug - throws NPE")
-  void testGetOrCreateKeyword_NullCheckAfterTrim_Bug() {
-    // This test documents the bug: name.trim() is called before null check
-    // Given
-    String input = null;
+    String uuid = "999e8400-e29b-41d4-a716-446655440999";
+    when(keywordRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
     // When & Then
-    assertThatThrownBy(() -> keywordService.getOrCreateKeyword(input))
-        .isInstanceOf(NullPointerException.class);
-
-    // BUG: The service should check null BEFORE calling trim()
-    // Expected behavior: return null without throwing exception
+    assertThatThrownBy(() -> keywordService.getByUuid(uuid))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessageContaining(uuid);
   }
 
   @Test
-  @DisplayName("Should return null for empty string after trim")
-  void testGetOrCreateKeyword_WithEmptyString_ReturnsNull() {
+  @DisplayName("Should throw NotFoundException with correct message")
+  void testGetById_NotFoundExceptionMessage() {
     // Given
-    String input = "";
+    String uuid = "123e4567-e89b-12d3-a456-426614174000";
+    when(keywordRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    assertThat(result).isNull();
-    verify(keywordRepository, never()).save(any());
+    // When & Then
+    assertThatThrownBy(() -> keywordService.getByUuid(uuid))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessage("Not found with id: " + uuid);
   }
 
   @Test
-  @DisplayName("Should return null for blank string after trim")
-  void testGetOrCreateKeyword_WithBlankString_ReturnsNull() {
+  @DisplayName("Should not return null")
+  void testGetById_NeverReturnsNull() {
     // Given
-    String input = "   ";
+    String uuid = "550e8400-e29b-41d4-a716-446655440000";
+    when(keywordRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    assertThat(result).isNull();
-    verify(keywordRepository, never()).save(any());
+    // When & Then - should throw, not return null
+    assertThatThrownBy(() -> keywordService.getByUuid(uuid))
+        .isInstanceOf(NotFoundException.class);
   }
+
+  // Edge Cases
 
   @Test
-  @DisplayName("Should not save when input is empty")
-  void testGetOrCreateKeyword_DoesNotSaveWhenEmpty() {
+  @DisplayName("Should handle null UUID")
+  void testGetById_WithNullId() {
     // Given
-    String input = "";
+    String uuid = null;
 
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    assertThat(result).isNull();
-    verify(keywordRepository, never()).save(any());
+    // When & Then
+    assertThatThrownBy(() -> keywordService.getByUuid(uuid))
+        .isInstanceOf(NotFoundException.class);
   }
-
-  // Case Sensitivity Matching Tests
-
-  @Test
-  @DisplayName("Should find existing keyword case insensitive")
-  void testGetOrCreateKeyword_FindsExistingCaseInsensitive() {
-    // Given
-    String input = "VINTAGE";
-    String normalized = "vintage";
-    Keyword existingKeyword = createKeyword("uuid-1", normalized);
-    when(keywordRepository.findByName(normalized)).thenReturn(Optional.of(existingKeyword));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    assertThat(result).isNotNull();
-    assertThat(result.getUuid()).isEqualTo("uuid-1");
-    verify(keywordRepository, never()).save(any());
-  }
-
-  @Test
-  @DisplayName("Should find existing keyword with whitespace")
-  void testGetOrCreateKeyword_FindsExistingWithWhitespace() {
-    // Given
-    String input = "  vintage  ";
-    String normalized = "vintage";
-    Keyword existingKeyword = createKeyword("uuid-1", normalized);
-    when(keywordRepository.findByName(normalized)).thenReturn(Optional.of(existingKeyword));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    assertThat(result).isNotNull();
-    assertThat(result.getUuid()).isEqualTo("uuid-1");
-    verify(keywordRepository, never()).save(any());
-  }
-
-  @Test
-  @DisplayName("Should find existing keyword with mixed case")
-  void testGetOrCreateKeyword_MixedCase() {
-    // Given
-    String input = "ViNtAgE";
-    String normalized = "vintage";
-    Keyword existingKeyword = createKeyword("uuid-1", normalized);
-    when(keywordRepository.findByName(normalized)).thenReturn(Optional.of(existingKeyword));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(input);
-
-    // Then
-    assertThat(result).isNotNull();
-    verify(keywordRepository, never()).save(any());
-  }
-
-  // Special Characters Tests
-
-  @Test
-  @DisplayName("Should handle special characters")
-  void testGetOrCreateKeyword_WithSpecialCharacters() {
-    // Given
-    String name = "art&craft";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result.getName()).isEqualTo(name);
-  }
-
-  @Test
-  @DisplayName("Should handle accents")
-  void testGetOrCreateKeyword_WithAccents() {
-    // Given
-    String name = "café";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result.getName()).isEqualTo(name);
-  }
-
-  @Test
-  @DisplayName("Should handle Unicode characters")
-  void testGetOrCreateKeyword_WithUnicode() {
-    // Given
-    String name = "カメラ";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result.getName()).isEqualTo(name);
-  }
-
-  @Test
-  @DisplayName("Should handle emoji")
-  void testGetOrCreateKeyword_WithEmoji() {
-    // Given
-    String name = "vintage📷";
-    when(keywordRepository.findByName(name)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any())).thenReturn(createKeyword("uuid-1", name));
-
-    // When
-    Keyword result = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(result.getName()).isEqualTo(name);
-  }
-
-  // Business Logic Tests
-
-  @Test
-  @DisplayName("Should be idempotent - calling twice with same name")
-  void testGetOrCreateKeyword_IdempotentOperation() {
-    // Given
-    String name = "vintage";
-    Keyword keyword = createKeyword("uuid-1", name);
-    when(keywordRepository.findByName(name))
-        .thenReturn(Optional.empty())
-        .thenReturn(Optional.of(keyword));
-    when(keywordRepository.save(any())).thenReturn(keyword);
-
-    // When
-    Keyword first = keywordService.getOrCreateKeyword(name);
-    Keyword second = keywordService.getOrCreateKeyword(name);
-
-    // Then
-    assertThat(first.getName()).isEqualTo(second.getName());
-    verify(keywordRepository, times(1)).save(any()); // Only saved once
-  }
-
-  @Test
-  @DisplayName("Should create different keywords for different names")
-  void testGetOrCreateKeyword_DifferentNamesCreateDifferent() {
-    // Given
-    String name1 = "vintage";
-    String name2 = "retro";
-    Keyword keyword1 = createKeyword("uuid-1", name1);
-    Keyword keyword2 = createKeyword("uuid-2", name2);
-
-    when(keywordRepository.findByName(name1)).thenReturn(Optional.empty());
-    when(keywordRepository.findByName(name2)).thenReturn(Optional.empty());
-    when(keywordRepository.save(any()))
-        .thenReturn(keyword1)
-        .thenReturn(keyword2);
-
-    // When
-    Keyword result1 = keywordService.getOrCreateKeyword(name1);
-    Keyword result2 = keywordService.getOrCreateKeyword(name2);
-
-    // Then
-    assertThat(result1.getName()).isEqualTo(name1);
-    assertThat(result2.getName()).isEqualTo(name2);
-    assertThat(result1.getUuid()).isNotEqualTo(result2.getUuid());
-  }
-
-  @Test
-  @DisplayName("Should handle multiple whitespace variations consistently")
-  void testGetOrCreateKeyword_MultipleWhitespaceVariations() {
-    // Given
-    String normalized = "vintage";
-    Keyword keyword = createKeyword("uuid-1", normalized);
-    when(keywordRepository.findByName(normalized))
-        .thenReturn(Optional.empty())
-        .thenReturn(Optional.of(keyword))
-        .thenReturn(Optional.of(keyword))
-        .thenReturn(Optional.of(keyword));
-    when(keywordRepository.save(any())).thenReturn(keyword);
-
-    // When
-    Keyword result1 = keywordService.getOrCreateKeyword("vintage");
-    Keyword result2 = keywordService.getOrCreateKeyword(" vintage");
-    Keyword result3 = keywordService.getOrCreateKeyword("vintage ");
-    Keyword result4 = keywordService.getOrCreateKeyword("  vintage  ");
-
-    // Then
-    assertThat(result1.getName()).isEqualTo(normalized);
-    assertThat(result2.getName()).isEqualTo(normalized);
-    assertThat(result3.getName()).isEqualTo(normalized);
-    assertThat(result4.getName()).isEqualTo(normalized);
-  }
-
 }
