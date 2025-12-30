@@ -114,8 +114,9 @@ public class ItemController {
     Item item = itemService.getById(uuid);
     if (principal == null) {
       model.addAttribute("item", item);
+      model.addAttribute("isOwner", false);
       model.addAttribute("liked", false);
-      return new ModelAndView("item");
+      return new ModelAndView("items/{uuid}");
     }
     User currentUser = this.userService.getByEmail(principal.getUsername());
     boolean liked = this.userService.hasLikedItem(currentUser, item);
