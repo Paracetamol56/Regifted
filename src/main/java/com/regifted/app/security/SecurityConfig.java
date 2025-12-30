@@ -23,17 +23,16 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            // 1. Ressources statiques
+            // Ressources statiques
             .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-
-            // 2. Routes publiques
+            // Ressources publiques
             .requestMatchers("/", "/register", "/login").permitAll()
             .requestMatchers(org.springframework.http.HttpMethod.POST, "/users").permitAll()
+            .requestMatchers(org.springframework.http.HttpMethod.GET, "/**").permitAll()
+            // Messages
             .requestMatchers("/items/*/messages").authenticated()
 
-            // 3. Navigation libre en lecture (GET)
-            .requestMatchers(org.springframework.http.HttpMethod.GET, "/**").permitAll()
-            // 4. Tout le reste demande une connexion
+            // Tout le reste demande une connexion
             .anyRequest().authenticated())
         // Utilisation de Customizer.withDefaults() ou Lambda pour éviter la
         // dépréciation
