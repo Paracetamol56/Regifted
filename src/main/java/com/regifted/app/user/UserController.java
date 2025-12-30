@@ -1,26 +1,20 @@
 package com.regifted.app.user;
 
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.servlet.ModelAndView;
-
 import com.regifted.app.item.Item;
 import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.dto.UserPostRequest;
-import com.regifted.app.user.dto.UserPublicResponse;
-
-
-
+import com.regifted.app.user.dto.UserPrivateGetResponse;
+import com.regifted.app.user.dto.UserPublicGetResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
-@RestController
+@Controller
 @RequestMapping("/users")
 public class UserController {
 
@@ -32,15 +26,17 @@ public class UserController {
 
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
-  public User createUserApi(@Valid @RequestBody UserPostRequest req) {
-      return userService.createUser(req);
+  @ResponseBody
+  public UserPrivateGetResponse createUserApi(@Valid @RequestBody UserPostRequest req) {
+    User user = userService.createUser(req);
+    return UserPrivateGetResponse.from(user);
   }
 
   @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public ModelAndView registerFromWeb(@Valid @ModelAttribute UserPostRequest req, Model model) {
-      User user = userService.createUser(req);
-      model.addAttribute("user", user);
-      return new ModelAndView("users/me");
+    User user = userService.createUser(req);
+    model.addAttribute("user", user);
+    return new ModelAndView("users/me");
   }
 
   @GetMapping(value = "/me", produces = { MediaType.TEXT_HTML_VALUE })
@@ -57,12 +53,13 @@ public class UserController {
 
   @GetMapping(value = "/me", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @ResponseBody
-  public User getMe(@AuthenticationPrincipal CustomUserPrincipal principal) {
-    return userService.getByEmail(principal.getUsername());
+  public UserPrivateGetResponse getMeApi(@AuthenticationPrincipal CustomUserPrincipal principal) {
+    User user = userService.getByEmail(principal.getUsername());
+    return UserPrivateGetResponse.from(user);
   }
 
   @GetMapping(value = "/{uuid}", produces = { MediaType.TEXT_HTML_VALUE })
-  public ModelAndView getUser(@PathVariable String uuid, Model model) {
+  public ModelAndView getUserHtml(@PathVariable String uuid, Model model) {
     User user = userService.getByUuid(uuid);
     model.addAttribute("user", user);
 
@@ -71,10 +68,9 @@ public class UserController {
 
   @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @ResponseBody
-  public UserPublicResponse getUser(@PathVariable String uuid) {
-    UserPublicResponse res = UserPublicResponse.fromUser(userService.getByUuid(uuid));
-
-    return res;
+  public UserPublicGetResponse getUserApi(@PathVariable String uuid) {
+    User user = userService.getByUuid(uuid);
+    return UserPublicGetResponse.from(user);
   }
 
   @PostMapping(value = "/me/likes", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -103,5 +99,4 @@ public class UserController {
 
     return new ModelAndView("items/like-button");
   }
-
 }
