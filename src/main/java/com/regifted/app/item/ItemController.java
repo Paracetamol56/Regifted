@@ -1,7 +1,16 @@
 package com.regifted.app.item;
 
+import com.regifted.app.item.dto.ItemPostRequest;
+import com.regifted.app.item.dto.ItemPutRequest;
+import com.regifted.app.item.dto.ItemGetResponse;
+import com.regifted.app.item.dto.ItemSearchRequest;
+import com.regifted.app.keyword.Keyword;
+import com.regifted.app.keyword.KeywordService;
+import com.regifted.app.security.CustomUserPrincipal;
+import com.regifted.app.user.User;
+import com.regifted.app.user.UserService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,17 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.regifted.app.item.dto.ItemPostRequest;
-import com.regifted.app.item.dto.ItemPutRequest;
-import com.regifted.app.item.dto.ItemSearchRequest;
-import com.regifted.app.keyword.Keyword;
-import com.regifted.app.keyword.KeywordService;
-import com.regifted.app.security.CustomUserPrincipal;
-import com.regifted.app.user.UserService;
-import com.regifted.app.user.User;
-
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -53,8 +51,9 @@ public class ItemController {
   // JSON
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public Item createItemJson(@RequestBody @Valid ItemPostRequest req) {
-    return itemService.createItem(req);
+  public ItemGetResponse createItemJson(@RequestBody @Valid ItemPostRequest req) {
+    Item item = itemService.createItem(req);
+    return ItemGetResponse.from(item);
   }
 
   // ======================
@@ -64,7 +63,6 @@ public class ItemController {
   // HTML
   @GetMapping(value = "", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
-  @ResponseBody
   public ModelAndView getPageHtml(@Valid @ModelAttribute ItemSearchRequest req, Model model) {
     Page<Item> items = itemService.getItemSearchPage(
         req.getPage(),
@@ -88,10 +86,16 @@ public class ItemController {
   @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @Transactional(readOnly = true)
   @ResponseBody
-  public Page<Item> getPageJson(
-      @Valid @ModelAttribute ItemSearchRequest req) {
+  public Page<ItemGetResponse> getPageJson(@Valid @ModelAttribute ItemSearchRequest req) {
+    Page<Item> items = itemService.getItemSearchPage(
+        req.getPage(),
+        req.getLimit(),
+        req.getQ(),
+        req.getKeyword(),
+        null,
+        null);
 
-    return itemService.getItemSearchPage(req.getPage(), req.getLimit(), req.getQ(), req.getKeyword(), null, null);
+    return items.map(ItemGetResponse::from);
   }
 
   // ======================
@@ -102,24 +106,30 @@ public class ItemController {
   @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   @Transactional(readOnly = true)
   @ResponseBody
-  public Item getItemById(@PathVariable String uuid) {
-    return itemService.getById(uuid);
+  public ItemGetResponse getItemById(@PathVariable String uuid) {
+    Item item = itemService.getById(uuid);
+    return ItemGetResponse.from(item);
   }
 
   // HTML
   @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
-  public ModelAndView getItemByIdHTML(@PathVariable String uuid, @AuthenticationPrincipal CustomUserPrincipal principal,
+  public ModelAndView getItemByIdHTML(
+      @PathVariable String uuid,
+      @AuthenticationPrincipal CustomUserPrincipal principal,
       Model model) {
+
     Item item = itemService.getById(uuid);
+
     if (principal == null) {
       model.addAttribute("item", item);
       model.addAttribute("isOwner", false);
       model.addAttribute("liked", false);
       return new ModelAndView("items/{uuid}");
     }
-    User currentUser = this.userService.getByEmail(principal.getUsername());
-    boolean liked = this.userService.hasLikedItem(currentUser, item);
+
+    User currentUser = userService.getByEmail(principal.getUsername());
+    boolean liked = userService.hasLikedItem(currentUser, item);
 
     model.addAttribute("item", item);
     model.addAttribute("isOwner", currentUser.equals(item.getUser()));
@@ -148,8 +158,9 @@ public class ItemController {
   // JSON
   @PutMapping(value = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public Item updateItemJson(@PathVariable String uuid, @RequestBody @Valid ItemPutRequest req) {
-    return itemService.updateItemById(uuid, req);
+  public ItemGetResponse updateItemJson(@PathVariable String uuid, @RequestBody @Valid ItemPutRequest req) {
+    Item item = itemService.updateItemById(uuid, req);
+    return ItemGetResponse.from(item);
   }
 
   // ======================
@@ -165,5 +176,4 @@ public class ItemController {
 
     return ResponseEntity.ok().headers(headers).build();
   }
-
 }
