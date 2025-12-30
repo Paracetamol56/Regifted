@@ -6,6 +6,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.regifted.app.keyword.dto.KeywordGetResponse;
+
 @RestController
 @RequestMapping("/keywords")
 public class KeywordController {
@@ -17,7 +19,7 @@ public class KeywordController {
   }
 
   @GetMapping
-  public ResponseEntity<Page<Keyword>> getKeywords(
+  public ResponseEntity<Page<KeywordGetResponse>> getKeywords(
       @RequestParam(required = false) String q,
       @PageableDefault(size = 20, sort = "name") Pageable pageable) {
 
@@ -28,12 +30,14 @@ public class KeywordController {
       keywords = keywordService.getAllKeywords(pageable);
     }
 
-    return ResponseEntity.ok(keywords);
+    Page<KeywordGetResponse> response = keywords.map(KeywordGetResponse::from);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/{uuid}")
-  public ResponseEntity<Keyword> getKeywordById(@PathVariable String uuid) {
+  public ResponseEntity<KeywordGetResponse> getKeywordById(@PathVariable String uuid) {
     Keyword keyword = keywordService.getByUuid(uuid);
-    return ResponseEntity.ok(keyword);
+    KeywordGetResponse response = KeywordGetResponse.from(keyword);
+    return ResponseEntity.ok(response);
   }
 }
