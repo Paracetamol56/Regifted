@@ -8,20 +8,27 @@ import org.springframework.stereotype.Service;
 
 import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.user.User;
+import com.regifted.app.user.UserService;
 
 @Service
 public class SearchService {
 
   private final SearchRepository searchRepository;
+  private final UserService userService;
 
-  public SearchService(SearchRepository searchRepository) {
+  public SearchService(SearchRepository searchRepository, UserService userService) {
     this.searchRepository = searchRepository;
+    this.userService = userService;
   }
 
   public Search createSearch(String query, User user) {
+
+    // On recupere l'utilisateur au complet à partir du mail
+    User userComplet = userService.getByEmail(user.getEmail());
+
     Search search = new Search();
     search.setUuid(UUID.randomUUID().toString());
-    search.setUser(user);
+    search.setUser(userComplet);
     search.setQuery(query);
 
     return searchRepository.save(search);
