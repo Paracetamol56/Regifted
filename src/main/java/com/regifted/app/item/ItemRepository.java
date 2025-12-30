@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.regifted.app.keyword.Keyword;
 
+import java.util.Set;
+
 public interface ItemRepository extends JpaRepository<Item, String> {
   @Query("""
           SELECT i FROM Item i
@@ -18,3 +20,4 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 
   Page<Item> findByKeywordsContaining(Keyword keyword, Pageable pageable);
 }
+
