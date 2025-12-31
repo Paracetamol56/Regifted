@@ -59,9 +59,10 @@ public class ItemService {
     }
 
     for (User user : users) {
-      System.out.println("User with email : " + user.getEmail() + " has been notified ! ");
+      if(user.isNotification()){
+        System.out.println("User with email : " + user.getEmail() + " has been notified ! ");
+      }
     }
-
     return res;
   }
 
