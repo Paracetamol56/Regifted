@@ -20,36 +20,26 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            // Ressources statiques
-            .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-            // Ressources publiques
-            .requestMatchers("/", "/register", "/login").permitAll()
-            .requestMatchers(org.springframework.http.HttpMethod.POST, "/users").permitAll()
-            .requestMatchers(org.springframework.http.HttpMethod.GET, "/**").permitAll()
-            // Messages
-            .requestMatchers("/items/*/messages").authenticated()
+      http
+          .csrf(csrf -> csrf.disable())
+          .authorizeHttpRequests(auth -> auth
+              // Ressources statiques et publiques
+              .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+              .requestMatchers("/", "/register").permitAll()
+              .requestMatchers(org.springframework.http.HttpMethod.POST, "/users").permitAll()
+              .requestMatchers(org.springframework.http.HttpMethod.GET, "/**").permitAll()
+              
+              // Ressources protégées
+              .requestMatchers("/items/*/messages").authenticated()
+              .anyRequest().authenticated())
 
-            // Tout le reste demande une connexion
-            .anyRequest().authenticated())
-        // Utilisation de Customizer.withDefaults() ou Lambda pour éviter la
-        // dépréciation
-        .formLogin(form -> form
-            .loginPage("/login")
-            .defaultSuccessUrl("/", true)
-            .permitAll())
-        // Correction de l'enchaînement : on ferme bien la parenthèse avant de passer au
-        // suivant
-        .httpBasic(org.springframework.security.config.Customizer.withDefaults())
+          .httpBasic(org.springframework.security.config.Customizer.withDefaults())
+          .formLogin(form -> form.disable())
 
-        .logout(logout -> logout
-            .logoutSuccessUrl("/login?logout")
-            .permitAll())
-        .userDetailsService(userDetailsService);
+          .logout(logout -> logout.permitAll())
+          .userDetailsService(userDetailsService);
 
-    return http.build();
+      return http.build();
   }
 
   @Bean
