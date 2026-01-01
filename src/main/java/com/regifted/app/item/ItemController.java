@@ -43,8 +43,9 @@ public class ItemController {
 
   // HTML Form
   @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String createItemHTML(@Valid ItemPostRequest req) {
-    Item created = itemService.createItem(req);
+  public String createItemHTML(@Valid ItemPostRequest req,  @AuthenticationPrincipal CustomUserPrincipal principal) {
+    User currentUser = this.userService.getByEmail(principal.getUsername());
+    Item created = itemService.createItem(req, currentUser);
     return "redirect:/items/" + created.getUuid();
   }
 

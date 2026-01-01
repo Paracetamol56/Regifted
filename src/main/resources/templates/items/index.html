@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/head :: head"></head>
+<head th:replace="fragments/head :: head">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
 
 <body>
 <div th:replace="fragments/header :: header"></div>
@@ -23,10 +25,24 @@
   <section class="content">
     <!-- SEARCH FORM -->
     <section>
-      <form role="group" action="/items" method="GET">
-        <input name="q" type="q" placeholder="Search" th:value="${param.q}" />
-        <input type="submit" value="Search" />
+      <form role="group" th:action="@{/items}" method="GET">
+        <input name="q" type="search" placeholder="Rechercher..." th:value="${param.q}" />
+        <input type="submit" value="Rechercher" />
       </form>
+
+      <div id="save-section">
+          <form role="group" 
+                hx-post="/searches" 
+                hx-target="#save-section" 
+                hx-swap="innerHTML">
+            
+            <input type="hidden" name="query" th:value="${param.q}" />
+            
+            <th:block th:if="${param.q != null and !#strings.isEmpty(param.q)}">
+                <input type="submit" value="Sauvegarder la recherche" />
+            </th:block>
+          </form>
+      </div>
     </section>
 
     <h1>All Items</h1>

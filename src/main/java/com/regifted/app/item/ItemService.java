@@ -10,23 +10,29 @@ import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.keyword.KeywordService;
+import com.regifted.app.search.SearchRepository;
+
+import com.regifted.app.user.*;
 
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 
 @Service
 public class ItemService {
   private final ItemRepository repository;
   private final KeywordService keywordService;
+  private final SearchRepository searchRepository;
 
-  public ItemService(ItemRepository repository, KeywordService keywordService) {
+  public ItemService(ItemRepository repository, KeywordService keywordService, SearchRepository searchRepository) {
     this.repository = repository;
     this.keywordService = keywordService;
+    this.searchRepository = searchRepository;
   }
 
-  public Item createItem(ItemPostRequest req) {
+  public Item createItem(ItemPostRequest req, User CurrentUser) {
     Item item = req.toItem();
 
     // Gestion des keywords
@@ -40,9 +46,37 @@ public class ItemService {
       }
     }
     item.setKeywords(keywords);
+    item.setUser(CurrentUser);
 
-    return repository.save(item);
+    Item res = repository.saveAndFlush(item);
+
+     // Notifier les utilisateurs de la création d'un item correspondant à leurs recherches sauvegarder
+    Set<User> users = this.getUserToNotify(item);
+
+    if(users.isEmpty()){
+      System.out.println("NoOne to notify");
+      return res;
+    }
+
+    for (User user : users) {
+      if(user.isNotification()){
+        System.out.println("User with email : " + user.getEmail() + " has been notified ! ");
+      }
+    }
+    return res;
   }
+
+
+  private Set<User> getUserToNotify(Item item) {
+    if (item == null || item.getUuid() == null) {
+        return Collections.emptySet();
+    }
+
+    // Récupération des utilisateurs matchant les critères
+    Set<User> usersToNotify = searchRepository.findUsersToNotify(item );
+    return usersToNotify;
+}
+
 
   public Page<Item> getItemSearchPage(
       int pageNumber,
