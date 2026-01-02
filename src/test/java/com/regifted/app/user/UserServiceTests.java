@@ -191,10 +191,9 @@ class UserServiceTest {
       when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
       // When
-      User result = userService.getByEmail(email);
-
-      // Then
-      assertNull(result);
+      assertThrows(NotFoundException.class, () -> {
+          userService.getByUuid(email);
+      });
       verify(userRepository).findByEmail(email);
     }
 
@@ -220,10 +219,10 @@ class UserServiceTest {
       when(userRepository.findByEmail(null)).thenReturn(Optional.empty());
 
       // When
-      User result = userService.getByEmail(null);
 
-      // Then
-      assertNull(result);
+      assertThrows(NotFoundException.class, () -> {
+          userService.getByUuid(null);
+      });
       verify(userRepository).findByEmail(null);
     }
 
@@ -235,10 +234,9 @@ class UserServiceTest {
       when(userRepository.findByEmail(emptyEmail)).thenReturn(Optional.empty());
 
       // When
-      User result = userService.getByEmail(emptyEmail);
-
-      // Then
-      assertNull(result);
+      assertThrows(NotFoundException.class, () -> {
+          userService.getByUuid(emptyEmail);
+      });
       verify(userRepository).findByEmail(emptyEmail);
     }
   }
