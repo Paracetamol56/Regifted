@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/searches")
+@RequestMapping("/users/me/searches")
 public class SearchController {
 
   private final SearchService searchService;
@@ -71,7 +71,7 @@ public class SearchController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
     Search created = searchService.createSearch(req.getQuery(), principal.getUser());
-    URI location = URI.create("/searches/" + created.getUuid());
+    URI location = URI.create("/users/me/searches/" + created.getUuid());
 
     return ResponseEntity.created(location).body(SearchGetResponse.from(created));
   }
