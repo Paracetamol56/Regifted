@@ -192,7 +192,7 @@ class UserServiceTest {
 
       // When
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(email);
+        userService.getByUuid(email);
       });
       verify(userRepository).findByEmail(email);
     }
@@ -219,9 +219,8 @@ class UserServiceTest {
       when(userRepository.findByEmail(null)).thenReturn(Optional.empty());
 
       // When
-
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(null);
+        userService.getByUuid(null);
       });
       verify(userRepository).findByEmail(null);
     }
@@ -235,7 +234,7 @@ class UserServiceTest {
 
       // When
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(emptyEmail);
+        userService.getByUuid(emptyEmail);
       });
       verify(userRepository).findByEmail(emptyEmail);
     }
@@ -269,16 +268,16 @@ class UserServiceTest {
     @Test
     @DisplayName("Should throw NotFoundException when UUID doesn't exist")
     void testGetByUuid_UserNotFound_ThrowsException() {
-        // Given
-        String uuid = "nonexistent-uuid";
-        when(userRepository.findById(uuid)).thenReturn(Optional.empty());
+      // Given
+      String uuid = "nonexistent-uuid";
+      when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(NotFoundException.class, () -> {
-            userService.getByUuid(uuid);
-        });
+      // When & Then
+      assertThrows(NotFoundException.class, () -> {
+        userService.getByUuid(uuid);
+      });
 
-        verify(userRepository).findById(uuid);
+      verify(userRepository).findById(uuid);
     }
 
     @Test
@@ -290,7 +289,7 @@ class UserServiceTest {
 
       // When
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(invalidUuid);
+        userService.getByUuid(invalidUuid);
       });
       verify(userRepository).findById(invalidUuid);
     }
@@ -303,7 +302,7 @@ class UserServiceTest {
 
       // When
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(null);
+        userService.getByUuid(null);
       });
       verify(userRepository).findById(null);
     }

@@ -21,7 +21,7 @@ public class SearchGetResponse {
     return new SearchGetResponse(
         search.getUuid(),
         ServletUriComponentsBuilder.fromCurrentContextPath()
-            .path("/searches/{uuid}")
+            .path("/users/me/searches/{uuid}")
             .buildAndExpand(search.getUuid())
             .toUriString(),
         search.getQuery(),
