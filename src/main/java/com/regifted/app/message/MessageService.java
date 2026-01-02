@@ -81,7 +81,7 @@ public class MessageService {
       Item item, User user, Pageable pageable) {
     return repo
         .findAllByItemAndSenderOrReceiverOrderByCreatedAtDesc(item, user, user, pageable)
-        .map(MessageGetResponse::fromMessage);
+        .map(MessageGetResponse::from);
   }
 
   public Message createMessage(User sender, User receiver, Item item, String content) {

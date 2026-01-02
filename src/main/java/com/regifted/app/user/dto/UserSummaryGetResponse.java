@@ -19,7 +19,7 @@ public class UserSummaryGetResponse {
     response.setUuid(user.getUuid());
     response.setHref(ServletUriComponentsBuilder.fromCurrentContextPath()
         .path("/users/{uuid}")
-        .buildAndExpand(user.getUuid()) // Changed from 'keyword.getUuid()'
+        .buildAndExpand(user.getUuid())
         .toUriString());
     response.setName(user.getName());
     return response;

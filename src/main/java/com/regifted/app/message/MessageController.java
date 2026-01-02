@@ -61,7 +61,7 @@ public class MessageController {
         itemService.getById(itemId),
         req.getContent());
 
-    model.addAttribute("message", MessageGetResponse.fromMessage(created));
+    model.addAttribute("message", MessageGetResponse.from(created));
 
     return new ModelAndView("messages/message", model.asMap());
   }
@@ -83,11 +83,11 @@ public class MessageController {
     URI location = URI.create("/items/" + itemId + "/messages/" + created.getUuid());
 
     return ResponseEntity.created(location)
-        .body(MessageGetResponse.fromMessage(created));
+        .body(MessageGetResponse.from(created));
   }
 
   // =============================
-  // GET MESSAGES — API
+  // GET MESSAGES
   // =============================
 
   @GetMapping(value = "/items/{itemId}/messages", produces = { MediaType.APPLICATION_JSON_VALUE,
@@ -106,10 +106,6 @@ public class MessageController {
         new ConversationQuery(item, requester, requested),
         pageable);
   }
-
-  // =============================
-  // GET MESSAGES — HTML
-  // =============================
 
   @GetMapping(value = "/items/{itemId}/messages", produces = MediaType.TEXT_HTML_VALUE)
   public ModelAndView getMessagesForItemHtml(
