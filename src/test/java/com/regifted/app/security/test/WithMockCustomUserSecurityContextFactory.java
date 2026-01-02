@@ -15,10 +15,9 @@ public class WithMockCustomUserSecurityContextFactory
     public SecurityContext createSecurityContext(WithMockCustomUser annotation) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-        // User de domaine minimal pour les tests
         User user = new User();
         user.setEmail(annotation.username());
-        user.setPassword("password"); // valeur factice, non utilisée
+        user.setPassword("password");
 
         CustomUserPrincipal principal = new CustomUserPrincipal(user);
 

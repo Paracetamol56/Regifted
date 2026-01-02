@@ -160,7 +160,7 @@ public class UserControllerTest {
         when(userService.getByEmail(TEST_EMAIL)).thenReturn(mockUser);
 
         mockMvc.perform(get("/users/me")
-                .accept(MediaType.TEXT_HTML))  // pas besoin de httpBasic
+                .accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(view().name("users/me"))
                 .andExpect(model().attribute("user", mockUser));

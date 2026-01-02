@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -43,7 +44,7 @@ public class UserController {
   @GetMapping(value = "/me", produces = { MediaType.TEXT_HTML_VALUE })
   public ModelAndView getMe(@AuthenticationPrincipal CustomUserPrincipal principal, Model model) {
     if (principal == null) {
-      return new ModelAndView("redirect:/");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authentified");
     }
 
     User user = userService.getByEmail(principal.getUsername());
