@@ -49,31 +49,31 @@ public class SearchController {
   @PostMapping(value = "", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   @ResponseBody // On renvoie du HTML brut pour HTMX
   public String createSearchHtmx(
-          @ModelAttribute SearchPostRequest req,
-          @AuthenticationPrincipal CustomUserPrincipal principal) {
-      try {
-          searchService.createSearch(req.getQuery(), principal.getUser());
-          return "<button type='button' class='secondary' disabled style='width: 100%;'>" +
-                "Saved !" +
-                "</button>";
-                
-      } catch (Exception e) {
-          return "<button type='submit' class='secondary'>Erreur (Réessayer)</button>";
-      }
+      @ModelAttribute SearchPostRequest req,
+      @AuthenticationPrincipal CustomUserPrincipal principal) {
+    try {
+      searchService.createSearch(req.getQuery(), principal.getUser());
+      return "<button type='button' class='secondary' disabled style='width: 100%;'>" +
+          "Saved !" +
+          "</button>";
+
+    } catch (Exception e) {
+      return "<button type='submit' class='secondary'>Erreur (Réessayer)</button>";
+    }
   }
 
-
-  @PostMapping(value = "", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+  @PostMapping(value = "", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   public ResponseEntity<SearchGetResponse> createSearchApi(
-          @Valid @RequestBody SearchPostRequest req,
-          @AuthenticationPrincipal CustomUserPrincipal principal) {
-      
-      if (principal == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      
-      Search created = searchService.createSearch(req.getQuery(), principal.getUser());
-      URI location = URI.create("/searches/" + created.getUuid());
-      
-      return ResponseEntity.created(location).body(SearchGetResponse.fromSearch(created));
+      @Valid @RequestBody SearchPostRequest req,
+      @AuthenticationPrincipal CustomUserPrincipal principal) {
+
+    if (principal == null)
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+    Search created = searchService.createSearch(req.getQuery(), principal.getUser());
+    URI location = URI.create("/searches/" + created.getUuid());
+
+    return ResponseEntity.created(location).body(SearchGetResponse.from(created));
   }
 
   // =============================
@@ -87,7 +87,7 @@ public class SearchController {
 
     Page<Search> searches = searchService.getAllSearchesForUser(principal.getUser(), pageable);
 
-    return searches.map(SearchGetResponse::fromSearch);
+    return searches.map(SearchGetResponse::from);
   }
 
   // =============================
@@ -102,7 +102,7 @@ public class SearchController {
 
     Search search = searchService.getSearchByUuid(uuid, principal.getUser());
 
-    return SearchGetResponse.fromSearch(search);
+    return SearchGetResponse.from(search);
   }
 
   // =============================
