@@ -51,7 +51,7 @@ public class ItemService {
     Item res = repository.saveAndFlush(item);
 
      // Notifier les utilisateurs de la création d'un item correspondant à leurs recherches sauvegarder
-    Set<User> users = this.getUserToNotify(item);
+    Set<User> users = this.getUserToNotify(res);
 
     if(users.isEmpty()){
       System.out.println("NoOne to notify");

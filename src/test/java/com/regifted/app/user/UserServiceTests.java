@@ -15,12 +15,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.regifted.app.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserService Unit Tests")
@@ -266,18 +269,18 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Should return null when UUID doesn't exist")
-    void testGetByUuid_UserNotFound() {
-      // Given
-      String uuid = "nonexistent-uuid";
-      when(userRepository.findById(uuid)).thenReturn(Optional.empty());
+    @DisplayName("Should throw NotFoundException when UUID doesn't exist")
+    void testGetByUuid_UserNotFound_ThrowsException() {
+        // Given
+        String uuid = "nonexistent-uuid";
+        when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
-      // When
-      User result = userService.getByUuid(uuid);
+        // When & Then
+        assertThrows(NotFoundException.class, () -> {
+            userService.getByUuid(uuid);
+        });
 
-      // Then
-      assertNull(result);
-      verify(userRepository).findById(uuid);
+        verify(userRepository).findById(uuid);
     }
 
     @Test
@@ -288,10 +291,9 @@ class UserServiceTest {
       when(userRepository.findById(invalidUuid)).thenReturn(Optional.empty());
 
       // When
-      User result = userService.getByUuid(invalidUuid);
-
-      // Then
-      assertNull(result);
+      assertThrows(NotFoundException.class, () -> {
+          userService.getByUuid(invalidUuid);
+      });
       verify(userRepository).findById(invalidUuid);
     }
 
@@ -302,10 +304,9 @@ class UserServiceTest {
       when(userRepository.findById(null)).thenReturn(Optional.empty());
 
       // When
-      User result = userService.getByUuid(null);
-
-      // Then
-      assertNull(result);
+      assertThrows(NotFoundException.class, () -> {
+          userService.getByUuid(null);
+      });
       verify(userRepository).findById(null);
     }
 

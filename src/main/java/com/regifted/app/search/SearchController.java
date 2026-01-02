@@ -89,19 +89,6 @@ public class SearchController {
 
     return searches.map(SearchGetResponse::fromSearch);
   }
-  /*
-  @GetMapping(value = "", produces = MediaType.TEXT_HTML_VALUE)
-  public ModelAndView getSearchesHtml(
-      @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable,
-      Model model,
-      @AuthenticationPrincipal CustomUserPrincipal principal) {
-
-    Page<Search> searches = searchService.getAllSearchesForUser(principal.getUser(), pageable);
-
-    model.addAttribute("searches", searches);
-
-    return new ModelAndView("searches/list", model.asMap());
-  }*/
 
   // =============================
   // GET SEARCH BY UUID
@@ -117,19 +104,6 @@ public class SearchController {
 
     return SearchGetResponse.fromSearch(search);
   }
-/*
-  @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
-  public ModelAndView getSearchByUuidHtml(
-      @PathVariable String uuid,
-      Model model,
-      @AuthenticationPrincipal CustomUserPrincipal principal) {
-
-    Search search = searchService.getSearchByUuid(uuid, principal.getUser());
-
-    model.addAttribute("search", SearchGetResponse.fromSearch(search));
-
-    return new ModelAndView("searches/search", model.asMap());
-  }*/
 
   // =============================
   // DELETE SEARCH
