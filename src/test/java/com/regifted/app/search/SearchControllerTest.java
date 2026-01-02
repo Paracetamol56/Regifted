@@ -137,7 +137,7 @@ class SearchControllerTest {
   // =============================
 
   @Test
-  void getSearchByUuidApi_ShouldReturnSearch() throws Exception {
+  void getSearchByUuid_ShouldRedirectToItemsWithQuery() throws Exception {
     Search search = new Search();
     search.setUuid("abc-456");
     search.setQuery("Test Query");
@@ -145,10 +145,9 @@ class SearchControllerTest {
     when(searchService.getSearchByUuid(eq("abc-456"), any())).thenReturn(search);
 
     mockMvc.perform(get("/users/me/searches/abc-456")
-        .with(user(mockPrincipal))
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.uuid").value("abc-456"));
+        .with(user(mockPrincipal)))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(header().string("Location", "/items?q=Test%20Query"));
   }
 
   // =============================
