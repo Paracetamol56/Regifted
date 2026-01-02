@@ -8,6 +8,7 @@ import com.regifted.app.user.dto.UserPublicGetResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,7 +43,7 @@ public class UserController {
   @GetMapping(value = "/me", produces = { MediaType.TEXT_HTML_VALUE })
   public ModelAndView getMe(@AuthenticationPrincipal CustomUserPrincipal principal, Model model) {
     if (principal == null) {
-      return new ModelAndView("redirect:/login");
+      return new ModelAndView("redirect:/");
     }
 
     User user = userService.getByEmail(principal.getUsername());
@@ -51,12 +52,17 @@ public class UserController {
     return new ModelAndView("users/me");
   }
 
-  @GetMapping(value = "/me", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-  @ResponseBody
-  public UserPrivateGetResponse getMeApi(@AuthenticationPrincipal CustomUserPrincipal principal) {
-    User user = userService.getByEmail(principal.getUsername());
-    return UserPrivateGetResponse.from(user);
-  }
+  @GetMapping(value = "/me", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @ResponseBody
+    public ResponseEntity<UserPrivateGetResponse> getMeApi(@AuthenticationPrincipal CustomUserPrincipal principal) {
+        if (principal == null) {
+            // Non authentifié → 401
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = userService.getByEmail(principal.getUsername());
+        return ResponseEntity.ok(UserPrivateGetResponse.from(user));
+    }
 
   @GetMapping(value = "/{uuid}", produces = { MediaType.TEXT_HTML_VALUE })
   public ModelAndView getUserHtml(@PathVariable String uuid, Model model) {

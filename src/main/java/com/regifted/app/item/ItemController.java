@@ -52,9 +52,9 @@ public class ItemController {
   // JSON
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public ItemGetResponse createItemJson(@RequestBody @Valid ItemPostRequest req) {
-    Item item = itemService.createItem(req);
-    return ItemGetResponse.from(item);
+  public Item createItemJson(@RequestBody @Valid ItemPostRequest req,  @AuthenticationPrincipal CustomUserPrincipal principal) {
+    User currentUser = this.userService.getByEmail(principal.getUsername());
+    return itemService.createItem(req, currentUser);
   }
 
   // ======================

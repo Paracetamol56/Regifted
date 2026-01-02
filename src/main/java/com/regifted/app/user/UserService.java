@@ -34,11 +34,13 @@ public class UserService {
   }
 
   public User getByEmail(String email) {
-    return userRepository.findByEmail(email).orElse(null);
+      return userRepository.findByEmail(email)
+              .orElseThrow(() -> new NotFoundException(email));
   }
 
-  public User getByUuid(String uuid) {
-    return userRepository.findById(uuid).orElse(null);
+ public User getByUuid(String uuid) {
+    return userRepository.findById(uuid)
+             .orElseThrow(() -> new NotFoundException(uuid));
   }
 
   public Item addLike(User user, String itemUuid) {
