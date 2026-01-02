@@ -40,7 +40,6 @@
 
       <section>
         <h2>Liked items</h2>
-        <p th:if="${#lists.isEmpty(user.items)}">You have no liked items.</p>
         <ul>
           <li th:each="i : ${user.getLikedItems()}">
             <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
@@ -50,7 +49,11 @@
 
       <section>
         <h2>Saved search</h2>
-
+        <ul>
+          <li th:each="s : ${user.getSavedSearches()}">
+            <a th:href="@{/searches/{uuid}(uuid=${s.getUuid()})}" th:text="${s.getQuery()}"></a>
+          </li>
+        </ul>
       </section>
     </main>
     <div th:replace="fragments/footer :: footer"></div>

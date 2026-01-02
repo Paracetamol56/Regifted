@@ -8,6 +8,8 @@ import com.regifted.app.item.ItemRepository;
 
 import java.util.HashSet;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @org.springframework.stereotype.Service
@@ -34,13 +36,13 @@ public class UserService {
   }
 
   public User getByEmail(String email) {
-      return userRepository.findByEmail(email)
-              .orElseThrow(() -> new NotFoundException(email));
+    return userRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundException(email));
   }
 
- public User getByUuid(String uuid) {
+  public User getByUuid(String uuid) {
     return userRepository.findById(uuid)
-             .orElseThrow(() -> new NotFoundException(uuid));
+        .orElseThrow(() -> new NotFoundException(uuid));
   }
 
   public Item addLike(User user, String itemUuid) {

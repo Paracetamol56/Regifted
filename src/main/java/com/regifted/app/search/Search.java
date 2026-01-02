@@ -36,7 +36,7 @@ public class Search {
   private String uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "userid", nullable = false, updatable = false)
+  @JoinColumn(name = "user", nullable = false, updatable = false)
   @JsonBackReference
   private User user;
 

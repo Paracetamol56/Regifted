@@ -14,7 +14,7 @@ public class SearchGetResponse {
   private String query;
   private Instant createdAt;
 
-  public static SearchGetResponse fromSearch(Search search) {
+  public static SearchGetResponse from(Search search) {
     return new SearchGetResponse(
         search.getUuid(),
         search.getQuery(),
