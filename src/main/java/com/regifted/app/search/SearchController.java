@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.regifted.app.search.dto.SearchGetResponse;
 import com.regifted.app.search.dto.SearchPostRequest;
@@ -94,15 +95,20 @@ public class SearchController {
   // GET SEARCH BY UUID
   // =============================
 
-  @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE,
-      MediaType.APPLICATION_XML_VALUE })
-  public SearchGetResponse getSearchByUuidApi(
+  @GetMapping("/{uuid}")
+  public ResponseEntity<Void> getSearchByUuid(
       @PathVariable String uuid,
       @AuthenticationPrincipal CustomUserPrincipal principal) {
 
     Search search = searchService.getSearchByUuid(uuid, principal.getUser());
 
-    return SearchGetResponse.from(search);
+    String redirectUrl = UriComponentsBuilder.fromPath("/items")
+        .queryParam("q", search.getQuery())
+        .toUriString();
+
+    return ResponseEntity.status(HttpStatus.FOUND)
+        .location(URI.create(redirectUrl))
+        .build();
   }
 
   // =============================
