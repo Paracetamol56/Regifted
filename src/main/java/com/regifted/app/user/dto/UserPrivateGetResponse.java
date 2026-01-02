@@ -17,6 +17,7 @@ public final class UserPrivateGetResponse {
   protected String name;
   protected Instant createdAt;
   protected Set<ItemGetResponse> items;
+  private String savedSearches;
   private String email;
   private Boolean notification;
   private Instant updatedAt;
@@ -33,6 +34,10 @@ public final class UserPrivateGetResponse {
     response.setItems(user.getItems().stream()
         .map(ItemGetResponse::from)
         .collect(java.util.stream.Collectors.toSet()));
+    response.setSavedSearches(ServletUriComponentsBuilder.fromCurrentContextPath()
+        .path("users/me/searches")
+        .buildAndExpand(user.getUuid())
+        .toUriString());
     response.setEmail(user.getEmail());
     response.setNotification(user.isNotification());
     response.setUpdatedAt(user.getUpdatedAt());

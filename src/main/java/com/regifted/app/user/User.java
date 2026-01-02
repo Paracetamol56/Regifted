@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.regifted.app.item.Item;
+import com.regifted.app.search.Search;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -54,12 +55,13 @@ public class User {
   private Instant updatedAt;
 
   @OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
-  @JsonManagedReference
   private Set<Item> items;
 
   @ManyToMany(fetch = FetchType.LAZY)
-  @JsonManagedReference
   private Set<Item> likedItems;
+
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  private Set<Search> savedSearches;
 
   @PrePersist
   public void prePersist() {
