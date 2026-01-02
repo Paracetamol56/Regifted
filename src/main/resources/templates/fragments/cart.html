@@ -1,0 +1,31 @@
+<ul th:fragment="cart-content" id="cart-dropdown-container" style="min-width: 320px; right: 0; left: auto; padding: 1rem; list-style: none;">
+    
+    <li th:if="${bundle == null or #lists.isEmpty(bundle.items)}">
+        <p style="margin: 0; text-align: center;">Votre panier est vide 📭</p>
+    </li>
+
+    <th:block th:if="${bundle != null and !#lists.isEmpty(bundle.items)}">
+        <li style="margin-bottom: 10px; border-bottom: 1px solid var(--muted-border-color); padding-bottom: 5px;">
+            <small>Donneur : <strong th:text="${bundle.donor.email}"></strong></small>
+        </li>
+        
+        <li th:each="cartItem : ${bundle.items}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span th:text="${cartItem.title}" style="font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+            <button th:hx-delete="'/bundles/cart/items/' + ${cartItem.uuid}"
+                    hx-target="#cart-dropdown-container"
+                    hx-swap="outerHTML"
+                    class="outline contrast"
+                    style="padding: 0 5px; font-size: 0.7rem; margin: 0; border: none; color: var(--del-color);">
+                ✕
+            </button>
+        </li>
+
+        <li style="margin-top: 15px;">
+            <button class="primary small" 
+                    hx-post="/bundles/checkout" 
+                    style="width: 100%; margin: 0;">
+                Valider le lot
+            </button>
+        </li>
+    </th:block>
+</ul>

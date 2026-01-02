@@ -2,6 +2,8 @@ package com.regifted.app.item;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
+import com.regifted.app.bundle.Bundle;
+import com.regifted.app.bundle.BundleService;
 import com.regifted.app.item.dto.ItemGetResponse;
 import com.regifted.app.item.dto.ItemSearchRequest;
 import com.regifted.app.keyword.Keyword;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -30,11 +33,13 @@ public class ItemController {
   private final ItemService itemService;
   private final KeywordService keywordService;
   private final UserService userService;
+  private final BundleService bundleService;
 
-  public ItemController(ItemService itemService, KeywordService keywordService, UserService userService) {
+  public ItemController(ItemService itemService, KeywordService keywordService, UserService userService, BundleService bundleService ) {
     this.itemService = itemService;
     this.keywordService = keywordService;
     this.userService = userService;
+    this.bundleService = bundleService;
   }
 
   // ======================
@@ -61,42 +66,59 @@ public class ItemController {
   // GET ALL ITEMS
   // ======================
 
-  // HTML
   @GetMapping(value = "", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
-  public ModelAndView getPageHtml(@Valid @ModelAttribute ItemSearchRequest req, Model model) {
-    Page<Item> items = itemService.getItemSearchPage(
-        req.getPage(),
-        req.getLimit(),
-        req.getQ(),
-        req.getKeyword(),
-        null,
-        null);
-    List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
-    model.addAttribute("items", items.getContent());
-    model.addAttribute("keywords", keywords);
-    model.addAttribute("page", req.getPage());
-    model.addAttribute("limit", req.getLimit());
-    model.addAttribute("query", req.getQ());
-    model.addAttribute("totalItems", items.getTotalElements());
-    model.addAttribute("totalPages", items.getTotalPages());
-    return new ModelAndView("items/index");
+  public ModelAndView getPageHtml(
+          @Valid @ModelAttribute ItemSearchRequest req, 
+          @AuthenticationPrincipal UserDetails userDetails,
+          Model model) {
+      
+      Page<Item> items = itemService.getItemSearchPage(
+              req.getPage(),
+              req.getLimit(),
+              req.getQ(),
+              req.getKeyword(),
+              null,
+              null);
+      
+      List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
+      
+      if (userDetails != null) {
+          Bundle cart = bundleService.getCurrentCart(userDetails.getUsername());
+          model.addAttribute("bundle", cart);
+      }
+
+      model.addAttribute("items", items.getContent());
+      model.addAttribute("keywords", keywords);
+      model.addAttribute("page", req.getPage());
+      model.addAttribute("limit", req.getLimit());
+      model.addAttribute("query", req.getQ());
+      model.addAttribute("keyword", req.getKeyword());
+      model.addAttribute("totalItems", items.getTotalElements());
+      model.addAttribute("totalPages", items.getTotalPages());
+      
+      return new ModelAndView("items/index");
   }
 
-  // JSON
   @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @Transactional(readOnly = true)
   @ResponseBody
-  public Page<ItemGetResponse> getPageJson(@Valid @ModelAttribute ItemSearchRequest req) {
-    Page<Item> items = itemService.getItemSearchPage(
-        req.getPage(),
-        req.getLimit(),
-        req.getQ(),
-        req.getKeyword(),
-        null,
-        null);
+  public Page<ItemGetResponse> getPageJson(
+      @Valid @ModelAttribute ItemSearchRequest req,
+      @AuthenticationPrincipal UserDetails userDetails) {
 
-    return items.map(ItemGetResponse::from);
+      Page<Item> items = itemService.getItemSearchPage(
+          req.getPage(),
+          req.getLimit(),
+          req.getQ(),
+          req.getKeyword(),
+          null,
+          null);
+
+      Bundle cart = (userDetails != null) ? bundleService.getCurrentCart(userDetails.getUsername()) : null;
+
+
+      return items.map(item -> ItemGetResponse.from(item, cart));
   }
 
   // ======================

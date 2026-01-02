@@ -1,21 +1,16 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head th:replace="fragments/head :: head"></head>
 <body>
 <div th:replace="fragments/header :: header"></div>
 
 <main class="container item-page">
-  <!-- Breadcrumb -->
   <a class="secondary" th:href="@{/items}">← Back to items</a>
-
-  <!-- Header -->
 
   <section>
     <hgroup>
       <h1 th:text="${item.title}"></h1>
       
-      <!-- Like / Unlike button -->
       <div th:replace="items/like-button :: likeButton(${item}, ${liked})"></div>
 
       <span class="badge" th:text="${item.donateAt == null} ? 'Available' : 'Unavailable'"></span>
@@ -26,8 +21,6 @@
     </p>
   </section>
 
-  <!-- Description -->
-
   <section>
     <h2>Description</h2>
     <p th:if="${item.description != null and !item.description.isEmpty()}" 
@@ -37,23 +30,16 @@
   </section>
   <hr/>
 
-  <!-- Keywords -->
-
   <section>
     <h2>Keywords</h2>
     <p th:if="${#lists.isEmpty(item.keywords)}">No keywords associated with this item.</p>
     <ul th:unless="${#lists.isEmpty(item.keywords)}">
       <li th:each="k : ${item.keywords}">
-        <a
-          th:href="@{/items(keyword=${k.name})}"
-          th:text="${k.name}"
-        ></a>
+        <a th:href="@{/items(keyword=${k.name})}" th:text="${k.name}"></a>
       </li>
     </ul>
   </section>
   <hr/>
-
-  <!-- Details -->
 
   <section>
     <h2>Details</h2>
@@ -89,21 +75,30 @@
   </section>
   <hr/>
 
-  <!-- Actions -->
-  <section th:if="${isOwner}">
-    <a th:href="@{/items/update/{id}(id=${item.uuid})}" role="button">Edit item</a>
-    <button aria-label="Delete item"
-            th:hx-delete="@{/items/{id}(id=${item.uuid})}"
-            hx-confirm="Are you sure you want to delete this item?">
-      Delete item
-    </button>
+  <section>
+    <div th:if="${isOwner}">
+      <a th:href="@{/items/update/{id}(id=${item.uuid})}" role="button">Edit item</a>
+      <button aria-label="Delete item"
+              class="contrast outline"
+              th:hx-delete="@{/items/{id}(id=${item.uuid})}"
+              hx-confirm="Are you sure you want to delete this item?">
+        Delete item
+      </button>
+    </div>
+
+    <div th:if="${!isOwner and item.donateAt == null}" sec:authorize="isAuthenticated()">
+      <button class="secondary" 
+              th:hx-post="'/bundles/cart/items/' + ${item.uuid}"
+              hx-target="#cart-dropdown-container"
+              hx-swap="outerHTML">
+          📦 Ajouter à mon lot
+      </button>
+    </div>
   </section>
 
-  <!-- Messages -->
   <section>
     <h3>Messages</h3>
-    
-    <a th:href="@{/items/{uuid}/messages(uuid=${item.uuid})}" role="button">Messages</a>
+    <a th:href="@{/items/{uuid}/messages(uuid=${item.uuid})}" role="button" class="outline">Messages</a>
   </section>
 
 </main>
@@ -120,6 +115,16 @@
   }
 
   hgroup h1 { flex: 1; }
+
+  .item-page hr {
+      margin: 2rem 0;
+  }
+  
+  /* Style optionnel pour espacer les boutons d'action */
+  section div {
+      display: flex;
+      gap: 1rem;
+  }
 </style>
 
 </body>

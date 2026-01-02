@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.user.User;
+import com.regifted.app.bundle.Bundle;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -75,6 +76,11 @@ public class Item {
   @ManyToMany(mappedBy = "likedItems", fetch = FetchType.LAZY)
   @JsonIgnore
   private Set<User> likedByUsers;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bundle_uuid")
+  @JsonBackReference
+  private Bundle bundle;
 
   @Formula("(SELECT COUNT(*) FROM user_liked_items uli WHERE uli.liked_items_uuid = uuid)")
   private int likes;

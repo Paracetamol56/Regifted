@@ -8,17 +8,30 @@
       <li><a th:href="@{/new-item}">Add Item</a></li>
     </ul>
     <ul>
-      <!-- Show Register when NOT logged in -->
       <li sec:authorize="isAnonymous()">
         <a th:href="@{/register}" class="secondary">Register</a>
       </li>
 
-      <!-- Show Profile when logged in -->
+      <li sec:authorize="isAuthenticated()">
+        <details class="dropdown">
+          <summary class="outline secondary" 
+                   hx-get="/bundles/cart" 
+                   hx-target="#cart-dropdown-container" 
+                   hx-trigger="click">
+            🛒 Mon Lot
+          </summary>
+          <ul id="cart-dropdown-container" style="min-width: 320px; right: 0; left: auto; padding: 1rem;">
+            <li><small>Chargement...</small></li>
+          </ul>
+        </details>
+      </li>
+
       <li sec:authorize="isAuthenticated()">
         <a th:href="@{/users/me}">Profile</a>
       </li>
+      
       <li>
-        <select id="theme-select" aria-label="Select color theme">
+        <select id="theme-select" style="margin-bottom: 0;">
           <option value="auto">Auto</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
@@ -26,27 +39,4 @@
       </li>
     </ul>
   </nav>
-  <script>
-  const html = document.documentElement;
-  const themeSelect = document.getElementById('theme-select');
-
-  // Load saved theme from localStorage
-  const savedTheme = localStorage.getItem('theme') || 'auto';
-  themeSelect.value = savedTheme;
-  applyTheme(savedTheme);
-
-  themeSelect.addEventListener('change', (e) => {
-    const theme = e.target.value;
-    applyTheme(theme);
-    localStorage.setItem('theme', theme);
-  });
-
-  function applyTheme(theme) {
-    if (theme === 'auto') {
-      html.removeAttribute('data-theme');
-    } else {
-      html.setAttribute('data-theme', theme);
-    }
-  }
-  </script>
 </header>
