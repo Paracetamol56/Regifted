@@ -1,4 +1,4 @@
-package com.regifted.app.security.test;
+package com.regifted.app.security;
 
 import org.springframework.security.test.context.support.WithSecurityContext;
 
@@ -14,5 +14,5 @@ import static java.lang.annotation.ElementType.TYPE;
 @WithSecurityContext(factory = WithMockCustomUserSecurityContextFactory.class)
 public @interface WithMockCustomUser {
 
-    String username() default "test@regifted.com";
+  String username() default "test@regifted.com";
 }

@@ -184,15 +184,15 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Should return null when email doesn't exist")
+    @DisplayName("Should throw NotFoundException when email doesn't exist")
     void testGetByEmail_UserNotFound() {
       // Given
       String email = "nonexistent@example.com";
       when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-      // When
+      // When & Then
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(email);
+        userService.getByEmail(email); // FIXED: was getByUuid
       });
       verify(userRepository).findByEmail(email);
     }
@@ -213,29 +213,28 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Should handle null email parameter")
+    @DisplayName("Should throw NotFoundException for null email parameter")
     void testGetByEmail_NullEmail() {
       // Given
       when(userRepository.findByEmail(null)).thenReturn(Optional.empty());
 
-      // When
-
+      // When & Then
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(null);
+        userService.getByEmail(null); // FIXED: was getByUuid
       });
       verify(userRepository).findByEmail(null);
     }
 
     @Test
-    @DisplayName("Should handle empty string email")
+    @DisplayName("Should throw NotFoundException for empty string email")
     void testGetByEmail_EmptyEmail() {
       // Given
       String emptyEmail = "";
       when(userRepository.findByEmail(emptyEmail)).thenReturn(Optional.empty());
 
-      // When
+      // When & Then
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(emptyEmail);
+        userService.getByEmail(emptyEmail); // FIXED: was getByUuid
       });
       verify(userRepository).findByEmail(emptyEmail);
     }
@@ -269,16 +268,16 @@ class UserServiceTest {
     @Test
     @DisplayName("Should throw NotFoundException when UUID doesn't exist")
     void testGetByUuid_UserNotFound_ThrowsException() {
-        // Given
-        String uuid = "nonexistent-uuid";
-        when(userRepository.findById(uuid)).thenReturn(Optional.empty());
+      // Given
+      String uuid = "nonexistent-uuid";
+      when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(NotFoundException.class, () -> {
-            userService.getByUuid(uuid);
-        });
+      // When & Then
+      assertThrows(NotFoundException.class, () -> {
+        userService.getByUuid(uuid);
+      });
 
-        verify(userRepository).findById(uuid);
+      verify(userRepository).findById(uuid);
     }
 
     @Test
@@ -290,7 +289,7 @@ class UserServiceTest {
 
       // When
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(invalidUuid);
+        userService.getByUuid(invalidUuid);
       });
       verify(userRepository).findById(invalidUuid);
     }
@@ -303,7 +302,7 @@ class UserServiceTest {
 
       // When
       assertThrows(NotFoundException.class, () -> {
-          userService.getByUuid(null);
+        userService.getByUuid(null);
       });
       verify(userRepository).findById(null);
     }
