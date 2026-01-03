@@ -1,7 +1,7 @@
 <th:block th:fragment="cart-content">
 
     <li th:if="${bundles == null or #lists.isEmpty(bundles)}" style="list-style: none;">
-        <p style="margin: 20px 0; text-align: center; color: var(--muted-color);">Votre panier est vide 📭</p>
+        <p style="margin: 20px 0; text-align: center; color: var(--muted-color);">Your cart is empty 📭</p>
     </li>
 
     <th:block th:if="${bundles != null and !#lists.isEmpty(bundles)}">
@@ -11,7 +11,7 @@
             <div style="border-bottom: 1px solid var(--muted-border-color); margin-bottom: 12px; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                 
                 <div style="display: flex; flex-direction: column;">
-                    <small style="text-transform: uppercase; font-size: 0.65rem; color: var(--muted-color);">Lot de dons de</small>
+                    <small style="text-transform: uppercase; font-size: 0.65rem; color: var(--muted-color);">Donation bundle from</small>
                     <strong th:text="${bundleItem.donor.email}" style="font-size: 0.85rem;"></strong>
                 </div>
 
@@ -21,22 +21,22 @@
                             th:hx-patch="'/user/me/cart/validate/' + ${bundleItem.uuid}"
                             hx-target="#cart-dropdown-container"
                             style="font-size: 0.7rem; padding: 4px 10px; margin: 0;">
-                        Valider ce lot
+                        Validate this bundle
                     </button>
 
                     <span th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).SENT}"
                           style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #e3f2fd; color: #1976d2; font-weight: bold;">
-                        En attente
+                        Pending
                     </span>
 
                     <span th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).ACCEPTED}"
                           style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; font-weight: bold;">
-                        Accepté ✓
+                        Accepted ✓
                     </span>
 
                     <span th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).REFUSED}"
                           style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #ffe3e3; color: #d32f2f; font-weight: bold;">
-                        Refusé ✕
+                        Refused ✕
                     </span>
                 </div>
             </div>

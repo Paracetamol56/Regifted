@@ -75,12 +75,12 @@
 
                 <div class="user-data">
                     <div class="meta-group">
-                        <span class="meta-label">Membre depuis</span>
+                        <span class="meta-label">Member since</span>
                         <span class="meta-value" th:text="${#temporals.format(user.createdAt, 'dd MMMM yyyy')}"></span>
                     </div>
                     <div class="meta-group">
                         <span class="meta-label">Notifications</span>
-                        <span class="meta-value" th:text="${user.notification ? 'Activées' : 'Désactivées'}"></span>
+                        <span class="meta-value" th:text="${user.notification ? 'Enabled' : 'Disabled'}"></span>
                     </div>
                 </div>
 
@@ -92,7 +92,7 @@
             <div class="main-content">
                 
                 <section id="received-requests">
-                    <h2 class="pico-muted-color">Demandes d'échange reçues</h2>
+                    <h2 class="pico-muted-color">Received Exchange Requests</h2>
                     
                     <th:block th:each="ownedItem : ${user.items}">
                         <div th:each="bundle : ${ownedItem.bundles}" 
@@ -100,11 +100,11 @@
                             
                             <article class="bundle-request">
                                 <header>
-                                    <small class="pico-muted-color">Demande de</small><br>
+                                    <small class="pico-muted-color">Request from</small><br>
                                     <strong th:text="${bundle.user.email}"></strong>
                                 </header>
                                 
-                                <p style="margin-bottom: 0;">Souhaite obtenir le lot :</p>
+                                <p style="margin-bottom: 0;">Wants to obtain this bundle:</p>
                                 <ul class="bundle-items-list">
                                     <li th:each="bi : ${bundle.items}" th:text="${bi.title}"></li>
                                 </ul>
@@ -116,7 +116,7 @@
                                             hx-target="#profile-main-content"
                                             hx-select="#profile-main-content"
                                             hx-swap="outerHTML">
-                                        Accepter
+                                        Accept
                                     </button>
                                     
                                     <button class="outline contrast" 
@@ -125,7 +125,7 @@
                                             hx-target="#profile-main-content"
                                             hx-select="#profile-main-content"
                                             hx-swap="outerHTML">
-                                        Refuser
+                                        Refuse
                                     </button>
                                 </div>
                             </article>
@@ -134,7 +134,7 @@
                 </section>
 
                 <section>
-                    <h2 class="pico-muted-color">Mes objets en donation</h2>
+                    <h2 class="pico-muted-color">My Items for Donation</h2>
                     <ul class="items-grid">
                         <li th:each="i : ${user.items}">
                             <article>
@@ -145,7 +145,7 @@
                 </section>
 
                 <section>
-                    <h2 class="pico-muted-color">Objets favoris</h2>
+                    <h2 class="pico-muted-color">Favorite Items</h2>
                     <ul class="items-grid">
                         <li th:each="i : ${user.likedItems}">
                             <article>
@@ -156,7 +156,7 @@
                 </section>
 
                 <section>
-                    <h2 class="pico-muted-color">Recherches enregistrées</h2>
+                    <h2 class="pico-muted-color">Saved Searches</h2>
                     <ul class="items-grid">
                         <li th:each="s : ${user.savedSearches}">
                             <article>
