@@ -48,37 +48,29 @@ public class BundleService {
     Bundle cart = bundleRepository.findByReceiverAndCheckoutAtIsNull(receiver).orElse(null);
 
 
-        System.out.println(item.getUuid());
-        
-        if (item.getUser().equals(receiver)) {
-            throw new IllegalStateException("You cannot add your own item to your cart");
-        }
-
-        Bundle cart = bundleRepository.findByReceiverAndCheckoutAtIsNull(receiver).orElse(null);
+    System.out.println(item.getUuid());
+    
+    if (item.getUser().equals(receiver)) {
+        throw new IllegalStateException("You cannot add your own item to your cart");
+    }
 
 
 
-        if (cart == null) {
-            cart = new Bundle();
-            cart.setReceiver(receiver);
-            cart = bundleRepository.save(cart);
-        } else{
-            System.out.println(cart.getUuid());
-        }
-
-        item.setBundle(cart);
-        cart.getItems().add(item);
-        
-        itemRepository.save(item);
-        return bundleRepository.save(cart);
+    if (cart == null) {
+        cart = new Bundle();
+        cart.setReceiver(receiver);
+        cart = bundleRepository.save(cart);
+    } else{
+        System.out.println(cart.getUuid());
     }
 
     item.setBundle(cart);
     cart.getItems().add(item);
-
+    
     itemRepository.save(item);
     return bundleRepository.save(cart);
-  }
+}
+
 
   @Transactional
   public Bundle removeItemFromCart(String itemUuid, String receiverEmail) {
