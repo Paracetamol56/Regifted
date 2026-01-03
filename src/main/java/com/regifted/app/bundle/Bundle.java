@@ -19,8 +19,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 
-@Entity @Table(name = "bundle")
+@Entity
+@Table(name = "bundle")
 public class Bundle {
+
     @Id
     private String uuid = UUID.randomUUID().toString();
 
@@ -28,16 +30,14 @@ public class Bundle {
     @JoinColumn(name = "receiver_uuid", nullable = false)
     private User receiver;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "donor_uuid", nullable = false)
-    private User donor;
-    @OneToMany(mappedBy = "bundle")
-    @JsonManagedReference
+    @OneToMany(mappedBy = "bundle", cascade = CascadeType.ALL)
     private Set<Item> items = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    private BundleStatus status;
 
     @CreationTimestamp
     private Instant createdAt;
 
-    @Column
     private Instant checkoutAt;
 }

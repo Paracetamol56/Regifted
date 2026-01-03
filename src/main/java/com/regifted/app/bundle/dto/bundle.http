@@ -1,7 +1,7 @@
 
 
-### get bundles
-POST http://localhost:8080/bundles/
+### get cart
+POST http://localhost:8080/cart/
 Content-Type: application/json
 Authorization: Basic YWRtaW5AYWRtaW4uZnI6YWRtaW5wYXNz
 

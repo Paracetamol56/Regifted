@@ -21,7 +21,20 @@ public class BundleService {
 
     public Bundle getCurrentCart(String receiverEmail) {
         User receiver = userService.getByEmail(receiverEmail);
-        return bundleRepository.findByReceiverAndCheckoutAtIsNull(receiver).orElse(null);
+        Bundle res = bundleRepository.findByReceiverAndCheckoutAtIsNull(receiver).orElse(null);
+        if( res == null ){
+            return res;
+        }
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        for (Item i : res.getItems()) {
+            System.out.println(i.getUser().getEmail() + " : " + i.getUuid());
+        }
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        return res;
     }
 
     @Transactional
@@ -30,21 +43,23 @@ public class BundleService {
         Item item = itemRepository.findById(itemUuid)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
+
+        System.out.println(item.getUuid());
+        
         if (item.getUser().equals(receiver)) {
             throw new IllegalStateException("You cannot add your own item to your cart");
         }
 
         Bundle cart = bundleRepository.findByReceiverAndCheckoutAtIsNull(receiver).orElse(null);
 
+
+
         if (cart == null) {
             cart = new Bundle();
             cart.setReceiver(receiver);
-            cart.setDonor(item.getUser());
             cart = bundleRepository.save(cart);
-        } else {
-            if (cart.getDonor() != null && !cart.getDonor().equals(item.getUser())) {
-                throw new IllegalStateException("A bundle can only contain items from the same donor. Clear your cart first.");
-            }
+        } else{
+            System.out.println(cart.getUuid());
         }
 
         item.setBundle(cart);
