@@ -1,6 +1,5 @@
 package com.regifted.app.user.dto;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import com.regifted.app.user.User;
 
 import jakarta.validation.constraints.Email;

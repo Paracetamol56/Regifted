@@ -32,7 +32,8 @@ public class UserController {
     this.userService = svc;
   }
 
-  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE })
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
   public UserPrivateGetResponse createUserApi(@Valid @RequestBody UserPostRequest req) {
@@ -40,7 +41,7 @@ public class UserController {
     return UserPrivateGetResponse.from(user);
   }
 
-  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.TEXT_HTML_VALUE)
   public ModelAndView registerFromWeb(@Valid @ModelAttribute UserPostRequest req, Model model) {
     User user = userService.createUser(req);
     model.addAttribute("user", user);
