@@ -1,0 +1,15 @@
+
+
+### get bundles
+POST http://localhost:8080/bundles/
+Content-Type: application/json
+Authorization: Basic YWRtaW5AYWRtaW4uZnI6YWRtaW5wYXNz
+
+{
+  "title": "Lamp",
+  "description": "Une superbe lamp en bois",
+  "latitude": 48.0,
+  "longitude": 40.0,
+  "state": "USED",
+  "keywords": ["lamp", "bois", "recyclé"]
+}

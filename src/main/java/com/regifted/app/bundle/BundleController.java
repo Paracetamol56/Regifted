@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 @Controller
-@RequestMapping("/bundles") // Suppression du /api
+@RequestMapping("/bundles")
 @RequiredArgsConstructor
 public class BundleController {
 
