@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.regifted.app.item.Item;
 import com.regifted.app.search.Search;
 
-import com.regifted.app.bundle.Bundle;
+import com.regifted.app.cart.Cart;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -62,7 +62,7 @@ public class User {
   private Set<Item> likedItems;
 
   @ManyToMany(fetch = FetchType.LAZY)
-  private Set<Bundle> Bundles;
+  private Set<Cart> carts;
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<Search> savedSearches;

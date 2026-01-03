@@ -1,4 +1,4 @@
-package com.regifted.app.bundle;
+package com.regifted.app.cart;
 
 import com.regifted.app.item.Item;
 
@@ -16,8 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "bundle")
-public class Bundle {
+@Table(name = "cart")
+public class Cart {
 
   @Id
   private String uuid = UUID.randomUUID().toString();
@@ -27,14 +27,14 @@ public class Bundle {
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "donor_uuid", nullable = false)
-  private User donor;
+  @JoinColumn(name = "owner_uuid", nullable = false)
+  private User owner;
 
-  @ManyToMany(mappedBy = "bundles", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(mappedBy = "carts", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   private Set<Item> items = new HashSet<>();
 
   @Enumerated(EnumType.STRING)
-  private BundleStatus status;
+  private CartStatus status;
 
   @CreationTimestamp
   private Instant createdAt;

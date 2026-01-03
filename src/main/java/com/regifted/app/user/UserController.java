@@ -1,17 +1,12 @@
 package com.regifted.app.user;
 
 import com.regifted.app.item.Item;
-import com.regifted.app.item.dto.ItemGetResponse;
 import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.dto.UserPostRequest;
 import com.regifted.app.user.dto.UserPrivateGetResponse;
 import com.regifted.app.user.dto.UserPublicGetResponse;
 import jakarta.validation.Valid;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

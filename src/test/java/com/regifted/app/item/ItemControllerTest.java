@@ -37,7 +37,7 @@ import com.regifted.app.security.SecurityConfig;
 import com.regifted.app.security.WithMockCustomUser;
 import com.regifted.app.user.User;
 import com.regifted.app.user.UserService;
-import com.regifted.app.bundle.BundleService;
+import com.regifted.app.cart.CartService;
 import com.regifted.app.exception.NotFoundException;
 
 @WebMvcTest(ItemController.class)
@@ -57,7 +57,7 @@ public class ItemControllerTest {
   private UserService userService;
 
   @MockBean
-  private BundleService bundleService;
+  private CartService bundleService;
 
   @MockBean
   private CustomUserDetailsService userDetailsService;

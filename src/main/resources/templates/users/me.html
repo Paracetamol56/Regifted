@@ -1,174 +1,174 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <style>
-        .profile-layout {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 4rem;
-            margin-top: 2rem;
-        }
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 4rem;
+      margin-top: 2rem;
+    }
 
-        .side-panel {
-            position: sticky;
-            top: 2rem;
-            height: fit-content;
-        }
+    .side-panel {
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+    }
 
-        .meta-group { margin-bottom: 1.5rem; }
+    .meta-group { margin-bottom: 1.5rem; }
 
-        .meta-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--pico-muted-color);
-            display: block;
-        }
+    .meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--pico-muted-color);
+      display: block;
+    }
 
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1rem;
-            padding: 0;
-            list-style: none;
-        }
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+      padding: 0;
+      list-style: none;
+    }
 
-        .items-grid li article {
-            margin: 0;
-            padding: 1rem;
-            height: 100%;
-        }
+    .items-grid li article {
+      margin: 0;
+      padding: 1rem;
+      height: 100%;
+    }
 
-        .bundle-request {
-            border-left: 4px solid var(--pico-primary);
-            margin-bottom: 2rem;
-        }
+    .cart-request {
+      border-left: 4px solid var(--pico-primary);
+      margin-bottom: 2rem;
+    }
 
-        .bundle-items-list {
-            margin: 0.5rem 0 1rem 1.2rem;
-            font-size: 0.9rem;
-        }
+    .cart-items-list {
+      margin: 0.5rem 0 1rem 1.2rem;
+      font-size: 0.9rem;
+    }
 
-        .request-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+    .request-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
 
-        @media (max-width: 992px) {
-            .profile-layout { grid-template-columns: 1fr; gap: 2rem; }
-        }
+    @media (max-width: 992px) {
+      .profile-layout { grid-template-columns: 1fr; gap: 2rem; }
+    }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div th:replace="~{fragments/header :: header}"></div>
 
     <main class="container" id="profile-main-content">
-        <div class="profile-layout">
-            
-            <aside class="side-panel">
-                <hgroup>
-                    <h1 th:text="${user.name}"></h1>
-                    <p th:text="${user.email}"></p>
-                </hgroup>
+      <div class="profile-layout">
 
-                <div class="user-data">
-                    <div class="meta-group">
-                        <span class="meta-label">Member since</span>
-                        <span class="meta-value" th:text="${#temporals.format(user.createdAt, 'dd MMMM yyyy')}"></span>
-                    </div>
-                    <div class="meta-group">
-                        <span class="meta-label">Notifications</span>
-                        <span class="meta-value" th:text="${user.notification ? 'Enabled' : 'Disabled'}"></span>
-                    </div>
-                </div>
+        <aside class="side-panel">
+          <hgroup>
+            <h1 th:text="${user.name}"></h1>
+            <p th:text="${user.email}"></p>
+          </hgroup>
 
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="outline secondary">Logout</button>
-                </form>
-            </aside>
-
-            <div class="main-content">
-                
-                <section id="received-requests">
-                    <h2 class="pico-muted-color">Received Exchange Requests</h2>
-                    
-                    <th:block th:each="ownedItem : ${user.items}">
-                        <div th:each="bundle : ${ownedItem.bundles}" 
-                             th:if="${bundle.status == T(com.regifted.app.bundle.BundleStatus).SENT}">
-                            
-                            <article class="bundle-request">
-                                <header>
-                                    <small class="pico-muted-color">Request from</small><br>
-                                    <strong th:text="${bundle.user.email}"></strong>
-                                </header>
-                                
-                                <p style="margin-bottom: 0;">Wants to obtain this bundle:</p>
-                                <ul class="bundle-items-list">
-                                    <li th:each="bi : ${bundle.items}" th:text="${bi.title}"></li>
-                                </ul>
-                                
-                                <div class="request-actions">
-                                    <button class="outline" 
-                                            style="border-color: #2e7d32; color: #2e7d32;"
-                                            th:hx-patch="'/user/me/cart/' + ${bundle.uuid} + '/status/ACCEPTED'"
-                                            hx-target="#profile-main-content"
-                                            hx-select="#profile-main-content"
-                                            hx-swap="outerHTML">
-                                        Accept
-                                    </button>
-                                    
-                                    <button class="outline contrast" 
-                                            style="border-color: #d32f2f; color: #d32f2f;"
-                                            th:hx-patch="'/user/me/cart/' + ${bundle.uuid} + '/status/REFUSED'"
-                                            hx-target="#profile-main-content"
-                                            hx-select="#profile-main-content"
-                                            hx-swap="outerHTML">
-                                        Refuse
-                                    </button>
-                                </div>
-                            </article>
-                        </div>
-                    </th:block>
-                </section>
-
-                <section>
-                    <h2 class="pico-muted-color">My Items for Donation</h2>
-                    <ul class="items-grid">
-                        <li th:each="i : ${user.items}">
-                            <article>
-                                <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
-                            </article>
-                        </li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="pico-muted-color">Favorite Items</h2>
-                    <ul class="items-grid">
-                        <li th:each="i : ${user.likedItems}">
-                            <article>
-                                <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
-                            </article>
-                        </li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="pico-muted-color">Saved Searches</h2>
-                    <ul class="items-grid">
-                        <li th:each="s : ${user.savedSearches}">
-                            <article>
-                                <a th:href="@{/searches/{uuid}(uuid=${s.uuid})}" th:text="${s.query}"></a>
-                            </article>
-                        </li>
-                    </ul>
-                </section>
+          <div class="user-data">
+            <div class="meta-group">
+              <span class="meta-label">Member since</span>
+              <span class="meta-value" th:text="${#temporals.format(user.createdAt, 'dd MMMM yyyy')}"></span>
             </div>
+            <div class="meta-group">
+              <span class="meta-label">Notifications</span>
+              <span class="meta-value" th:text="${user.notification ? 'Enabled' : 'Disabled'}"></span>
+            </div>
+          </div>
+
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="outline secondary">Logout</button>
+          </form>
+        </aside>
+
+        <div class="main-content">
+
+          <section id="received-requests">
+            <h2 class="pico-muted-color">Received Exchange Requests</h2>
+
+            <th:block th:each="ownedItem : ${user.items}">
+              <div th:each="cart : ${ownedItem.carts}" 
+                th:if="${cart.status == T(com.regifted.app.cart.BundleStatus).SENT}">
+
+                <article class="cart-request">
+                  <header>
+                    <small class="pico-muted-color">Request from</small><br>
+                    <strong th:text="${cart.user.email}"></strong>
+                  </header>
+
+                  <p style="margin-bottom: 0;">Wants to obtain this cart:</p>
+                  <ul class="cart-items-list">
+                    <li th:each="bi : ${cart.items}" th:text="${bi.title}"></li>
+                  </ul>
+
+                  <div class="request-actions">
+                    <button class="outline" 
+                      style="border-color: #2e7d32; color: #2e7d32;"
+                      th:hx-patch="'/users/me/cart/' + ${cart.uuid} + '/status/ACCEPTED'"
+                      hx-target="#profile-main-content"
+                      hx-select="#profile-main-content"
+                      hx-swap="outerHTML">
+                      Accept
+                    </button>
+
+                    <button class="outline contrast" 
+                      style="border-color: #d32f2f; color: #d32f2f;"
+                      th:hx-patch="'/users/me/cart/' + ${cart.uuid} + '/status/REFUSED'"
+                      hx-target="#profile-main-content"
+                      hx-select="#profile-main-content"
+                      hx-swap="outerHTML">
+                      Refuse
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </th:block>
+          </section>
+
+          <section>
+            <h2 class="pico-muted-color">My Items for Donation</h2>
+            <ul class="items-grid">
+              <li th:each="i : ${user.items}">
+                <article>
+                  <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
+                </article>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="pico-muted-color">Favorite Items</h2>
+            <ul class="items-grid">
+              <li th:each="i : ${user.likedItems}">
+                <article>
+                  <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
+                </article>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="pico-muted-color">Saved Searches</h2>
+            <ul class="items-grid">
+              <li th:each="s : ${user.savedSearches}">
+                <article>
+                  <a th:href="@{/searches/{uuid}(uuid=${s.uuid})}" th:text="${s.query}"></a>
+                </article>
+              </li>
+            </ul>
+          </section>
         </div>
+      </div>
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
-</body>
+  </body>
 </html>

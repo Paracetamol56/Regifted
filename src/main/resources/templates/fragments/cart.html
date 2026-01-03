@@ -1,59 +1,59 @@
 <th:block th:fragment="cart-content">
 
-    <li th:if="${bundles == null or #lists.isEmpty(bundles)}" style="list-style: none;">
-        <p style="margin: 20px 0; text-align: center; color: var(--muted-color);">Your cart is empty 📭</p>
-    </li>
+  <li th:if="${carts == null or #lists.isEmpty(carts)}" style="list-style: none;">
+    <p style="margin: 20px 0; text-align: center; color: var(--muted-color);">Your cart is empty 📭</p>
+  </li>
 
-    <th:block th:if="${bundles != null and !#lists.isEmpty(bundles)}">
-        <div th:each="bundleItem : ${bundles}" 
-             style="margin-bottom: 20px; border: 1px solid var(--muted-border-color); padding: 15px; border-radius: 8px; background-color: var(--card-background-color);">
-            
-            <div style="border-bottom: 1px solid var(--muted-border-color); margin-bottom: 12px; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                
-                <div style="display: flex; flex-direction: column;">
-                    <small style="text-transform: uppercase; font-size: 0.65rem; color: var(--muted-color);">Donation bundle from</small>
-                    <strong th:text="${bundleItem.donor.email}" style="font-size: 0.85rem;"></strong>
-                </div>
+  <th:block th:if="${carts != null and !#lists.isEmpty(carts)}">
+    <div th:each="cartItem : ${carts}" 
+      style="margin-bottom: 20px; border: 1px solid var(--muted-border-color); padding: 15px; border-radius: 8px; background-color: var(--card-background-color);">
 
-                <div>
-                    <button th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).DRAFT}"
-                            class="outline primary"
-                            th:hx-patch="'/user/me/cart/validate/' + ${bundleItem.uuid}"
-                            hx-target="#cart-dropdown-container"
-                            style="font-size: 0.7rem; padding: 4px 10px; margin: 0;">
-                        Validate this bundle
-                    </button>
+      <div style="border-bottom: 1px solid var(--muted-border-color); margin-bottom: 12px; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
 
-                    <span th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).SENT}"
-                          style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #e3f2fd; color: #1976d2; font-weight: bold;">
-                        Pending
-                    </span>
-
-                    <span th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).ACCEPTED}"
-                          style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; font-weight: bold;">
-                        Accepted ✓
-                    </span>
-
-                    <span th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).REFUSED}"
-                          style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #ffe3e3; color: #d32f2f; font-weight: bold;">
-                        Refused ✕
-                    </span>
-                </div>
-            </div>
-
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                <li th:each="item : ${bundleItem.items}"
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span th:text="${item.title}" style="font-size: 0.9rem;"></span>
-
-                    <button th:if="${bundleItem.status == T(com.regifted.app.bundle.BundleStatus).DRAFT}"
-                            th:hx-delete="'/user/me/cart/items/' + ${item.uuid}" 
-                            hx-target="#cart-dropdown-container"
-                            style="padding: 0 8px; background: none; border: none; color: var(--del-color); cursor: pointer; font-weight: bold;">
-                        ✕
-                    </button>
-                </li>
-            </ul>
+        <div style="display: flex; flex-direction: column;">
+          <small style="text-transform: uppercase; font-size: 0.65rem; color: var(--muted-color);">Donation cart from</small>
+          <strong th:text="${cartItem.owner.email}" style="font-size: 0.85rem;"></strong>
         </div>
-    </th:block>
+
+        <div>
+          <button th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).DRAFT}"
+            class="outline primary"
+            th:hx-patch="'/users/me/cart/validate/' + ${cartItem.uuid}"
+            hx-target="#cart-dropdown-container"
+            style="font-size: 0.7rem; padding: 4px 10px; margin: 0;">
+            Validate this cart
+          </button>
+
+          <span th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).SENT}"
+            style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #e3f2fd; color: #1976d2; font-weight: bold;">
+            Pending
+          </span>
+
+          <span th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).ACCEPTED}"
+            style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; font-weight: bold;">
+            Accepted ✓
+          </span>
+
+          <span th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).REFUSED}"
+            style="font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #ffe3e3; color: #d32f2f; font-weight: bold;">
+            Refused ✕
+          </span>
+        </div>
+      </div>
+
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <li th:each="item : ${cartItem.items}"
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span th:text="${item.title}" style="font-size: 0.9rem;"></span>
+
+          <button th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).DRAFT}"
+            th:hx-delete="'/users/me/cart/items/' + ${item.uuid}" 
+            hx-target="#cart-dropdown-container"
+            style="padding: 0 8px; background: none; border: none; color: var(--del-color); cursor: pointer; font-weight: bold;">
+            ✕
+          </button>
+        </li>
+      </ul>
+    </div>
+  </th:block>
 </th:block>

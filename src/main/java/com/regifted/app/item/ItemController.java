@@ -2,8 +2,8 @@ package com.regifted.app.item;
 
 import com.regifted.app.item.dto.ItemPostRequest;
 import com.regifted.app.item.dto.ItemPutRequest;
-import com.regifted.app.bundle.Bundle;
-import com.regifted.app.bundle.BundleService;
+import com.regifted.app.cart.Cart;
+import com.regifted.app.cart.CartService;
 import com.regifted.app.item.dto.ItemGetResponse;
 import com.regifted.app.item.dto.ItemSearchRequest;
 import com.regifted.app.keyword.Keyword;
@@ -11,6 +11,7 @@ import com.regifted.app.keyword.KeywordService;
 import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.User;
 import com.regifted.app.user.UserService;
+
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -34,13 +35,14 @@ public class ItemController {
   private final ItemService itemService;
   private final KeywordService keywordService;
   private final UserService userService;
-  private final BundleService bundleService;
+  private final CartService cartService;
 
-  public ItemController(ItemService itemService, KeywordService keywordService, UserService userService, BundleService bundleService ) {
+  public ItemController(ItemService itemService, KeywordService keywordService, UserService userService,
+      CartService cartService) {
     this.itemService = itemService;
     this.keywordService = keywordService;
     this.userService = userService;
-    this.bundleService = bundleService;
+    this.cartService = cartService;
   }
 
   // ======================
@@ -49,7 +51,7 @@ public class ItemController {
 
   // HTML Form
   @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String createItemHTML(@Valid ItemPostRequest req,  @AuthenticationPrincipal CustomUserPrincipal principal) {
+  public String createItemHTML(@Valid ItemPostRequest req, @AuthenticationPrincipal CustomUserPrincipal principal) {
     User currentUser = this.userService.getByEmail(principal.getUsername());
     Item created = itemService.createItem(req, currentUser);
     return "redirect:/items/" + created.getUuid();
@@ -58,7 +60,8 @@ public class ItemController {
   // JSON
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public Item createItemJson(@RequestBody @Valid ItemPostRequest req,  @AuthenticationPrincipal CustomUserPrincipal principal) {
+  public Item createItemJson(@RequestBody @Valid ItemPostRequest req,
+      @AuthenticationPrincipal CustomUserPrincipal principal) {
     User currentUser = this.userService.getByEmail(principal.getUsername());
     return itemService.createItem(req, currentUser);
   }
@@ -70,35 +73,35 @@ public class ItemController {
   @GetMapping(value = "", produces = MediaType.TEXT_HTML_VALUE)
   @Transactional(readOnly = true)
   public ModelAndView getPageHtml(
-          @Valid @ModelAttribute ItemSearchRequest req, 
-          @AuthenticationPrincipal UserDetails userDetails,
-          Model model) {
-      
-      Page<Item> items = itemService.getItemSearchPage(
-              req.getPage(),
-              req.getLimit(),
-              req.getQ(),
-              req.getKeyword(),
-              null,
-              null);
-      
-      List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
-      
-      if (userDetails != null) {
-          Set<Bundle> cart = bundleService.getCurrentCart(userDetails.getUsername());
-          model.addAttribute("bundle", cart);
-      }
+      @Valid @ModelAttribute ItemSearchRequest req,
+      @AuthenticationPrincipal UserDetails userDetails,
+      Model model) {
 
-      model.addAttribute("items", items.getContent());
-      model.addAttribute("keywords", keywords);
-      model.addAttribute("page", req.getPage());
-      model.addAttribute("limit", req.getLimit());
-      model.addAttribute("query", req.getQ());
-      model.addAttribute("keyword", req.getKeyword());
-      model.addAttribute("totalItems", items.getTotalElements());
-      model.addAttribute("totalPages", items.getTotalPages());
-      
-      return new ModelAndView("items/index");
+    Page<Item> items = itemService.getItemSearchPage(
+        req.getPage(),
+        req.getLimit(),
+        req.getQ(),
+        req.getKeyword(),
+        null,
+        null);
+
+    List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
+
+    if (userDetails != null) {
+      Set<Cart> cart = cartService.getAllCartsForUser(userDetails.getUsername());
+      model.addAttribute("bundle", cart);
+    }
+
+    model.addAttribute("items", items.getContent());
+    model.addAttribute("keywords", keywords);
+    model.addAttribute("page", req.getPage());
+    model.addAttribute("limit", req.getLimit());
+    model.addAttribute("query", req.getQ());
+    model.addAttribute("keyword", req.getKeyword());
+    model.addAttribute("totalItems", items.getTotalElements());
+    model.addAttribute("totalPages", items.getTotalPages());
+
+    return new ModelAndView("items/index");
   }
 
   @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -108,18 +111,15 @@ public class ItemController {
       @Valid @ModelAttribute ItemSearchRequest req,
       @AuthenticationPrincipal UserDetails userDetails) {
 
-      Page<Item> items = itemService.getItemSearchPage(
-          req.getPage(),
-          req.getLimit(),
-          req.getQ(),
-          req.getKeyword(),
-          null,
-          null);
+    Page<Item> items = itemService.getItemSearchPage(
+        req.getPage(),
+        req.getLimit(),
+        req.getQ(),
+        req.getKeyword(),
+        null,
+        null);
 
-      Set<Bundle> cart = (userDetails != null) ? bundleService.getCurrentCart(userDetails.getUsername()) : null;
-
-
-      return items.map(item -> ItemGetResponse.from(item, cart));
+    return items.map(item -> ItemGetResponse.from(item));
   }
 
   // ======================

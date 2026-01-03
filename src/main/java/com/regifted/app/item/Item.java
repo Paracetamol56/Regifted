@@ -12,10 +12,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.regifted.app.cart.Cart;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.user.User;
-import com.regifted.app.bundle.Bundle;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -79,13 +78,9 @@ public class Item {
   private Set<User> likedByUsers;
 
   @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE }) // Ajoutez PERSIST ici
-  @JoinTable(
-      name = "bundle_items",
-      joinColumns = @JoinColumn(name = "item_uuid"),
-      inverseJoinColumns = @JoinColumn(name = "bundle_uuid")
-  )
+  @JoinTable(name = "bundle_items", joinColumns = @JoinColumn(name = "item_uuid"), inverseJoinColumns = @JoinColumn(name = "bundle_uuid"))
   @JsonBackReference
-  private Set<Bundle> bundles = new HashSet<>();
+  private Set<Cart> carts = new HashSet<>();
 
   @Formula("(SELECT COUNT(*) FROM user_liked_items uli WHERE uli.liked_items_uuid = uuid)")
   private int likes;
