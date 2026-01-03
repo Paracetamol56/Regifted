@@ -7,11 +7,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.regifted.app.bundle.dto.BundleGetResponse;
 
+import java.net.URI;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequestMapping("/bundles")
@@ -37,7 +41,24 @@ public class BundleController {
     return "fragments/cart :: cart-content";
   }
 
-  @PostMapping("/cart/items/{itemUuid}")
+  @PostMapping(value = "/cart/items/{itemUuid}", produces = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE })
+  public ResponseEntity<?> addItemToCartApi(
+      @PathVariable String itemUuid,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    try {
+      Bundle updatedBundle = bundleService.addItemToCart(itemUuid, userDetails.getUsername());
+      URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+          .path("/bundles/cart")
+          .buildAndExpand(updatedBundle.getUuid())
+          .toUri();
+      return ResponseEntity.created(location).build();
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  @PostMapping(value = "/cart/items/{itemUuid}", produces = MediaType.TEXT_HTML_VALUE)
   public String addItemToCart(
       @PathVariable String itemUuid,
       @AuthenticationPrincipal UserDetails userDetails,
@@ -49,6 +70,18 @@ public class BundleController {
     } catch (IllegalStateException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+  }
+
+  @DeleteMapping(value = "/cart/items/{itemUuid}", produces = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE })
+  public ResponseEntity<?> removeItemFromCartApi(
+      @PathVariable String itemUuid,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    Bundle updatedBundle = bundleService.removeItemFromCart(itemUuid, userDetails.getUsername());
+    if (updatedBundle == null) {
+      return ResponseEntity.noContent().build();
+    }
+    return ResponseEntity.ok(BundleGetResponse.from(updatedBundle));
   }
 
   @DeleteMapping("/cart/items/{itemUuid}")

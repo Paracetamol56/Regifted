@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import com.regifted.app.bundle.Bundle;
 import com.regifted.app.item.dto.ItemGetResponse;
 import com.regifted.app.user.dto.UserSummaryGetResponse;
@@ -17,6 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BundleGetResponse {
   private String uuid;
+  private String href;
   private UserSummaryGetResponse receiver;
   private UserSummaryGetResponse donor;
   private Set<ItemGetResponse> items;
@@ -26,6 +29,10 @@ public class BundleGetResponse {
   public static BundleGetResponse from(Bundle bundle) {
     BundleGetResponse response = new BundleGetResponse();
     response.setUuid(bundle.getUuid());
+    response.setHref(ServletUriComponentsBuilder.fromCurrentContextPath()
+        .path("/bundles/{uuid}")
+        .buildAndExpand(bundle.getUuid())
+        .toUriString());
     response.setReceiver(UserSummaryGetResponse.from(bundle.getReceiver()));
     response.setDonor(UserSummaryGetResponse.from(bundle.getDonor()));
     response.setCreatedAt(bundle.getCreatedAt());
