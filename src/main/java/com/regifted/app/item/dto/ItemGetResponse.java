@@ -31,14 +31,14 @@ public class ItemGetResponse {
     private EState state;
     private Set<KeywordGetResponse> keywords;
     private int likes;
-    private String bundleUuid; 
+    private Set<String> bundlesUuid; 
     private boolean inCurrentCart;
 
     public static ItemGetResponse from(Item item) {
         return from(item, null);
     }
 
-    public static ItemGetResponse from(Item item, Bundle currentCart) {
+    public static ItemGetResponse from(Item item, Set<Bundle> currentCart) {
         ItemGetResponse response = new ItemGetResponse();
         response.setUuid(item.getUuid());
         response.setHref(ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -67,16 +67,19 @@ public class ItemGetResponse {
 
         response.setLikes(item.getLikes());
 
-        if (item.getBundle() != null) {
-            String bUuid = item.getBundle().getUuid();
-            response.setBundleUuid(bUuid);
-            
-            // Si un panier est fourni, on vérifie si cet item en fait partie
-            if (currentCart != null && bUuid.equals(currentCart.getUuid())) {
-                response.setInCurrentCart(true);
-            }
-        }
+        if (item.getBundles().isEmpty()) {
+            Set<Bundle> bUuids = item.getBundles();
+            for (Bundle bundle : bUuids) {
+                response.getBundlesUuid().add(bundle.getUuid());
 
+                // Si un panier est fourni, on vérifie si cet item en fait partie
+                for (Bundle bundleCart : currentCart) {
+                     if (currentCart != null && bundle.getUuid().equals(bundleCart.getUuid())) {
+                        response.setInCurrentCart(true);
+                    }
+                }
+            }    
+        }
         return response;
     }
 }

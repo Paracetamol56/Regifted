@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/items")
@@ -84,7 +85,7 @@ public class ItemController {
       List<Keyword> keywords = keywordService.getMostUsedKeywords(10);
       
       if (userDetails != null) {
-          Bundle cart = bundleService.getCurrentCart(userDetails.getUsername());
+          Set<Bundle> cart = bundleService.getCurrentCart(userDetails.getUsername());
           model.addAttribute("bundle", cart);
       }
 
@@ -115,7 +116,7 @@ public class ItemController {
           null,
           null);
 
-      Bundle cart = (userDetails != null) ? bundleService.getCurrentCart(userDetails.getUsername()) : null;
+      Set<Bundle> cart = (userDetails != null) ? bundleService.getCurrentCart(userDetails.getUsername()) : null;
 
 
       return items.map(item -> ItemGetResponse.from(item, cart));

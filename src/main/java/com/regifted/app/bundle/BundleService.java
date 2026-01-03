@@ -3,6 +3,7 @@ package com.regifted.app.bundle;
 import com.regifted.app.user.User;
 import com.regifted.app.user.UserService;
 import lombok.RequiredArgsConstructor;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,91 +18,84 @@ public class BundleService {
   private final ItemRepository itemRepository;
   private final UserService userService;
 
-    public Bundle getCurrentCart(String receiverEmail) {
-        User receiver = userService.getByEmail(receiverEmail);
-        Bundle res = bundleRepository.findByReceiverAndCheckoutAtIsNull(receiver).orElse(null);
-        if( res == null ){
-            return res;
-        }
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        for (Item i : res.getItems()) {
-            System.out.println(i.getUser().getEmail() + " : " + i.getUuid());
-        }
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        return res;
+  public Set<Bundle> getCurrentCart(String email) {
+      User user = userService.getByEmail(email);
+      Set<Bundle> bundles = user.getBundles();
+      return bundles;
   }
 
   @Transactional
-  public Bundle addItemToCart(String itemUuid, String receiverEmail) {
-    User receiver = userService.getByEmail(receiverEmail);
-    Item item = itemRepository.findById(itemUuid)
-        .orElseThrow(() -> new RuntimeException("Item not found"));
+    public Bundle addItemToUserBundles(String itemUuid, String email) {
+        User receiver = userService.getByEmail(email);
+        Item item = itemRepository.findById(itemUuid)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
 
-    if (item.getUser().equals(receiver)) {
-      throw new IllegalStateException("You cannot add your own item to your cart");
-    }
+        if (item.getUser().equals(receiver)) {
+            throw new IllegalStateException("You cannot add your own item to your cart");
+        }
 
-    Bundle cart = bundleRepository.findByReceiverAndCheckoutAtIsNull(receiver).orElse(null);
+        Bundle currentBundle = receiver.getBundles().stream()
+                .filter(b -> b.getDonor().getUuid().equals(item.getUser().getUuid()))
+                .filter(b -> b.getStatus() == BundleStatus.DRAFT)
+                .findFirst()
+                .orElseGet(() -> {
+                    Bundle newBundle = new Bundle();
+                    newBundle.setUser(receiver);
+                    newBundle.setDonor(item.getUser());
+                    newBundle.setStatus(BundleStatus.DRAFT);
+                    Bundle saved = bundleRepository.save(newBundle);
+                    receiver.getBundles().add(saved); 
+                    return saved;
+                });
 
+        if (!currentBundle.getItems().contains(item)) {
+            currentBundle.getItems().add(item);
+            item.getBundles().add(currentBundle);
+        }
 
-    System.out.println(item.getUuid());
-    
-    if (item.getUser().equals(receiver)) {
-        throw new IllegalStateException("You cannot add your own item to your cart");
-    }
-
-
-
-    if (cart == null) {
-        cart = new Bundle();
-        cart.setReceiver(receiver);
-        cart = bundleRepository.save(cart);
-    } else{
-        System.out.println(cart.getUuid());
-    }
-
-    item.setBundle(cart);
-    cart.getItems().add(item);
-    
-    itemRepository.save(item);
-    return bundleRepository.save(cart);
-}
-
-
-  @Transactional
-  public Bundle removeItemFromCart(String itemUuid, String receiverEmail) {
-    Bundle cart = getCurrentCart(receiverEmail);
-    if (cart == null)
-      return null;
-
-    Item item = itemRepository.findById(itemUuid)
-        .orElseThrow(() -> new RuntimeException("Item not found"));
-
-    item.setBundle(null);
-    cart.getItems().remove(item);
-    itemRepository.save(item);
-
-    if (cart.getItems().isEmpty()) {
-      bundleRepository.delete(cart);
-      return null;
-    }
-
-    return bundleRepository.save(cart);
-  }
-
-  @Transactional
-  public void clearCart(String receiverEmail) {
-    Bundle cart = getCurrentCart(receiverEmail);
-    if (cart != null) {
-      for (Item item : cart.getItems()) {
-        item.setBundle(null);
         itemRepository.save(item);
-      }
-      bundleRepository.delete(cart);
+        return bundleRepository.save(currentBundle);
     }
-  }
+
+    @Transactional
+    public Bundle removeItemFromUserBundle(String itemUuid, String email) {
+        Item item = itemRepository.findById(itemUuid)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        Bundle cart = item.getBundles().stream()
+                .filter(b -> b.getUser().getEmail().equals(email))
+                .filter(b -> b.getStatus() == BundleStatus.DRAFT)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Item is not in your cart"));
+
+        cart.getItems().remove(item);
+        item.getBundles().remove(cart);
+        itemRepository.save(item);
+
+        if (cart.getItems().isEmpty()) {
+            cart.getUser().getBundles().remove(cart);
+            bundleRepository.delete(cart);
+            return null;
+        }
+
+        return bundleRepository.save(cart);
+    }
+
+    @Transactional
+    public void validateBundle(String bundleUuid, String email) {
+        Bundle bundle = bundleRepository.findById(bundleUuid)
+                .orElseThrow(() -> new RuntimeException("Lot non trouvé"));
+
+        if (!bundle.getUser().getEmail().equals(email)) {
+            throw new IllegalStateException("Ce lot ne vous appartient pas");
+        }
+
+        if (bundle.getItems().isEmpty()) {
+            throw new IllegalStateException("Impossible de valider un lot vide");
+        }
+
+        bundle.setStatus(BundleStatus.SENT);
+        bundleRepository.save(bundle);
+    }
+  
 }

@@ -1,6 +1,7 @@
 package com.regifted.app.item;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -77,10 +78,14 @@ public class Item {
   @JsonIgnore
   private Set<User> likedByUsers;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "bundle_uuid")
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE }) // Ajoutez PERSIST ici
+  @JoinTable(
+      name = "bundle_items",
+      joinColumns = @JoinColumn(name = "item_uuid"),
+      inverseJoinColumns = @JoinColumn(name = "bundle_uuid")
+  )
   @JsonBackReference
-  private Bundle bundle;
+  private Set<Bundle> bundles = new HashSet<>();
 
   @Formula("(SELECT COUNT(*) FROM user_liked_items uli WHERE uli.liked_items_uuid = uuid)")
   private int likes;

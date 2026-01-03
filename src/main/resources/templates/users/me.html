@@ -1,61 +1,154 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-  <head th:replace="fragments/head :: head"></head>
-  <body>
-    <div th:replace="fragments/header :: header"></div>
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <style>
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 4rem;
+            margin-top: 2rem;
+        }
+
+        .side-panel {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .meta-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--pico-muted-color);
+            display: block;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1rem;
+            padding: 0;
+            list-style: none;
+        }
+
+        .items-grid li article {
+            margin: 0;
+            padding: 1rem;
+            height: 100%;
+        }
+
+        .bundle-request {
+            border-left: 4px solid var(--pico-primary);
+            margin-bottom: 2rem;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--pico-secondary-background);
+        }
+
+        @media (max-width: 992px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+
     <main class="container">
-      <h1 th:text="${user.name}"></h1>
-      <section>
-        <h2>Personal information</h2>
-        <p>
-          <strong>Email:</strong>
-          <span th:text="${user.email}"></span>
-        </p>
+        <div class="profile-layout">
+            
+            <aside class="side-panel">
+                <hgroup>
+                    <h1 th:text="${user.name}"></h1>
+                    <p th:text="${user.email}"></p>
+                </hgroup>
 
-        <p>
-          <strong>Member since:</strong>
-          <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}"></span>
-        </p>
+                <div class="user-data">
+                    <div class="meta-group">
+                        <span class="meta-label">Membre depuis</span>
+                        <span class="meta-value" th:text="${#temporals.format(user.createdAt, 'dd MMMM yyyy')}"></span>
+                    </div>
+                    <div class="meta-group">
+                        <span class="meta-label">Notifications</span>
+                        <span class="meta-value" th:text="${user.notification ? 'Activées' : 'Désactivées'}"></span>
+                    </div>
+                </div>
 
-        <p>
-          <strong>Notifications enabled:</strong>
-          <span th:text="${user.notification ? 'Yes' : 'No'}"></span>
-        </p>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="outline secondary">Logout</button>
+                </form>
+            </aside>
 
-        <!-- logout button (forget the http basic auth and redirect to home) -->
-        <form th:action="@{/logout}" method="post">
-          <button type="submit">Logout</button>
-        </form>
-      </section>
+            <div class="main-content">
+                
+                <section>
+                    <h2 class="pico-muted-color">Demandes d'échange reçues</h2>
+                    <div th:each="item : ${user.items}">
+                        <div th:each="bundle : ${item.bundles}" th:if="${bundle.status != T(com.regifted.app.bundle.BundleStatus).DRAFT}">
+                            <article class="bundle-request">
+                                <header>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong th:text="${bundle.user.name}"></strong>
+                                        <span class="status-badge" th:text="${bundle.status}"></span>
+                                    </div>
+                                </header>
+                                <p>Souhaite obtenir : <strong th:text="${item.title}"></strong></p>
+                                <footer>
+                                    <small th:text="'Contact : ' + ${bundle.user.email}"></small>
+                                </footer>
+                            </article>
+                        </div>
+                    </div>
+                    <p th:if="${#lists.isEmpty(user.items)}" class="pico-muted-color">Aucune demande reçue.</p>
+                </section>
 
-      <section>
-        <h2>Items for donation</h2>
-        <p th:if="${#lists.isEmpty(user.items)}">This user has no items for donation.</p>
-        <ul>
-          <li th:each="i : ${user.getItems()}">
-            <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
-          </li>
-        </ul>
-      </section>
+                <section>
+                    <h2 class="pico-muted-color">Mes objets en donation</h2>
+                    <ul class="items-grid">
+                        <li th:each="i : ${user.items}">
+                            <article>
+                                <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
+                            </article>
+                        </li>
+                    </ul>
+                </section>
 
-      <section>
-        <h2>Liked items</h2>
-        <ul>
-          <li th:each="i : ${user.getLikedItems()}">
-            <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
-          </li>
-        </ul>
-      </section>
+                <section>
+                    <h2 class="pico-muted-color">Objets favoris</h2>
+                    <ul class="items-grid">
+                        <li th:each="i : ${user.likedItems}">
+                            <article>
+                                <a th:href="@{/items/{uuid}(uuid=${i.uuid})}" th:text="${i.title}"></a>
+                            </article>
+                        </li>
+                    </ul>
+                </section>
 
-      <section>
-        <h2>Saved search</h2>
-        <ul>
-          <li th:each="s : ${user.getSavedSearches()}">
-            <a th:href="@{/searches/{uuid}(uuid=${s.getUuid()})}" th:text="${s.getQuery()}"></a>
-          </li>
-        </ul>
-      </section>
+                <section>
+                    <h2 class="pico-muted-color">Recherches enregistrées</h2>
+                    <ul class="items-grid">
+                        <li th:each="s : ${user.savedSearches}">
+                            <article>
+                                <a th:href="@{/searches/{uuid}(uuid=${s.uuid})}" th:text="${s.query}"></a>
+                            </article>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+        </div>
     </main>
-    <div th:replace="fragments/footer :: footer"></div>
-  </body>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
 </html>

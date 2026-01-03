@@ -23,10 +23,14 @@ public class Bundle {
   private String uuid = UUID.randomUUID().toString();
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "receiver_uuid", nullable = false)
-  private User receiver;
+  @JoinColumn(name = "user_uuid", nullable = false)
+  private User user;
 
-  @OneToMany(mappedBy = "bundle", cascade = CascadeType.ALL)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "donor_uuid", nullable = false)
+  private User donor;
+
+  @ManyToMany(mappedBy = "bundles", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   private Set<Item> items = new HashSet<>();
 
   @Enumerated(EnumType.STRING)
@@ -34,7 +38,4 @@ public class Bundle {
 
   @CreationTimestamp
   private Instant createdAt;
-
-  @Column(nullable = true)
-  private Instant checkoutAt;
 }
