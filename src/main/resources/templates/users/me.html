@@ -16,9 +16,7 @@
             height: fit-content;
         }
 
-        .meta-group {
-            margin-bottom: 1.5rem;
-        }
+        .meta-group { margin-bottom: 1.5rem; }
 
         .meta-label {
             font-size: 0.75rem;
@@ -46,25 +44,27 @@
             margin-bottom: 2rem;
         }
 
-        .status-badge {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: var(--pico-secondary-background);
+        .bundle-items-list {
+            margin: 0.5rem 0 1rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .request-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         @media (max-width: 992px) {
-            .profile-layout {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
+            .profile-layout { grid-template-columns: 1fr; gap: 2rem; }
         }
     </style>
 </head>
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
 
-    <main class="container">
+    <main class="container" id="profile-main-content">
         <div class="profile-layout">
             
             <aside class="side-panel">
@@ -91,25 +91,46 @@
 
             <div class="main-content">
                 
-                <section>
+                <section id="received-requests">
                     <h2 class="pico-muted-color">Demandes d'échange reçues</h2>
-                    <div th:each="item : ${user.items}">
-                        <div th:each="bundle : ${item.bundles}" th:if="${bundle.status != T(com.regifted.app.bundle.BundleStatus).DRAFT}">
+                    
+                    <th:block th:each="ownedItem : ${user.items}">
+                        <div th:each="bundle : ${ownedItem.bundles}" 
+                             th:if="${bundle.status == T(com.regifted.app.bundle.BundleStatus).SENT}">
+                            
                             <article class="bundle-request">
                                 <header>
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <strong th:text="${bundle.user.name}"></strong>
-                                        <span class="status-badge" th:text="${bundle.status}"></span>
-                                    </div>
+                                    <small class="pico-muted-color">Demande de</small><br>
+                                    <strong th:text="${bundle.user.email}"></strong>
                                 </header>
-                                <p>Souhaite obtenir : <strong th:text="${item.title}"></strong></p>
-                                <footer>
-                                    <small th:text="'Contact : ' + ${bundle.user.email}"></small>
-                                </footer>
+                                
+                                <p style="margin-bottom: 0;">Souhaite obtenir le lot :</p>
+                                <ul class="bundle-items-list">
+                                    <li th:each="bi : ${bundle.items}" th:text="${bi.title}"></li>
+                                </ul>
+                                
+                                <div class="request-actions">
+                                    <button class="outline" 
+                                            style="border-color: #2e7d32; color: #2e7d32;"
+                                            th:hx-patch="'/user/me/cart/' + ${bundle.uuid} + '/status/ACCEPTED'"
+                                            hx-target="#profile-main-content"
+                                            hx-select="#profile-main-content"
+                                            hx-swap="outerHTML">
+                                        Accepter
+                                    </button>
+                                    
+                                    <button class="outline contrast" 
+                                            style="border-color: #d32f2f; color: #d32f2f;"
+                                            th:hx-patch="'/user/me/cart/' + ${bundle.uuid} + '/status/REFUSED'"
+                                            hx-target="#profile-main-content"
+                                            hx-select="#profile-main-content"
+                                            hx-swap="outerHTML">
+                                        Refuser
+                                    </button>
+                                </div>
                             </article>
                         </div>
-                    </div>
-                    <p th:if="${#lists.isEmpty(user.items)}" class="pico-muted-color">Aucune demande reçue.</p>
+                    </th:block>
                 </section>
 
                 <section>
@@ -145,7 +166,6 @@
                     </ul>
                 </section>
             </div>
-
         </div>
     </main>
 

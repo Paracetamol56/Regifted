@@ -4,6 +4,8 @@ import com.regifted.app.user.User;
 import com.regifted.app.user.UserService;
 import lombok.RequiredArgsConstructor;
 import java.util.Set;
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,5 +99,19 @@ public class BundleService {
         bundle.setStatus(BundleStatus.SENT);
         bundleRepository.save(bundle);
     }
-  
+
+    @Transactional
+    public void changeStatus(String bundleUuid, BundleStatus newStatus, String email) {
+        Bundle bundle = bundleRepository.findById(bundleUuid)
+                .orElseThrow(() -> new RuntimeException("Lot introuvable"));
+
+        if (newStatus == BundleStatus.SENT) {
+            if (!bundle.getUser().getEmail().equals(email)) throw new AccessDeniedException("Action interdite");
+        } else if (newStatus == BundleStatus.ACCEPTED || newStatus == BundleStatus.REFUSED) {
+            if (!bundle.getDonor().getEmail().equals(email)) throw new AccessDeniedException("Action interdite");
+        }
+
+        bundle.setStatus(newStatus);
+        bundleRepository.save(bundle);
+    }   
 }
