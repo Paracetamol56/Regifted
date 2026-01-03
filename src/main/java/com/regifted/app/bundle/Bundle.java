@@ -1,8 +1,6 @@
 package com.regifted.app.bundle;
 
-
 import com.regifted.app.item.Item;
-
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.regifted.app.user.User;
@@ -14,8 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter 
-@Setter 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -26,9 +24,9 @@ public class Bundle {
     @Id
     private String uuid = UUID.randomUUID().toString();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_uuid", nullable = false)
-    private User receiver;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "receiver_uuid", nullable = false)
+  private User receiver;
 
     @OneToMany(mappedBy = "bundle", cascade = CascadeType.ALL)
     private Set<Item> items = new HashSet<>();
