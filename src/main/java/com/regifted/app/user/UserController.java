@@ -1,17 +1,12 @@
 package com.regifted.app.user;
 
 import com.regifted.app.item.Item;
-import com.regifted.app.item.dto.ItemGetResponse;
 import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.dto.UserPostRequest;
 import com.regifted.app.user.dto.UserPrivateGetResponse;
 import com.regifted.app.user.dto.UserPublicGetResponse;
 import jakarta.validation.Valid;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +27,8 @@ public class UserController {
     this.userService = svc;
   }
 
-  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE })
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
   public UserPrivateGetResponse createUserApi(@Valid @RequestBody UserPostRequest req) {
@@ -40,7 +36,7 @@ public class UserController {
     return UserPrivateGetResponse.from(user);
   }
 
-  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.TEXT_HTML_VALUE)
   public ModelAndView registerFromWeb(@Valid @ModelAttribute UserPostRequest req, Model model) {
     User user = userService.createUser(req);
     model.addAttribute("user", user);

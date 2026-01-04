@@ -30,6 +30,8 @@ public class ItemGetResponse {
   private EState state;
   private Set<KeywordGetResponse> keywords;
   private int likes;
+  private Set<String> bundlesUuid;
+  private boolean inCurrentCart;
 
   public static ItemGetResponse from(Item item) {
     ItemGetResponse response = new ItemGetResponse();
@@ -39,7 +41,6 @@ public class ItemGetResponse {
         .buildAndExpand(item.getUuid())
         .toUriString());
 
-    // User information
     if (item.getUser() != null) {
       response.setUser(UserSummaryGetResponse.from(item.getUser()));
     }
@@ -53,7 +54,6 @@ public class ItemGetResponse {
     response.setLongitude(item.getLongitude());
     response.setState(item.getState());
 
-    // Convert keywords to KeywordResponse DTOs
     if (item.getKeywords() != null) {
       response.setKeywords(item.getKeywords().stream()
           .map(KeywordGetResponse::from)

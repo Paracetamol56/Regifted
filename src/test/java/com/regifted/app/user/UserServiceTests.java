@@ -184,15 +184,15 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Should return null when email doesn't exist")
+    @DisplayName("Should throw NotFoundException when email doesn't exist")
     void testGetByEmail_UserNotFound() {
       // Given
       String email = "nonexistent@example.com";
       when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-      // When
+      // When & Then
       assertThrows(NotFoundException.class, () -> {
-        userService.getByUuid(email);
+        userService.getByEmail(email);
       });
       verify(userRepository).findByEmail(email);
     }
@@ -213,28 +213,28 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Should handle null email parameter")
+    @DisplayName("Should throw NotFoundException for null email parameter")
     void testGetByEmail_NullEmail() {
       // Given
       when(userRepository.findByEmail(null)).thenReturn(Optional.empty());
 
-      // When
+      // When & Then
       assertThrows(NotFoundException.class, () -> {
-        userService.getByUuid(null);
+        userService.getByEmail(null);
       });
       verify(userRepository).findByEmail(null);
     }
 
     @Test
-    @DisplayName("Should handle empty string email")
+    @DisplayName("Should throw NotFoundException for empty string email")
     void testGetByEmail_EmptyEmail() {
       // Given
       String emptyEmail = "";
       when(userRepository.findByEmail(emptyEmail)).thenReturn(Optional.empty());
 
-      // When
+      // When & Then
       assertThrows(NotFoundException.class, () -> {
-        userService.getByUuid(emptyEmail);
+        userService.getByEmail(emptyEmail);
       });
       verify(userRepository).findByEmail(emptyEmail);
     }

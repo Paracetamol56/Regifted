@@ -1,6 +1,7 @@
 package com.regifted.app.item;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.regifted.app.cart.Cart;
 import com.regifted.app.keyword.Keyword;
 import com.regifted.app.user.User;
 
@@ -75,6 +76,11 @@ public class Item {
   @ManyToMany(mappedBy = "likedItems", fetch = FetchType.LAZY)
   @JsonIgnore
   private Set<User> likedByUsers;
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE }) // Ajoutez PERSIST ici
+  @JoinTable(name = "bundle_items", joinColumns = @JoinColumn(name = "item_uuid"), inverseJoinColumns = @JoinColumn(name = "bundle_uuid"))
+  @JsonBackReference
+  private Set<Cart> carts = new HashSet<>();
 
   @Formula("(SELECT COUNT(*) FROM user_liked_items uli WHERE uli.liked_items_uuid = uuid)")
   private int likes;
