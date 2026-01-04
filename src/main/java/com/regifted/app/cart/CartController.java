@@ -60,16 +60,6 @@ public class CartController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
-  public String getSpecificCartHtml(
-      @PathVariable String uuid,
-      @AuthenticationPrincipal UserDetails userDetails,
-      Model model) {
-    Cart cart = cartService.getCartByUuidForUser(uuid, userDetails.getUsername());
-    model.addAttribute("cart", cart);
-    return "fragments/single-cart :: single-cart-content";
-  }
-
   @PostMapping(value = "/items", consumes = { MediaType.APPLICATION_JSON_VALUE,
       MediaType.APPLICATION_XML_VALUE }, produces = {
           MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
