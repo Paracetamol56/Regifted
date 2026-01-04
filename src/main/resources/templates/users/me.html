@@ -112,19 +112,21 @@
                   <div class="request-actions">
                     <button class="outline" 
                       style="border-color: #2e7d32; color: #2e7d32;"
-                      th:hx-patch="'/users/me/cart/' + ${cart.uuid} + '/status/ACCEPTED'"
+                      th:hx-patch="'/users/me/carts/' + ${cart.uuid} + '/status?status=ACCEPTED'"
                       hx-target="#profile-main-content"
                       hx-select="#profile-main-content"
-                      hx-swap="outerHTML">
+                      hx-swap="outerHTML"
+                      hx-disabled-elt="this">
                       Accept
                     </button>
 
                     <button class="outline contrast" 
                       style="border-color: #d32f2f; color: #d32f2f;"
-                      th:hx-patch="'/users/me/cart/' + ${cart.uuid} + '/status/REFUSED'"
+                      th:hx-patch="'/users/me/carts/' + ${cart.uuid} + '/status?status=REFUSED'"
                       hx-target="#profile-main-content"
                       hx-select="#profile-main-content"
-                      hx-swap="outerHTML">
+                      hx-swap="outerHTML"
+                      hx-disabled-elt="this">
                       Refuse
                     </button>
                   </div>

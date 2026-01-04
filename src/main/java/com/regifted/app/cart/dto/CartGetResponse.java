@@ -32,7 +32,7 @@ public class CartGetResponse {
     response.setUuid(bundle.getUuid());
 
     response.setHref(ServletUriComponentsBuilder.fromCurrentContextPath()
-        .path("/bundles/{uuid}")
+        .path("/users/me/carts/{uuid}")
         .buildAndExpand(bundle.getUuid())
         .toUriString());
 

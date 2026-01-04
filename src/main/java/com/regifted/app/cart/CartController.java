@@ -12,6 +12,8 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Set;
 
 import com.regifted.app.cart.dto.CartGetResponse;
+import com.regifted.app.cart.dto.CartItemPostRequest;
+import com.regifted.app.cart.dto.CartPatchRequest;
 import com.regifted.app.security.CustomUserPrincipal;
 import com.regifted.app.user.User;
 import com.regifted.app.user.UserService;
@@ -24,7 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 @Controller
-@RequestMapping("/users/me/cart")
+@RequestMapping("/users/me/carts")
 @RequiredArgsConstructor
 public class CartController {
 
@@ -49,31 +51,44 @@ public class CartController {
     return "fragments/cart :: cart-content";
   }
 
-  @PostMapping(value = "/items/{itemUuid}", produces = MediaType.TEXT_HTML_VALUE)
-  public String addItemToCart(
-      @PathVariable String itemUuid,
-      @AuthenticationPrincipal UserDetails userDetails,
-      Model model) {
-    try {
-      cartService.addItemToUserBundles(itemUuid, userDetails.getUsername());
+  @GetMapping(value = "/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  public ResponseEntity<CartGetResponse> getSpecificCart(
+      @PathVariable String uuid,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    Cart cart = cartService.getCartByUuidForUser(uuid, userDetails.getUsername());
+    CartGetResponse response = CartGetResponse.from(cart);
 
-      // On recharge la liste complète pour que le fragment affiche tous les lots
-      Set<Cart> carts = cartService.getAllCartsForUser(userDetails.getUsername());
-      model.addAttribute("bundles", carts);
-
-      return "fragments/cart :: cart-content";
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
+    return ResponseEntity.ok(response);
   }
 
-  @PatchMapping(value = "/bundle/{bundleItem}", produces = MediaType.TEXT_HTML_VALUE)
-  public String u(
-      @PathVariable String itemUuid,
+  @GetMapping(value = "/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
+  public String getSpecificCartHtml(
+      @PathVariable String uuid,
       @AuthenticationPrincipal UserDetails userDetails,
       Model model) {
+    Cart cart = cartService.getCartByUuidForUser(uuid, userDetails.getUsername());
+    model.addAttribute("cart", cart);
+    return "fragments/single-cart :: single-cart-content";
+  }
 
-    cartService.removeItemFromUserBundle(itemUuid, userDetails.getUsername());
+  @PostMapping(value = "/items", consumes = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE }, produces = {
+          MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  public ResponseEntity<CartGetResponse> addItemToCartApi(
+      @RequestBody CartItemPostRequest req,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    Cart cart = cartService.addItemToUserCarts(req.getItem(), userDetails.getUsername());
+    CartGetResponse response = CartGetResponse.from(cart);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping(value = "/items", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.TEXT_HTML_VALUE)
+  public String addItemToCartHtml(
+      @RequestBody CartItemPostRequest req,
+      @AuthenticationPrincipal UserDetails userDetails,
+      Model model) {
+    cartService.addItemToUserCarts(req.getItem(), userDetails.getUsername());
 
     Set<Cart> carts = cartService.getAllCartsForUser(userDetails.getUsername());
     model.addAttribute("bundles", carts);
@@ -95,31 +110,27 @@ public class CartController {
     return "fragments/cart :: cart-content";
   }
 
-  @PatchMapping("/validate/{bundleUuid}")
-  public String validateSpecificBundle(
-      @PathVariable String bundleUuid,
-      @AuthenticationPrincipal UserDetails userDetails,
-      Model model) {
+  @PatchMapping(value = "/{uuid}", consumes = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE }, produces = {
+          MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+  public ResponseEntity<CartGetResponse> updateStatusApi(
+      @PathVariable String uuid,
+      @RequestBody CartPatchRequest req,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    Cart cart = cartService.changeStatus(uuid, req.getStatus(), userDetails.getUsername());
+    CartGetResponse response = CartGetResponse.from(cart);
 
-    cartService.validateBundle(bundleUuid, userDetails.getUsername());
-
-    Set<Cart> carts = cartService.getAllCartsForUser(userDetails.getUsername());
-    model.addAttribute("bundles", carts);
-
-    return "fragments/cart :: cart-content";
+    return ResponseEntity.ok(response);
   }
 
-  @PatchMapping("/{bundleUuid}/status/{newStatus}")
+  @PatchMapping(value = "/{uuid}", consumes = { MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_XML_VALUE }, produces = MediaType.TEXT_HTML_VALUE)
   public ModelAndView updateStatusAndReturnProfile(
-      @PathVariable String bundleUuid,
-      @PathVariable CartStatus newStatus,
+      @PathVariable String uuid,
+      @RequestBody CartPatchRequest req,
       @AuthenticationPrincipal CustomUserPrincipal principal,
       Model model) {
-
-    if (principal == null)
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
-
-    cartService.changeStatus(bundleUuid, newStatus, principal.getUsername());
+    cartService.changeStatus(uuid, req.getStatus(), principal.getUsername());
 
     User user = userService.getByEmail(principal.getUsername());
     model.addAttribute("user", user);

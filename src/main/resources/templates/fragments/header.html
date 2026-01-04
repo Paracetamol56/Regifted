@@ -15,7 +15,7 @@
       <li sec:authorize="isAuthenticated()">
         <details class="dropdown">
           <summary class="outline secondary" 
-                   hx-get="/users/me/cart"
+                   hx-get="/users/me/carts"
                    hx-target="#cart-dropdown-container" 
                    hx-trigger="click"
                    hx-headers='{"Accept": "text/html"}'

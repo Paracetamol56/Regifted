@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.regifted.app.item.ItemRepository;
+import com.regifted.app.exception.CartStatusPermissionException;
+import com.regifted.app.exception.InvalidStatusTransitionException;
+import com.regifted.app.exception.NotFoundException;
 import com.regifted.app.item.Item;
 
 @Service
@@ -34,11 +37,17 @@ public class CartService {
     return carts;
   }
 
+  public Cart getCartByUuidForUser(String uuid, String email) {
+    User user = userService.getByEmail(email);
+    Cart cart = cartRepository.findByUuidAndUser(uuid, user);
+    return cart;
+  }
+
   @Transactional
-  public Cart addItemToUserBundles(String itemUuid, String email) {
+  public Cart addItemToUserCarts(String itemUuid, String email) {
     User receiver = userService.getByEmail(email);
     Item item = itemRepository.findById(itemUuid)
-        .orElseThrow(() -> new RuntimeException("Item not found"));
+        .orElseThrow(() -> new NotFoundException(itemUuid));
 
     if (item.getUser().equals(receiver)) {
       throw new IllegalStateException("You cannot add your own item to your cart");
@@ -92,36 +101,37 @@ public class CartService {
   }
 
   @Transactional
-  public void validateBundle(String bundleUuid, String email) {
+  public Cart changeStatus(String bundleUuid, CartStatus newStatus, String email) {
     Cart bundle = cartRepository.findById(bundleUuid)
-        .orElseThrow(() -> new RuntimeException("Lot non trouvé"));
+        .orElseThrow(() -> new NotFoundException(bundleUuid));
 
-    if (!bundle.getUser().getEmail().equals(email)) {
-      throw new IllegalStateException("Ce lot ne vous appartient pas");
+    // Block transition to DRAFT
+    if (newStatus == CartStatus.DRAFT) {
+      throw InvalidStatusTransitionException.cannotSetToDraft();
     }
 
-    if (bundle.getItems().isEmpty()) {
-      throw new IllegalStateException("Impossible de valider un lot vide");
-    }
-
-    bundle.setStatus(CartStatus.SENT);
-    cartRepository.save(bundle);
-  }
-
-  @Transactional
-  public void changeStatus(String bundleUuid, CartStatus newStatus, String email) {
-    Cart bundle = cartRepository.findById(bundleUuid)
-        .orElseThrow(() -> new RuntimeException("Lot introuvable"));
-
+    // User (buyer) can only change to SENT
     if (newStatus == CartStatus.SENT) {
-      if (!bundle.getUser().getEmail().equals(email))
-        throw new AccessDeniedException("Action interdite");
-    } else if (newStatus == CartStatus.ACCEPTED || newStatus == CartStatus.REFUSED) {
-      if (!bundle.getOwner().getEmail().equals(email))
-        throw new AccessDeniedException("Action interdite");
+      if (!bundle.getUser().getEmail().equals(email)) {
+        throw CartStatusPermissionException.onlyUserCanSend();
+      }
+      // Validate current status (only DRAFT can be sent)
+      if (bundle.getStatus() != CartStatus.DRAFT) {
+        throw InvalidStatusTransitionException.onlyDraftCanBeSent();
+      }
+    }
+    // Owner can only change to ACCEPTED or REFUSED
+    else if (newStatus == CartStatus.ACCEPTED || newStatus == CartStatus.REFUSED) {
+      if (!bundle.getOwner().getEmail().equals(email)) {
+        throw CartStatusPermissionException.onlyOwnerCanAcceptOrRefuse();
+      }
+      // Validate current status (only SENT can be accepted/refused)
+      if (bundle.getStatus() != CartStatus.SENT) {
+        throw InvalidStatusTransitionException.onlySentCanBeAcceptedOrRefused();
+      }
     }
 
     bundle.setStatus(newStatus);
-    cartRepository.save(bundle);
+    return cartRepository.save(bundle);
   }
 }

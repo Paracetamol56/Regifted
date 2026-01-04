@@ -18,8 +18,10 @@
         <div>
           <button th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).DRAFT}"
             class="outline primary"
-            th:hx-patch="'/users/me/cart/validate/' + ${cartItem.uuid}"
+            th:hx-patch="'/users/me/carts/' + ${cartItem.uuid} + '/status'"
+            hx-vals='{"status": "SENT"}'
             hx-target="#cart-dropdown-container"
+            hx-swap="outerHTML"
             style="font-size: 0.7rem; padding: 4px 10px; margin: 0;">
             Validate this cart
           </button>
@@ -47,7 +49,7 @@
           <span th:text="${item.title}" style="font-size: 0.9rem;"></span>
 
           <button th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).DRAFT}"
-            th:hx-delete="'/users/me/cart/items/' + ${item.uuid}" 
+            th:hx-delete="'/users/me/carts/items/' + ${item.uuid}" 
             hx-target="#cart-dropdown-container"
             style="padding: 0 8px; background: none; border: none; color: var(--del-color); cursor: pointer; font-weight: bold;">
             ✕
