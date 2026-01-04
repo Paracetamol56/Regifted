@@ -18,7 +18,7 @@
         <div>
           <button th:if="${cartItem.status == T(com.regifted.app.cart.CartStatus).DRAFT}"
             class="outline primary"
-            th:hx-patch="'/users/me/carts/' + ${cartItem.uuid} + '/status'"
+            th:hx-patch="'/users/me/carts/' + ${cartItem.uuid}"
             hx-vals='{"status": "SENT"}'
             hx-target="#cart-dropdown-container"
             hx-swap="outerHTML"

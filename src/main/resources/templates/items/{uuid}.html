@@ -88,10 +88,10 @@
 
     <div th:if="${!isOwner and item.donateAt == null}" sec:authorize="isAuthenticated()">
       <button class="secondary" 
-        th:hx-post="'/users/me/cart/items/' + ${item.uuid}"
+        th:hx-post="'/users/me/carts/items?item=' + ${item.uuid}"
         hx-target="#cart-dropdown-container"
         hx-swap="innerHTML">
-        Ajouter à mon lot
+        Add to cart
       </button>
     </div>
   </section>

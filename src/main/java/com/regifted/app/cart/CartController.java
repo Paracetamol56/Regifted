@@ -5,8 +5,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Set;
@@ -21,7 +21,6 @@ import com.regifted.app.user.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -85,7 +84,7 @@ public class CartController {
 
   @PostMapping(value = "/items", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.TEXT_HTML_VALUE)
   public String addItemToCartHtml(
-      @RequestBody CartItemPostRequest req,
+      @Validated @ModelAttribute CartItemPostRequest req,
       @AuthenticationPrincipal UserDetails userDetails,
       Model model) {
     cartService.addItemToUserCarts(req.getItem(), userDetails.getUsername());
@@ -102,7 +101,7 @@ public class CartController {
       @AuthenticationPrincipal UserDetails userDetails,
       Model model) {
 
-    cartService.removeItemFromUserBundle(itemUuid, userDetails.getUsername());
+    cartService.removeItemFromUserCart(itemUuid, userDetails.getUsername());
 
     Set<Cart> carts = cartService.getAllCartsForUser(userDetails.getUsername());
     model.addAttribute("bundles", carts);
@@ -115,7 +114,7 @@ public class CartController {
           MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
   public ResponseEntity<CartGetResponse> updateStatusApi(
       @PathVariable String uuid,
-      @RequestBody CartPatchRequest req,
+      @Validated @RequestBody CartPatchRequest req,
       @AuthenticationPrincipal UserDetails userDetails) {
     Cart cart = cartService.changeStatus(uuid, req.getStatus(), userDetails.getUsername());
     CartGetResponse response = CartGetResponse.from(cart);
@@ -123,11 +122,10 @@ public class CartController {
     return ResponseEntity.ok(response);
   }
 
-  @PatchMapping(value = "/{uuid}", consumes = { MediaType.APPLICATION_JSON_VALUE,
-      MediaType.APPLICATION_XML_VALUE }, produces = MediaType.TEXT_HTML_VALUE)
+  @PatchMapping(value = "/{uuid}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.TEXT_HTML_VALUE)
   public ModelAndView updateStatusAndReturnProfile(
       @PathVariable String uuid,
-      @RequestBody CartPatchRequest req,
+      @Validated @ModelAttribute CartPatchRequest req,
       @AuthenticationPrincipal CustomUserPrincipal principal,
       Model model) {
     cartService.changeStatus(uuid, req.getStatus(), principal.getUsername());

@@ -96,7 +96,7 @@
 
             <th:block th:each="ownedItem : ${user.items}">
               <div th:each="cart : ${ownedItem.carts}" 
-                th:if="${cart.status == T(com.regifted.app.cart.BundleStatus).SENT}">
+                th:if="${cart.status == T(com.regifted.app.cart.CartStatus).SENT}">
 
                 <article class="cart-request">
                   <header>
@@ -112,7 +112,9 @@
                   <div class="request-actions">
                     <button class="outline" 
                       style="border-color: #2e7d32; color: #2e7d32;"
-                      th:hx-patch="'/users/me/carts/' + ${cart.uuid} + '/status?status=ACCEPTED'"
+                      th:hx-patch="'/users/me/carts/' + ${cart.uuid}"
+                      hx-vals='{"status": "ACCEPTED"}'
+                      hx-headers='{"Content-Type": "application/x-www-form-urlencoded"}'
                       hx-target="#profile-main-content"
                       hx-select="#profile-main-content"
                       hx-swap="outerHTML"
@@ -122,11 +124,14 @@
 
                     <button class="outline contrast" 
                       style="border-color: #d32f2f; color: #d32f2f;"
-                      th:hx-patch="'/users/me/carts/' + ${cart.uuid} + '/status?status=REFUSED'"
+                      th:hx-patch="'/users/me/carts/' + ${cart.uuid}"
+                      hx-vals='{"status": "REFUSED"}'
+                      hx-headers='{"Content-Type": "application/x-www-form-urlencoded"}'
                       hx-target="#profile-main-content"
                       hx-select="#profile-main-content"
                       hx-swap="outerHTML"
-                      hx-disabled-elt="this">
+                      hx-disabled-elt="this"
+                      hx-confirm="Are you sure you want to refuse this cart?">
                       Refuse
                     </button>
                   </div>

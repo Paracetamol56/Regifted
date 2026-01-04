@@ -77,7 +77,7 @@ public class CartService {
   }
 
   @Transactional
-  public Cart removeItemFromUserBundle(String itemUuid, String email) {
+  public Cart removeItemFromUserCart(String itemUuid, String email) {
     Item item = itemRepository.findById(itemUuid)
         .orElseThrow(() -> new RuntimeException("Item not found"));
 
@@ -110,7 +110,7 @@ public class CartService {
       throw InvalidStatusTransitionException.cannotSetToDraft();
     }
 
-    // User (buyer) can only change to SENT
+    // User can only change to SENT
     if (newStatus == CartStatus.SENT) {
       if (!bundle.getUser().getEmail().equals(email)) {
         throw CartStatusPermissionException.onlyUserCanSend();
