@@ -1,4 +1,4 @@
-*Binôme : Youssef EL KADI & Mathéo GALUBA*
+**Binôme : Youssef EL KADI & Mathéo GALUBA**
 ## 2. Architecture technique
 ### Stack technologique
 - **Framework** : Spring Boot
@@ -18,13 +18,16 @@ Chaque ressource est autonome avec 4 composants principaux :
 ## 3. Modèle de données
 ```mermaid
 erDiagram
-    USER ||--o{ ITEM : "pubie"
+    USER ||--o{ ITEM : "publie"
     USER ||--o{ SEARCH : "enregistre"
-    USER ||--o{ MESSAGE : "envoie/reçoit"
+    USER ||--o{ MESSAGE : "envoie"
+    USER ||--o{ MESSAGE : "reçoit"
     USER }|--|{ ITEM : "like"
+    USER ||--o{ CART : "possède"
 
     ITEM ||--|{ KEYWORD : "associe"
     ITEM ||--o{ MESSAGE : "concerne"
+    ITEM }|--o{ CART : "appartient"
 
     USER {
         string uuid PK
@@ -47,6 +50,7 @@ erDiagram
         float latitude
         float longitude
         int likes
+        string user_uuid FK
     }
 
     KEYWORD {
@@ -58,6 +62,9 @@ erDiagram
         string uuid PK
         string content
         datetime createdAt
+        string sender_uuid FK
+        string receiver_uuid FK
+        string item_uuid FK
     }
 
     SEARCH {
@@ -65,6 +72,16 @@ erDiagram
         string query
         datetime createdAt
         datetime updatedAt
+        string user_uuid FK
+    }
+
+    CART {
+        string uuid PK
+        enum status
+        datetime createdAt
+        datetime updatedAt
+        string user_uuid FK
+        string owner_uuid FK
     }
 ```
 ## 4. Ressources
@@ -120,8 +137,8 @@ erDiagram
   ```
 - `DELETE /items/{uuid}` - Suppression d'un item *propriétaire uniquement*
 
-### Messages
-- `POST /items/{itemUuid}/messages` - Envoyer un message *authentifié*
+### Messages *authentifié*
+- `POST /items/{itemUuid}/messages` - Envoyer un message
   ```json
   {
     "receiverUuid": "uuid",
@@ -132,15 +149,15 @@ erDiagram
 - `GET /items/{itemUuid}/messages` - Liste les conversations *propriétaire uniquement*
 	- Paramètre : `user` (permet d'afficher les messages de la conversation avec ce participant)
 
-### Searches
-- `POST /users/me/searches` - Sauvegarder une recherche *authentifié*
+### Searches *authentifié*
+- `POST /users/me/searches` - Sauvegarder une recherche 
   ```json
   {
     "query": "string"
   }
   ```
-- `GET /users/me/searches/{uuid}` - Redirige vers le resultat de cette recherche *authentifié*
-- `DELETE /users/me/searches/{uuid}` - Supprimer une recherche *authentifié*
+- `GET /users/me/searches/{uuid}` - Redirige vers le resultat de cette recherche
+- `DELETE /users/me/searches/{uuid}` - Supprimer une recherche
 
 ### Keywords
 - `GET /keywords` - Liste des mots-clés
@@ -148,6 +165,16 @@ erDiagram
 - `GET /keywords/{uuid}` - Détails d'un mot-clé
 
 > Les mots-clés sont créés lors de l'ajout d'un item s'ils n'existent pas déjà.
+
+### Carts *authentifié*
+- `GET /user/me/carts` - Liste tous les lots
+- `GET /user/me/carts/{uuid}` -  Détails d'un lot
+- `POST /users/me/carts/items/{item_uuid}` - Ajoute un item à un lot (créé le lot s'il n'existe pas)
+- `DELETE /users/me/carts/items/{item_uuid}` - Supprime un item d'un lot
+- `PATCH /user/me/carts/{uuid}` - Modifie le status d'un lot
+	- DRAFT -> SENT (accessible par le créateur du lot)
+	- SENT -> ACCEPTED (Accessible par le propriétaire des objets du lot)
+	- SENT -> REFUSED  (Accessible par le propriétaire des objets du lot)
 
 ## 5. Exécution
 Compiler le projet
